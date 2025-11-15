@@ -1,0 +1,622 @@
+erDiagram
+    %% Core Hospital Entity
+    HOSPITALS {
+        int HOSPITAL_ID PK
+        varchar HOSPITAL_NAME
+        varchar ADDRESS
+        varchar PHONE
+        varchar EMAIL
+        varchar LICENSE_NUMBER
+        date ESTABLISHMENT_DATE
+        varchar STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    %% Patient Management Tables
+    PATIENTS {
+        int PATIENT_ID PK
+        int HOSPITAL_ID FK
+        varchar PATIENT_NUMBER UK
+        varchar FIRST_NAME
+        varchar MIDDLE_NAME
+        varchar LAST_NAME
+        date DATE_OF_BIRTH
+        char GENDER
+        varchar PHONE
+        varchar EMAIL
+        varchar ADDRESS
+        varchar CITY
+        varchar STATE
+        varchar ZIP_CODE
+        varchar COUNTRY
+        varchar BLOOD_TYPE
+        varchar MARITAL_STATUS
+        varchar OCCUPATION
+        varchar EMERGENCY_CONTACT_NAME
+        varchar EMERGENCY_CONTACT_PHONE
+        varchar NATIONAL_ID
+        varchar MEDICAL_RECORD_NUMBER UK
+        timestamp REGISTRATION_DATE
+        varchar STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    PATIENT_ALLERGIES {
+        int ALLERGY_ID PK
+        int PATIENT_ID FK
+        int HOSPITAL_ID FK
+        varchar ALLERGEN
+        varchar ALLERGY_TYPE
+        varchar SEVERITY
+        varchar REACTION_DESCRIPTION
+        date IDENTIFIED_DATE
+        varchar IDENTIFIED_BY
+        varchar STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+    }
+
+    PATIENT_INSURANCE {
+        int INSURANCE_ID PK
+        int PATIENT_ID FK
+        int HOSPITAL_ID FK
+        varchar INSURANCE_PROVIDER
+        varchar POLICY_NUMBER
+        varchar GROUP_NUMBER
+        date EFFECTIVE_DATE
+        date EXPIRY_DATE
+        varchar COVERAGE_TYPE
+        decimal COVERAGE_PERCENTAGE
+        decimal DEDUCTIBLE_AMOUNT
+        varchar STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+    }
+
+    %% Staff Management Tables
+    DEPARTMENTS {
+        int DEPARTMENT_ID PK
+        int HOSPITAL_ID FK
+        varchar DEPARTMENT_NAME
+        varchar DEPARTMENT_CODE UK
+        varchar DESCRIPTION
+        int HEAD_OF_DEPARTMENT FK
+        varchar LOCATION
+        varchar PHONE_EXTENSION
+        varchar STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+    }
+
+    STAFF_MEMBERS {
+        int STAFF_ID PK
+        int HOSPITAL_ID FK
+        int DEPARTMENT_ID FK
+        varchar EMPLOYEE_NUMBER UK
+        varchar FIRST_NAME
+        varchar MIDDLE_NAME
+        varchar LAST_NAME
+        varchar STAFF_TYPE
+        varchar SPECIALIZATION
+        varchar QUALIFICATION
+        varchar LICENSE_NUMBER
+        date LICENSE_EXPIRY
+        varchar PHONE
+        varchar EMAIL
+        varchar ADDRESS
+        date DATE_OF_BIRTH
+        date HIRE_DATE
+        date TERMINATION_DATE
+        varchar EMPLOYMENT_STATUS
+        decimal HOURLY_RATE
+        varchar SHIFT_PREFERENCE
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    STAFF_SCHEDULES {
+        int SCHEDULE_ID PK
+        int STAFF_ID FK
+        int HOSPITAL_ID FK
+        date SCHEDULE_DATE
+        time START_TIME
+        time END_TIME
+        varchar SHIFT_TYPE
+        varchar STATUS
+        varchar NOTES
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+    }
+
+    %% Clinical Data Tables
+    PATIENT_ADMISSIONS {
+        int ADMISSION_ID PK
+        int PATIENT_ID FK
+        int HOSPITAL_ID FK
+        int ATTENDING_DOCTOR FK
+        int ADMITTED_BY FK
+        datetime ADMISSION_DATE
+        datetime DISCHARGE_DATE
+        varchar ADMISSION_TYPE
+        varchar ADMISSION_SOURCE
+        varchar CHIEF_COMPLAINT
+        varchar PRELIMINARY_DIAGNOSIS
+        varchar FINAL_DIAGNOSIS
+        varchar DISCHARGE_DISPOSITION
+        varchar ROOM_NUMBER
+        varchar BED_NUMBER
+        varchar STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    MEDICAL_RECORDS {
+        int RECORD_ID PK
+        int PATIENT_ID FK
+        int ADMISSION_ID FK
+        int HOSPITAL_ID FK
+        int DOCTOR_ID FK
+        datetime VISIT_DATE
+        varchar VISIT_TYPE
+        varchar CHIEF_COMPLAINT
+        text HISTORY_OF_PRESENT_ILLNESS
+        text PAST_MEDICAL_HISTORY
+        text PHYSICAL_EXAMINATION
+        text ASSESSMENT_AND_PLAN
+        varchar DIAGNOSIS_CODE
+        varchar DIAGNOSIS_DESCRIPTION
+        varchar TREATMENT_PLAN
+        varchar FOLLOW_UP_INSTRUCTIONS
+        varchar STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    VITAL_SIGNS {
+        int VITAL_ID PK
+        int PATIENT_ID FK
+        int ADMISSION_ID FK
+        int HOSPITAL_ID FK
+        int RECORDED_BY FK
+        datetime RECORDED_DATE
+        decimal TEMPERATURE
+        varchar TEMPERATURE_UNIT
+        decimal BLOOD_PRESSURE_SYSTOLIC
+        decimal BLOOD_PRESSURE_DIASTOLIC
+        decimal HEART_RATE
+        decimal RESPIRATORY_RATE
+        decimal OXYGEN_SATURATION
+        decimal WEIGHT
+        decimal HEIGHT
+        varchar BMI_CATEGORY
+        varchar PAIN_SCALE
+        text NOTES
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+    }
+
+    %% Laboratory & Diagnostics
+    LAB_TESTS {
+        int TEST_ID PK
+        int HOSPITAL_ID FK
+        varchar TEST_CODE UK
+        varchar TEST_NAME
+        varchar TEST_CATEGORY
+        varchar SPECIMEN_TYPE
+        varchar NORMAL_RANGE_MIN
+        varchar NORMAL_RANGE_MAX
+        varchar UNIT_OF_MEASURE
+        decimal COST
+        varchar STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+    }
+
+    LAB_ORDERS {
+        int ORDER_ID PK
+        int PATIENT_ID FK
+        int ADMISSION_ID FK
+        int HOSPITAL_ID FK
+        int DOCTOR_ID FK
+        int TEST_ID FK
+        datetime ORDER_DATE
+        datetime SPECIMEN_COLLECTION_DATE
+        varchar PRIORITY
+        varchar SPECIMEN_ID
+        varchar CLINICAL_INDICATION
+        varchar SPECIAL_INSTRUCTIONS
+        varchar ORDER_STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    LAB_RESULTS {
+        int RESULT_ID PK
+        int ORDER_ID FK
+        int HOSPITAL_ID FK
+        varchar RESULT_VALUE
+        varchar RESULT_STATUS
+        varchar REFERENCE_RANGE
+        varchar ABNORMAL_FLAG
+        varchar RESULT_INTERPRETATION
+        datetime RESULT_DATE
+        int TECHNICIAN_ID FK
+        int VERIFIED_BY FK
+        datetime VERIFIED_DATE
+        varchar COMMENTS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+    }
+
+    %% Pharmacy & Medications
+    MEDICATIONS {
+        int MEDICATION_ID PK
+        int HOSPITAL_ID FK
+        varchar MEDICATION_CODE UK
+        varchar MEDICATION_NAME
+        varchar GENERIC_NAME
+        varchar BRAND_NAME
+        varchar DOSAGE_FORM
+        varchar STRENGTH
+        varchar THERAPEUTIC_CLASS
+        varchar CONTROLLED_SUBSTANCE_SCHEDULE
+        decimal UNIT_COST
+        int STOCK_QUANTITY
+        int REORDER_LEVEL
+        date EXPIRY_DATE
+        varchar MANUFACTURER
+        varchar BATCH_NUMBER
+        varchar STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    PRESCRIPTIONS {
+        int PRESCRIPTION_ID PK
+        int PATIENT_ID FK
+        int ADMISSION_ID FK
+        int HOSPITAL_ID FK
+        int DOCTOR_ID FK
+        int MEDICATION_ID FK
+        datetime PRESCRIPTION_DATE
+        varchar DOSAGE
+        varchar FREQUENCY
+        varchar ROUTE
+        int QUANTITY
+        int REFILLS
+        varchar SPECIAL_INSTRUCTIONS
+        date START_DATE
+        date END_DATE
+        varchar PRESCRIPTION_STATUS
+        datetime DISPENSED_DATE
+        int DISPENSED_BY FK
+        varchar DISPENSED_QUANTITY
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    %% Procedures & Surgery
+    PROCEDURES {
+        int PROCEDURE_ID PK
+        int HOSPITAL_ID FK
+        varchar PROCEDURE_CODE UK
+        varchar PROCEDURE_NAME
+        varchar PROCEDURE_CATEGORY
+        varchar PROCEDURE_TYPE
+        text DESCRIPTION
+        decimal ESTIMATED_DURATION
+        decimal BASE_COST
+        varchar ANESTHESIA_REQUIRED
+        varchar STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+    }
+
+    PATIENT_PROCEDURES {
+        int PATIENT_PROCEDURE_ID PK
+        int PATIENT_ID FK
+        int ADMISSION_ID FK
+        int HOSPITAL_ID FK
+        int PROCEDURE_ID FK
+        int PRIMARY_SURGEON FK
+        datetime PROCEDURE_DATE
+        datetime START_TIME
+        datetime END_TIME
+        varchar PROCEDURE_STATUS
+        text PRE_PROCEDURE_NOTES
+        text PROCEDURE_NOTES
+        text POST_PROCEDURE_NOTES
+        varchar COMPLICATIONS
+        varchar ANESTHESIA_TYPE
+        int ANESTHESIOLOGIST FK
+        varchar OPERATING_ROOM
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    %% Facility Management
+    ROOMS {
+        int ROOM_ID PK
+        int HOSPITAL_ID FK
+        int DEPARTMENT_ID FK
+        varchar ROOM_NUMBER UK
+        varchar ROOM_TYPE
+        varchar ROOM_STATUS
+        int BED_CAPACITY
+        varchar LOCATION
+        varchar EQUIPMENT_LIST
+        decimal DAILY_RATE
+        varchar SPECIAL_FEATURES
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    BEDS {
+        int BED_ID PK
+        int ROOM_ID FK
+        int HOSPITAL_ID FK
+        varchar BED_NUMBER UK
+        varchar BED_TYPE
+        varchar BED_STATUS
+        int CURRENT_PATIENT_ID FK
+        datetime OCCUPIED_SINCE
+        varchar SPECIAL_EQUIPMENT
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    MEDICAL_EQUIPMENT {
+        int EQUIPMENT_ID PK
+        int HOSPITAL_ID FK
+        int DEPARTMENT_ID FK
+        varchar EQUIPMENT_CODE UK
+        varchar EQUIPMENT_NAME
+        varchar EQUIPMENT_TYPE
+        varchar MANUFACTURER
+        varchar MODEL_NUMBER
+        varchar SERIAL_NUMBER
+        date PURCHASE_DATE
+        decimal PURCHASE_COST
+        date WARRANTY_EXPIRY
+        date LAST_MAINTENANCE_DATE
+        date NEXT_MAINTENANCE_DATE
+        varchar MAINTENANCE_SCHEDULE
+        varchar EQUIPMENT_STATUS
+        varchar LOCATION
+        int ASSIGNED_TO FK
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    %% Financial Management
+    BILLING {
+        int BILL_ID PK
+        int PATIENT_ID FK
+        int ADMISSION_ID FK
+        int HOSPITAL_ID FK
+        varchar BILL_NUMBER UK
+        datetime BILL_DATE
+        decimal TOTAL_AMOUNT
+        decimal INSURANCE_AMOUNT
+        decimal PATIENT_AMOUNT
+        decimal DISCOUNT_AMOUNT
+        decimal TAX_AMOUNT
+        varchar BILLING_STATUS
+        date DUE_DATE
+        datetime PAYMENT_DATE
+        varchar PAYMENT_METHOD
+        varchar PAYMENT_REFERENCE
+        text BILLING_NOTES
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    BILLING_ITEMS {
+        int BILLING_ITEM_ID PK
+        int BILL_ID FK
+        int HOSPITAL_ID FK
+        varchar ITEM_TYPE
+        varchar ITEM_CODE
+        varchar ITEM_DESCRIPTION
+        int QUANTITY
+        decimal UNIT_PRICE
+        decimal TOTAL_PRICE
+        decimal DISCOUNT_PERCENTAGE
+        decimal DISCOUNT_AMOUNT
+        varchar BILLING_CATEGORY
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+    }
+
+    %% AI/ML Related Tables
+    AI_CLASSIFICATIONS {
+        int CLASSIFICATION_ID PK
+        int PATIENT_ID FK
+        int HOSPITAL_ID FK
+        varchar CLASSIFICATION_TYPE
+        varchar INPUT_DATA_TYPE
+        text INPUT_DATA
+        varchar MODEL_NAME
+        varchar MODEL_VERSION
+        varchar CLASSIFICATION_RESULT
+        decimal CONFIDENCE_SCORE
+        varchar ICD_10_CODE
+        varchar DIAGNOSIS_CATEGORY
+        varchar RISK_LEVEL
+        datetime CLASSIFICATION_DATE
+        varchar CLASSIFICATION_STATUS
+        varchar VALIDATED_BY
+        datetime VALIDATION_DATE
+        varchar VALIDATION_STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+    }
+
+    AI_PREDICTIONS {
+        int PREDICTION_ID PK
+        int PATIENT_ID FK
+        int ADMISSION_ID FK
+        int HOSPITAL_ID FK
+        varchar PREDICTION_TYPE
+        varchar MODEL_NAME
+        varchar MODEL_VERSION
+        text INPUT_FEATURES
+        varchar PREDICTION_RESULT
+        decimal CONFIDENCE_SCORE
+        decimal RISK_PROBABILITY
+        int PREDICTED_LOS_DAYS
+        varchar READMISSION_RISK
+        varchar TREATMENT_RECOMMENDATION
+        datetime PREDICTION_DATE
+        date PREDICTION_TARGET_DATE
+        varchar PREDICTION_STATUS
+        varchar ACTUAL_OUTCOME
+        datetime OUTCOME_DATE
+        decimal ACCURACY_SCORE
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    ML_MODEL_METADATA {
+        int MODEL_ID PK
+        int HOSPITAL_ID FK
+        varchar MODEL_NAME UK
+        varchar MODEL_TYPE
+        varchar MODEL_PURPOSE
+        varchar ALGORITHM_TYPE
+        varchar MODEL_VERSION
+        date TRAINING_DATE
+        date DEPLOYMENT_DATE
+        decimal ACCURACY_SCORE
+        decimal PRECISION_SCORE
+        decimal RECALL_SCORE
+        decimal F1_SCORE
+        text TRAINING_DATASET_INFO
+        text MODEL_PARAMETERS
+        varchar MODEL_STATUS
+        varchar MODEL_FILE_PATH
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    %% System & Audit Tables
+    AUDIT_TRAIL {
+        int AUDIT_ID PK
+        int HOSPITAL_ID FK
+        varchar TABLE_NAME
+        varchar OPERATION_TYPE
+        varchar RECORD_ID
+        varchar USER_ID
+        varchar USER_ROLE
+        datetime OPERATION_DATE
+        text OLD_VALUES
+        text NEW_VALUES
+        varchar IP_ADDRESS
+        varchar SESSION_ID
+        varchar APPLICATION_NAME
+        text OPERATION_DESCRIPTION
+        timestamp CREATED_DATE
+    }
+
+    SYSTEM_CONFIGURATIONS {
+        int CONFIG_ID PK
+        int HOSPITAL_ID FK
+        varchar CONFIG_CATEGORY
+        varchar CONFIG_KEY UK
+        varchar CONFIG_VALUE
+        varchar DATA_TYPE
+        varchar DESCRIPTION
+        varchar IS_SENSITIVE
+        varchar STATUS
+        timestamp CREATED_DATE
+        varchar CREATED_BY
+        timestamp UPDATED_DATE
+        varchar UPDATED_BY
+    }
+
+    %% Relationships
+    HOSPITALS ||--o{ PATIENTS : "manages"
+    HOSPITALS ||--o{ DEPARTMENTS : "contains"
+    HOSPITALS ||--o{ STAFF_MEMBERS : "employs"
+    HOSPITALS ||--o{ ROOMS : "has"
+    HOSPITALS ||--o{ MEDICAL_EQUIPMENT : "owns"
+    HOSPITALS ||--o{ MEDICATIONS : "stocks"
+    HOSPITALS ||--o{ LAB_TESTS : "offers"
+    HOSPITALS ||--o{ PROCEDURES : "performs"
+    HOSPITALS ||--o{ AI_CLASSIFICATIONS : "generates"
+    HOSPITALS ||--o{ AI_PREDICTIONS : "creates"
+    HOSPITALS ||--o{ ML_MODEL_METADATA : "maintains"
+
+    PATIENTS ||--o{ PATIENT_ALLERGIES : "has"
+    PATIENTS ||--o{ PATIENT_INSURANCE : "holds"
+    PATIENTS ||--o{ PATIENT_ADMISSIONS : "undergoes"
+    PATIENTS ||--o{ MEDICAL_RECORDS : "maintains"
+    PATIENTS ||--o{ VITAL_SIGNS : "records"
+    PATIENTS ||--o{ LAB_ORDERS : "requests"
+    PATIENTS ||--o{ PRESCRIPTIONS : "receives"
+    PATIENTS ||--o{ PATIENT_PROCEDURES : "undergoes"
+    PATIENTS ||--o{ BILLING : "generates"
+    PATIENTS ||--o{ AI_CLASSIFICATIONS : "subjects"
+    PATIENTS ||--o{ AI_PREDICTIONS : "subjects"
+
+    DEPARTMENTS ||--o{ STAFF_MEMBERS : "employs"
+    DEPARTMENTS ||--o{ ROOMS : "contains"
+    DEPARTMENTS ||--o{ MEDICAL_EQUIPMENT : "uses"
+    STAFF_MEMBERS ||--o{ STAFF_SCHEDULES : "follows"
+    STAFF_MEMBERS ||--o{ PATIENT_ADMISSIONS : "attends"
+    STAFF_MEMBERS ||--o{ MEDICAL_RECORDS : "creates"
+    STAFF_MEMBERS ||--o{ VITAL_SIGNS : "records"
+    STAFF_MEMBERS ||--o{ LAB_ORDERS : "orders"
+    STAFF_MEMBERS ||--o{ LAB_RESULTS : "verifies"
+    STAFF_MEMBERS ||--o{ PRESCRIPTIONS : "prescribes"
+    STAFF_MEMBERS ||--o{ PATIENT_PROCEDURES : "performs"
+
+    PATIENT_ADMISSIONS ||--o{ MEDICAL_RECORDS : "contains"
+    PATIENT_ADMISSIONS ||--o{ VITAL_SIGNS : "includes"
+    PATIENT_ADMISSIONS ||--o{ LAB_ORDERS : "generates"
+    PATIENT_ADMISSIONS ||--o{ PRESCRIPTIONS : "includes"
+    PATIENT_ADMISSIONS ||--o{ PATIENT_PROCEDURES : "involves"
+    PATIENT_ADMISSIONS ||--o{ BILLING : "results_in"
+    PATIENT_ADMISSIONS ||--o{ AI_PREDICTIONS : "triggers"
+
+    LAB_TESTS ||--o{ LAB_ORDERS : "ordered_as"
+    LAB_ORDERS ||--o{ LAB_RESULTS : "produces"
+    MEDICATIONS ||--o{ PRESCRIPTIONS : "prescribed_as"
+    PROCEDURES ||--o{ PATIENT_PROCEDURES : "performed_as"
+
+    ROOMS ||--o{ BEDS : "contains"
+    BEDS ||--o{ PATIENTS : "accommodates"
+
+    BILLING ||--o{ BILLING_ITEMS : "contains"

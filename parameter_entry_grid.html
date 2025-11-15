@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parameter Entry Grid - Oracle APEX</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            padding: 20px;
+        }
+
+        /* Oracle APEX Container */
+        .apex-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .apex-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 15px 20px;
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-icon {
+            margin-right: 8px;
+            color: #3d9aef;
+            font-size: 18px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Test Information Panel */
+        .test-info-panel {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .test-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .priority-stat {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        /* Parameter Entry Section */
+        .parameter-section {
+            padding: 20px;
+        }
+
+        .section-header {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #dee2e6;
+        }
+
+        .section-progress {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+        }
+
+        /* Parameter Grid */
+        .parameter-grid {
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .grid-header {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr 1fr 1.5fr 120px;
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .grid-header-cell {
+            padding: 12px 15px;
+            border-right: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+        }
+
+        .grid-header-cell:last-child {
+            border-right: none;
+        }
+
+        .parameter-row {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr 1fr 1.5fr 120px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+            min-height: 50px;
+        }
+
+        .parameter-row:hover {
+            background: #f8f9fa;
+        }
+
+        .parameter-row:last-child {
+            border-bottom: none;
+        }
+
+        .parameter-cell {
+            padding: 8px 15px;
+            border-right: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .parameter-cell:last-child {
+            border-right: none;
+        }
+
+        .parameter-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Input Fields */
+        .result-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 32px;
+            transition: all 0.2s;
+            background: #fff;
+        }
+
+        .result-input:focus {
+            outline: none;
+            border-color: #3d9aef;
+            box-shadow: 0 0 0 2px rgba(61, 154, 239, 0.2);
+        }
+
+        .result-input.normal {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+
+        .result-input.abnormal {
+            border-color: #ffc107;
+            background: #fffdf0;
+        }
+
+        .result-input.critical {
+            border-color: #dc3545;
+            background: #fff5f5;
+            font-weight: bold;
+        }
+
+        .result-input.empty {
+            background: #fff;
+            border-color: #ccc;
+        }
+
+        /* Reference Range */
+        .reference-range {
+            font-size: 11px;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Status Column */
+        .result-status {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .status-pending { 
+            background: #6c757d; 
+        }
+
+        .status-normal { 
+            background: #28a745; 
+        }
+
+        .status-abnormal { 
+            background: #ffc107; 
+            color: #333;
+        }
+
+        .status-critical { 
+            background: #dc3545; 
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .status-text {
+            font-size: 9px;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .flag-normal { color: #28a745; }
+        .flag-high { color: #dc3545; }
+        .flag-low { color: #007bff; }
+        .flag-critical { color: #dc3545; font-weight: bold; }
+
+        /* Units */
+        .units-text {
+            font-size: 11px;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #2c8bd6;
+            border-color: #2c8bd6;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            border-color: #218838;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Critical Alert */
+        .critical-alert {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border-radius: 4px;
+            padding: 12px 15px;
+            margin: 15px 20px;
+            text-align: center;
+            font-weight: 600;
+            animation: criticalBlink 2s infinite;
+        }
+
+        @keyframes criticalBlink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.8; }
+        }
+
+        .alert-icon {
+            font-size: 18px;
+            margin-right: 8px;
+        }
+
+        /* Progress Indicator */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #3d9aef);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* Validation Messages */
+        .validation-message {
+            font-size: 11px;
+            margin-top: 4px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            display: none;
+        }
+
+        .validation-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .validation-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .validation-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* Auto-save indicator */
+        .autosave-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: none;
+            z-index: 1000;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .parameter-grid,
+            .grid-header,
+            .parameter-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-header-cell,
+            .parameter-cell {
+                border-right: none;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            
+            .parameter-cell::before {
+                content: attr(data-label);
+                font-weight: 600;
+                display: block;
+                margin-bottom: 4px;
+                color: #666;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Auto-save indicator -->
+    <div class="autosave-indicator" id="autosaveIndicator">
+        ✓ Auto-saved
+    </div>
+
+    <!-- Main Container -->
+    <div class="apex-container">
+        <!-- Header -->
+        <div class="apex-header">
+            <div class="header-title">
+                <span class="header-icon">📊</span>
+                Results Entry Workspace
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" onclick="saveResults()" id="saveBtn" disabled>
+                    💾 Save
+                </button>
+                <button class="btn btn-success" onclick="submitResults()" id="submitBtn" disabled>
+                    ✓ Submit
+                </button>
+            </div>
+        </div>
+
+        <!-- Test Information Panel -->
+        <div class="test-info-panel">
+            <div class="test-info-grid">
+                <div class="info-item">
+                    <div class="info-label">Patient Name</div>
+                    <div class="info-value">Ahmed Hassan</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">MRN</div>
+                    <div class="info-value">MRN-20241215-0001</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Sample ID</div>
+                    <div class="info-value">SPE-2024-1215-044</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Test Name</div>
+                    <div class="info-value">Complete Blood Count</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Collection Date</div>
+                    <div class="info-value">12/15/2024 2:30 PM</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Priority</div>
+                    <div class="info-value priority-stat">STAT</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Critical Alert (hidden by default) -->
+        <div class="critical-alert" id="criticalAlert" style="display: none;">
+            <span class="alert-icon">🚨</span>
+            CRITICAL VALUE DETECTED - Immediate physician notification required
+        </div>
+
+        <!-- Parameter Entry Section -->
+        <div class="parameter-section">
+            <div class="section-header">
+                <span>Complete Blood Count Parameters</span>
+                <span class="section-progress" id="sectionProgress">0/5 completed</span>
+            </div>
+
+            <div class="parameter-grid">
+                <!-- Header Row -->
+                <div class="grid-header">
+                    <div class="grid-header-cell">Parameter</div>
+                    <div class="grid-header-cell">Result</div>
+                    <div class="grid-header-cell">Units</div>
+                    <div class="grid-header-cell">Reference Range</div>
+                    <div class="grid-header-cell">Status</div>
+                </div>
+
+                <!-- WBC Parameter Row -->
+                <div class="parameter-row">
+                    <div class="parameter-cell" data-label="Parameter:">
+                        <span class="parameter-name">WBC (White Blood Cells)</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Result:">
+                        <input type="text" class="result-input empty" id="wbc-input" 
+                               placeholder="Enter result" 
+                               onchange="validateResult('wbc', this.value)"
+                               oninput="markUnsaved()">
+                        <div class="validation-message" id="wbc-validation"></div>
+                    </div>
+                    <div class="parameter-cell" data-label="Units:">
+                        <span class="units-text">10³/µL</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Reference Range:">
+                        <span class="reference-range">4.0 - 11.0</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Status:">
+                        <div class="result-status">
+                            <div class="status-icon status-pending" id="wbc-status-icon">⏳</div>
+                            <div class="status-text" id="wbc-status-text">PENDING</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RBC Parameter Row -->
+                <div class="parameter-row">
+                    <div class="parameter-cell" data-label="Parameter:">
+                        <span class="parameter-name">RBC (Red Blood Cells)</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Result:">
+                        <input type="text" class="result-input empty" id="rbc-input" 
+                               placeholder="Enter result" 
+                               onchange="validateResult('rbc', this.value)"
+                               oninput="markUnsaved()">
+                        <div class="validation-message" id="rbc-validation"></div>
+                    </div>
+                    <div class="parameter-cell" data-label="Units:">
+                        <span class="units-text">10⁶/µL</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Reference Range:">
+                        <span class="reference-range">4.2 - 5.8</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Status:">
+                        <div class="result-status">
+                            <div class="status-icon status-pending" id="rbc-status-icon">⏳</div>
+                            <div class="status-text" id="rbc-status-text">PENDING</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hemoglobin Parameter Row -->
+                <div class="parameter-row">
+                    <div class="parameter-cell" data-label="Parameter:">
+                        <span class="parameter-name">Hemoglobin</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Result:">
+                        <input type="text" class="result-input empty" id="hgb-input" 
+                               placeholder="Enter result" 
+                               onchange="validateResult('hgb', this.value)"
+                               oninput="markUnsaved()">
+                        <div class="validation-message" id="hgb-validation"></div>
+                    </div>
+                    <div class="parameter-cell" data-label="Units:">
+                        <span class="units-text">g/dL</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Reference Range:">
+                        <span class="reference-range">12.0 - 16.0</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Status:">
+                        <div class="result-status">
+                            <div class="status-icon status-pending" id="hgb-status-icon">⏳</div>
+                            <div class="status-text" id="hgb-status-text">PENDING</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hematocrit Parameter Row -->
+                <div class="parameter-row">
+                    <div class="parameter-cell" data-label="Parameter:">
+                        <span class="parameter-name">Hematocrit</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Result:">
+                        <input type="text" class="result-input empty" id="hct-input" 
+                               placeholder="Enter result" 
+                               onchange="validateResult('hct', this.value)"
+                               oninput="markUnsaved()">
+                        <div class="validation-message" id="hct-validation"></div>
+                    </div>
+                    <div class="parameter-cell" data-label="Units:">
+                        <span class="units-text">%</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Reference Range:">
+                        <span class="reference-range">36.0 - 48.0</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Status:">
+                        <div class="result-status">
+                            <div class="status-icon status-pending" id="hct-status-icon">⏳</div>
+                            <div class="status-text" id="hct-status-text">PENDING</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Platelets Parameter Row -->
+                <div class="parameter-row">
+                    <div class="parameter-cell" data-label="Parameter:">
+                        <span class="parameter-name">Platelets</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Result:">
+                        <input type="text" class="result-input empty" id="plt-input" 
+                               placeholder="Enter result" 
+                               onchange="validateResult('plt', this.value)"
+                               oninput="markUnsaved()">
+                        <div class="validation-message" id="plt-validation"></div>
+                    </div>
+                    <div class="parameter-cell" data-label="Units:">
+                        <span class="units-text">10³/µL</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Reference Range:">
+                        <span class="reference-range">150 - 450</span>
+                    </div>
+                    <div class="parameter-cell" data-label="Status:">
+                        <div class="result-status">
+                            <div class="status-icon status-pending" id="plt-status-icon">⏳</div>
+                            <div class="status-text" id="plt-status-text">PENDING</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let hasUnsavedChanges = false;
+        let completedParameters = 0;
+        const totalParameters = 5;
+        let autoSaveTimer;
+
+        // Parameter configuration
+        const parameters = {
+            'wbc': { min: 1.0, max: 30.0, normalMin: 4.0, normalMax: 11.0, criticalLow: 1.0, criticalHigh: 30.0 },
+            'rbc': { min: 2.0, max: 8.0, normalMin: 4.2, normalMax: 5.8, criticalLow: 2.0, criticalHigh: 7.0 },
+            'hgb': { min: 3.0, max: 25.0, normalMin: 12.0, normalMax: 16.0, criticalLow: 5.0, criticalHigh: 20.0 },
+            'hct': { min: 10.0, max: 60.0, normalMin: 36.0, normalMax: 48.0, criticalLow: 15.0, criticalHigh: 55.0 },
+            'plt': { min: 10, max: 1000, normalMin: 150, normalMax: 450, criticalLow: 20, criticalHigh: 1000 }
+        };
+
+        // Initialize the form
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress();
+            
+            // Add keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    // Tab navigation is handled by browser
+                } else if (e.key === 'Enter') {
+                    // Move to next input field on Enter
+                    const currentInput = document.activeElement;
+                    if (currentInput && currentInput.classList.contains('result-input')) {
+                        const inputs = Array.from(document.querySelectorAll('.result-input'));
+                        const currentIndex = inputs.indexOf(currentInput);
+                        if (currentIndex < inputs.length - 1) {
+                            inputs[currentIndex + 1].focus();
+                        }
+                    }
+                }
+            });
+        });
+
+        // Validate result input
+        function validateResult(parameterCode, value) {
+            const config = parameters[parameterCode];
+            const input = document.getElementById(`${parameterCode}-input`);
+            const statusIcon = document.getElementById(`${parameterCode}-status-icon`);
+            const statusText = document.getElementById(`${parameterCode}-status-text`);
+            const validation = document.getElementById(`${parameterCode}-validation`);
+            
+            // Clear previous validation
+            validation.style.display = 'none';
+            validation.className = 'validation-message';
+            
+            // If empty, reset to pending
+            if (!value || value.trim() === '') {
+                input.className = 'result-input empty';
+                statusIcon.className = 'status-icon status-pending';
+                statusIcon.textContent = '⏳';
+                statusText.textContent = 'PENDING';
+                statusText.className = 'status-text';
+                updateProgress();
+                return;
+            }
+            
+            // Parse numeric value
+            const numValue = parseFloat(value);
+            
+            // Check if valid number
+            if (isNaN(numValue)) {
+                input.className = 'result-input';
+                statusIcon.className = 'status-icon status-pending';
+                statusIcon.textContent = '❌';
+                statusText.textContent = 'INVALID';
+                statusText.className = 'status-text';
+                
+                validation.textContent = 'Please enter a valid number';
+                validation.className = 'validation-message validation-error';
+                validation.style.display = 'block';
+                updateProgress();
+                return;
+            }
+            
+            // Check if within acceptable range
+            if (numValue < config.min || numValue > config.max) {
+                input.className = 'result-input';
+                statusIcon.className = 'status-icon status-pending';
+                statusIcon.textContent = '❌';
+                statusText.textContent = 'OUT OF RANGE';
+                statusText.className = 'status-text';
+                
+                validation.textContent = `Value must be between ${config.min} and ${config.max}`;
+                validation.className = 'validation-message validation-error';
+                validation.style.display = 'block';
+                updateProgress();
+                return;
+            }
+            
+            // Determine result classification
+            let resultClass, statusClass, statusSymbol, statusLabel, flagClass;
+            
+            if (numValue <= config.criticalLow || numValue >= config.criticalHigh) {
+                resultClass = 'critical';
+                statusClass = 'status-critical';
+                statusSymbol = '🚨';
+                statusLabel = 'CRITICAL';
+                flagClass = 'flag-critical';
+                showCriticalAlert();
+            } else if (numValue < config.normalMin) {
+                resultClass = 'abnormal';
+                statusClass = 'status-abnormal';
+                statusSymbol = '⬇';
+                statusLabel = 'LOW';
+                flagClass = 'flag-low';
+            } else if (numValue > config.normalMax) {
+                resultClass = 'abnormal';
+                statusClass = 'status-abnormal';
+                statusSymbol = '⬆';
+                statusLabel = 'HIGH';
+                flagClass = 'flag-high';
+            } else {
+                resultClass = 'normal';
+                statusClass = 'status-normal';
+                statusSymbol = '✓';
+                statusLabel = 'NORMAL';
+                flagClass = 'flag-normal';
+            }
+            
+            // Update UI
+            input.className = `result-input ${resultClass}`;
+            statusIcon.className = `status-icon ${statusClass}`;
+            statusIcon.textContent = statusSymbol;
+            statusText.textContent = statusLabel;
+            statusText.className = `status-text ${flagClass}`;
+            
+            // Show success validation
+            if (resultClass !== 'critical') {
+                validation.textContent = `${statusLabel} - Result validated`;
+                validation.className = `validation-message validation-${resultClass === 'normal' ? 'success' : 'warning'}`;
+                validation.style.display = 'block';
+            }
+            
+            updateProgress();
+            triggerAutoSave();
+        }
+
+        // Show critical alert
+        function showCriticalAlert() {
+            document.getElementById('criticalAlert').style.display = 'block';
+        }
+
+        // Mark as unsaved
+        function markUnsaved() {
+            hasUnsavedChanges = true;
+            document.getElementById('saveBtn').disabled = false;
+            
+            // Clear auto-save timer and set new one
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(autoSave, 3000); // Auto-save after 3 seconds of inactivity
+        }
+
+        // Update progress
+        function updateProgress() {
+            const inputs = document.querySelectorAll('.result-input');
+            completedParameters = 0;
+            
+            inputs.forEach(input => {
+                if (input.value && input.value.trim() !== '' && !input.classList.contains('empty')) {
+                    const validation = input.nextElementSibling;
+                    if (!validation || !validation.classList.contains('validation-error')) {
+                        completedParameters++;
+                    }
+                }
+            });
+            
+            const progressPercent = (completedParameters / totalParameters) * 100;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            document.getElementById('sectionProgress').textContent = `${completedParameters}/${totalParameters} completed`;
+            
+            // Enable submit button when all completed
+            document.getElementById('submitBtn').disabled = completedParameters !== totalParameters;
+        }
+
+        // Auto-save function
+        function autoSave() {
+            if (hasUnsavedChanges) {
+                // Simulate auto-save
+                showAutoSaveIndicator();
+                console.log('Auto-saving results...');
+            }
+        }
+
+        // Trigger auto-save
+        function triggerAutoSave() {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(autoSave, 3000);
+        }
+
+        // Show auto-save indicator
+        function showAutoSaveIndicator() {
+            const indicator = document.getElementById('autosaveIndicator');
+            indicator.style.display = 'block';
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 2000);
+        }
+
+        // Save results
+        function saveResults() {
+            if (!hasUnsavedChanges) return;
+            
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.innerHTML = '<div style="width: 14px; height: 14px; border: 2px solid #f3f3f3; border-top: 2px solid #fff; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 6px; display: inline-block;"></div>Saving...';
+            saveBtn.disabled = true;
+            
+            setTimeout(() => {
+                hasUnsavedChanges = false;
+                saveBtn.innerHTML = '💾 Save';
+                saveBtn.disabled = true;
+                showAutoSaveIndicator();
+                alert('Results saved successfully!');
+            }, 1500);
+        }
+
+        // Submit results
+        function submitResults() {
+            if (completedParameters !== totalParameters) {
+                alert('Please complete all parameters before submitting.');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.innerHTML = '<div style="width: 14px; height: 14px; border: 2px solid #f3f3f3; border-top: 2px solid #fff; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 6px; display: inline-block;"></div>Submitting...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                alert('Results submitted successfully for review!');
+                submitBtn.innerHTML = '✓ Submit';
+                
+                // Simulate moving to next test
+                setTimeout(() => {
+                    if (confirm('Results submitted! Would you like to move to the next test in the queue?')) {
+                        // Reset form for next test
+                        location.reload();
+                    }
+                }, 500);
+            }, 2000);
+        }
+
+        // Add CSS for spinner animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        console.log('Parameter Entry Grid Initialized');
+    </script>
+</body>
+</html>

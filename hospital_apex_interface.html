@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System - Oracle APEX Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .apex-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* APEX Navigation Bar */
+        .apex-navbar {
+            background: linear-gradient(135deg, #2c5282 0%, #3182ce 100%);
+            color: white;
+            padding: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+        }
+
+        .nav-brand {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-brand .logo {
+            margin-right: 10px;
+            font-size: 1.8em;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2c5282;
+            font-weight: bold;
+        }
+
+        /* APEX Navigation Menu */
+        .apex-nav-menu {
+            background: #2c5282;
+            padding: 0;
+        }
+
+        .nav-menu-list {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-menu-item {
+            position: relative;
+        }
+
+        .nav-menu-link {
+            display: block;
+            padding: 15px 25px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-menu-link:hover,
+        .nav-menu-link.active {
+            background: rgba(255,255,255,0.1);
+            border-bottom-color: #60a5fa;
+        }
+
+        /* APEX Dashboard Container */
+        .apex-dashboard {
+            padding: 30px;
+            background: #f8fafc;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .dashboard-title {
+            color: #2c5282;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .apex-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .apex-button.primary {
+            background: #3182ce;
+            color: white;
+        }
+
+        .apex-button.primary:hover {
+            background: #2c5282;
+            transform: translateY(-1px);
+        }
+
+        .apex-button.secondary {
+            background: #e2e8f0;
+            color: #2c5282;
+        }
+
+        .apex-button.secondary:hover {
+            background: #cbd5e0;
+        }
+
+        /* APEX Cards Grid */
+        .apex-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .apex-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .apex-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.5em;
+            color: white;
+        }
+
+        .card-icon.patients { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+        .card-icon.doctors { background: linear-gradient(135deg, #34d399, #10b981); }
+        .card-icon.appointments { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+        .card-icon.revenue { background: linear-gradient(135deg, #a78bfa, #8b5cf6); }
+        .card-icon.ai { background: linear-gradient(135deg, #f472b6, #ec4899); }
+        .card-icon.lab { background: linear-gradient(135deg, #fb7185, #e11d48); }
+
+        .card-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2d3748;
+            margin: 0;
+        }
+
+        .card-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #2c5282;
+            margin: 10px 0;
+        }
+
+        .card-change {
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .card-change.positive { color: #10b981; }
+        .card-change.negative { color: #ef4444; }
+
+        /* APEX Interactive Grid */
+        .apex-ig-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .ig-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ig-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c5282;
+        }
+
+        .ig-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .ig-content {
+            padding: 0;
+        }
+
+        /* Mock Interactive Grid Table */
+        .apex-ig-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .apex-ig-table th {
+            background: #f8fafc;
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #2d3748;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .apex-ig-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .apex-ig-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .status-badge.active { background: #dcfce7; color: #166534; }
+        .status-badge.pending { background: #fef3c7; color: #92400e; }
+        .status-badge.completed { background: #dbeafe; color: #1e40af; }
+        .status-badge.critical { background: #fee2e2; color: #dc2626; }
+
+        /* APEX Charts Container */
+        .apex-charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .chart-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c5282;
+            margin-bottom: 20px;
+        }
+
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 1.1em;
+        }
+
+        /* AI Classification Panel */
+        .ai-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .ai-panel-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .ai-icon {
+            font-size: 2em;
+            margin-right: 15px;
+        }
+
+        .ai-title {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .ai-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .ai-metric {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .ai-metric-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .ai-metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-header {
+                padding: 15px 20px;
+            }
+
+            .nav-menu-list {
+                flex-direction: column;
+            }
+
+            .apex-dashboard {
+                padding: 20px;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .apex-charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ai-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* APEX Form Styling */
+        .apex-form-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3182ce;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="apex-container">
+        <!-- APEX Navigation Bar -->
+        <nav class="apex-navbar">
+            <div class="nav-header">
+                <div class="nav-brand">
+                    <span class="logo">🏥</span>
+                    <span>Hospital Management System</span>
+                </div>
+                <div class="nav-user">
+                    <div class="user-info">
+                        <div class="user-avatar">DR</div>
+                        <div>
+                            <div style="font-weight: bold;">Dr. Sarah Johnson</div>
+                            <div style="font-size: 0.9em; opacity: 0.8;">Chief Medical Officer</div>
+                        </div>
+                    </div>
+                    <button class="apex-button secondary" style="padding: 8px 15px;">Logout</button>
+                </div>
+            </div>
+            <div class="apex-nav-menu">
+                <ul class="nav-menu-list">
+                    <li class="nav-menu-item">
+                        <a href="#" class="nav-menu-link active">Dashboard</a>
+                    </li>
+                    <li class="nav-menu-item">
+                        <a href="#" class="nav-menu-link">Patients</a>
+                    </li>
+                    <li class="nav-menu-item">
+                        <a href="#" class="nav-menu-link">Clinical</a>
+                    </li>
+                    <li class="nav-menu-item">
+                        <a href="#" class="nav-menu-link">Laboratory</a>
+                    </li>
+                    <li class="nav-menu-item">
+                        <a href="#" class="nav-menu-link">Pharmacy</a>
+                    </li>
+                    <li class="nav-menu-item">
+                        <a href="#" class="nav-menu-link">AI Analytics</a>
+                    </li>
+                    <li class="nav-menu-item">
+                        <a href="#" class="nav-menu-link">Reports</a>
+                    </li>
+                    <li class="nav-menu-item">
+                        <a href="#" class="nav-menu-link">Administration</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- APEX Dashboard Content -->
+        <div class="apex-dashboard">
+            <!-- Dashboard Header -->
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Hospital Dashboard</h1>
+                <div class="dashboard-actions">
+                    <button class="apex-button primary">New Patient</button>
+                    <button class="apex-button secondary">Quick Admission</button>
+                    <button class="apex-button secondary">Emergency Alert</button>
+                </div>
+            </div>
+
+            <!-- AI Classification Panel -->
+            <div class="ai-panel">
+                <div class="ai-panel-header">
+                    <div class="ai-icon">🤖</div>
+                    <div>
+                        <div class="ai-title">AI Classification & Prediction Center</div>
+                        <div style="opacity: 0.9;">Real-time intelligent healthcare analytics</div>
+                    </div>
+                </div>
+                <div class="ai-metrics">
+                    <div class="ai-metric">
+                        <div class="ai-metric-label">Classifications Today</div>
+                        <div class="ai-metric-value">1,247</div>
+                    </div>
+                    <div class="ai-metric">
+                        <div class="ai-metric-label">ICD-10 Accuracy</div>
+                        <div class="ai-metric-value">96.2%</div>
+                    </div>
+                    <div class="ai-metric">
+                        <div class="ai-metric-label">Risk Predictions</div>
+                        <div class="ai-metric-value">423</div>
+                    </div>
+                    <div class="ai-metric">
+                        <div class="ai-metric-label">Model Performance</div>
+                        <div class="ai-metric-value">94.8%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI Cards Grid -->
+            <div class="apex-cards-grid">
+                <div class="apex-card">
+                    <div class="card-header">
+                        <div class="card-icon patients">👥</div>
+                        <div>
+                            <h3 class="card-title">Active Patients</h3>
+                        </div>
+                    </div>
+                    <div class="card-value">1,847</div>
+                    <div class="card-change positive">
+                        ↗ +12% from last month
+                    </div>
+                </div>
+
+                <div class="apex-card">
+                    <div class="card-header">
+                        <div class="card-icon doctors">⚕️</div>
+                        <div>
+                            <h3 class="card-title">Available Doctors</h3>
+                        </div>
+                    </div>
+                    <div class="card-value">94</div>
+                    <div class="card-change positive">
+                        ↗ 6 on duty now
+                    </div>
+                </div>
+
+                <div class="apex-card">
+                    <div class="card-header">
+                        <div class="card-icon appointments">📅</div>
+                        <div>
+                            <h3 class="card-title">Today's Appointments</h3>
+                        </div>
+                    </div>
+                    <div class="card-value">312</div>
+                    <div class="card-change negative">
+                        ↘ 8 cancelled
+                    </div>
+                </div>
+
+                <div class="apex-card">
+                    <div class="card-header">
+                        <div class="card-icon revenue">💰</div>
+                        <div>
+                            <h3 class="card-title">Daily Revenue</h3>
+                        </div>
+                    </div>
+                    <div class="card-value">$127K</div>
+                    <div class="card-change positive">
+                        ↗ +8.3% vs yesterday
+                    </div>
+                </div>
+
+                <div class="apex-card">
+                    <div class="card-header">
+                        <div class="card-icon ai">🧠</div>
+                        <div>
+                            <h3 class="card-title">AI Diagnoses</h3>
+                        </div>
+                    </div>
+                    <div class="card-value">156</div>
+                    <div class="card-change positive">
+                        ↗ 95.2% accuracy
+                    </div>
+                </div>
+
+                <div class="apex-card">
+                    <div class="card-header">
+                        <div class="card-icon lab">🔬</div>
+                        <div>
+                            <h3 class="card-title">Lab Results</h3>
+                        </div>
+                    </div>
+                    <div class="card-value">89</div>
+                    <div class="card-change positive">
+                        ↗ 23 pending review
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="apex-charts-grid">
+                <div class="chart-container">
+                    <h3 class="chart-title">Patient Admissions Trend</h3>
+                    <div class="chart-placeholder">
+                        APEX Line Chart - Patient admissions over time with AI predictions
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">Department Utilization</h3>
+                    <div class="chart-placeholder">
+                        APEX Pie Chart - Department capacity usage
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Grid - Recent Patients -->
+            <div class="apex-ig-container">
+                <div class="ig-header">
+                    <h3 class="ig-title">Recent Patient Admissions</h3>
+                    <div class="ig-actions">
+                        <button class="apex-button secondary">Filter</button>
+                        <button class="apex-button secondary">Export</button>
+                        <button class="apex-button primary">Add Patient</button>
+                    </div>
+                </div>
+                <div class="ig-content">
+                    <table class="apex-ig-table">
+                        <thead>
+                            <tr>
+                                <th>Patient ID</th>
+                                <th>Patient Name</th>
+                                <th>Age</th>
+                                <th>Department</th>
+                                <th>Admission Date</th>
+                                <th>AI Risk Score</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>P-2024-001</td>
+                                <td>Ahmed Hassan</td>
+                                <td>45</td>
+                                <td>Cardiology</td>
+                                <td>2024-03-15 08:30</td>
+                                <td style="color: #dc2626; font-weight: bold;">High (92%)</td>
+                                <td><span class="status-badge critical">Critical</span></td>
+                                <td>
+                                    <button class="apex-button secondary" style="padding: 5px 10px; font-size: 0.9em;">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>P-2024-002</td>
+                                <td>Fatima Al-Zahra</td>
+                                <td>28</td>
+                                <td>Obstetrics</td>
+                                <td>2024-03-15 09:15</td>
+                                <td style="color: #059669; font-weight: bold;">Low (15%)</td>
+                                <td><span class="status-badge active">Stable</span></td>
+                                <td>
+                                    <button class="apex-button secondary" style="padding: 5px 10px; font-size: 0.9em;">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>P-2024-003</td>
+                                <td>Omar Khaled</td>
+                                <td>62</td>
+                                <td>Emergency</td>
+                                <td>2024-03-15 10:45</td>
+                                <td style="color: #d97706; font-weight: bold;">Medium (67%)</td>
+                                <td><span class="status-badge pending">Under Review</span></td>
+                                <td>
+                                    <button class="apex-button secondary" style="padding: 5px 10px; font-size: 0.9em;">View</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>P-2024-004</td>
+                                <td>Layla Mohammed</td>
+                                <td>34</td>
+                                <td>Neurology</td>
+                                <td>2024-03-15 11:20</td>
+                                <td style="color: #059669; font-weight: bold;">Low (23%)</td>
+                                <td><span class="status-badge completed">Discharged</span></td>
+                                <td>
+                                    <button class="apex-button secondary" style="padding: 5px 10px; font-size: 0.9em;">View</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Patient Registration Form Example -->
+            <div class="apex-form-container">
+                <h3 class="chart-title">Quick Patient Registration</h3>
+                <form>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">First Name *</label>
+                            <input type="text" class="form-input" placeholder="Enter first name">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Last Name *</label>
+                            <input type="text" class="form-input" placeholder="Enter last name">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth *</label>
+                            <input type="date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">National ID</label>
+                            <input type="text" class="form-input" placeholder="Enter national ID">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-input" placeholder="Enter phone number">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Department</label>
+                            <select class="form-input">
+                                <option>Select Department</option>
+                                <option>Emergency</option>
+                                <option>Cardiology</option>
+                                <option>Neurology</option>
+                                <option>Obstetrics</option>
+                                <option>Pediatrics</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Chief Complaint</label>
+                        <textarea class="form-input" rows="3" placeholder="Describe the main symptoms or reason for visit"></textarea>
+                    </div>
+                    <div style="display: flex; gap: 15px; margin-top: 25px;">
+                        <button type="submit" class="apex-button primary">Register Patient</button>
+                        <button type="button" class="apex-button secondary">Clear Form</button>
+                        <button type="button" class="apex-button secondary">AI Diagnosis Assistant</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time updates
+        function updateMetrics() {
+            const cards = document.querySelectorAll('.card-value');
+            cards.forEach(card => {
+                const currentValue = parseInt(card.textContent.replace(/[^0-9]/g, ''));
+                const variation = Math.floor(Math.random() * 10) - 5;
+                const newValue = Math.max(0, currentValue + variation);
+                
+                if (card.textContent.includes('$')) {
+                    card.textContent = '$' + newValue + 'K';
+                } else {
+                    card.textContent = newValue.toLocaleString();
+                }
+            });
+        }
+
+        // Update metrics every 30 seconds
+        setInterval(updateMetrics, 30000);
+
+        // Simulate navigation
+        document.querySelectorAll('.nav-menu-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-menu-link').forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

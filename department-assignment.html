@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Assignment - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1600px;
+        }
+
+        /* Three-column layout for department assignment */
+        .assignment-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 380px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Department Hierarchy & Staff */
+        .department-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Center Panel - Assignment Management */
+        .assignment-content {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .assignment-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .assignment-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .assignment-tab.active {
+            background: white;
+            border-bottom-color: #3d9aef;
+            color: #3d9aef;
+        }
+
+        .assignment-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .assignment-workspace {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Right Panel - Actions & Monitoring */
+        .actions-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Region Header */
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Department Tree */
+        .department-tree {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .tree-node {
+            padding: 8px 12px;
+            margin: 2px 0;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            position: relative;
+        }
+
+        .tree-node:hover {
+            background: #f8f9fa;
+        }
+
+        .tree-node.selected {
+            background: #e8f4fd;
+            color: #3d9aef;
+            font-weight: 600;
+        }
+
+        .tree-node.expandable::before {
+            content: '▶';
+            margin-right: 5px;
+            font-size: 10px;
+            transition: transform 0.2s;
+        }
+
+        .tree-node.expanded::before {
+            transform: rotate(90deg);
+        }
+
+        .tree-node .department-icon {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+        }
+
+        .tree-node .staff-count {
+            margin-left: auto;
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            color: #495057;
+        }
+
+        .tree-children {
+            margin-left: 20px;
+            border-left: 1px solid #e9ecef;
+            padding-left: 10px;
+            display: none;
+        }
+
+        .tree-children.expanded {
+            display: block;
+        }
+
+        /* Staff Grid */
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .staff-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            cursor: move;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .staff-card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+
+        .staff-card.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .staff-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .staff-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        .staff-info {
+            flex: 1;
+        }
+
+        .staff-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .staff-role {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .staff-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .status-assigned { background: #d4edda; color: #155724; }
+        .status-available { background: #cce5ff; color: #004085; }
+        .status-temporary { background: #fff3cd; color: #856404; }
+        .status-transfer { background: #f8d7da; color: #721c24; }
+
+        .staff-details {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Drop Zones */
+        .drop-zone {
+            min-height: 100px;
+            border: 2px dashed #dee2e6;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 12px;
+            margin: 10px 0;
+            transition: all 0.2s;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #3d9aef;
+            background: #e8f4fd;
+            color: #3d9aef;
+        }
+
+        /* Organizational Chart */
+        .org-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .org-level {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .org-node {
+            background: white;
+            border: 2px solid #3d9aef;
+            border-radius: 8px;
+            padding: 12px 15px;
+            min-width: 120px;
+            text-align: center;
+            position: relative;
+        }
+
+        .org-node.ceo { border-color: #dc3545; background: #fff5f5; }
+        .org-node.director { border-color: #ffc107; background: #fffbf0; }
+        .org-node.manager { border-color: #28a745; background: #f8fff8; }
+        .org-node.staff { border-color: #6c757d; background: #f8f9fa; }
+
+        .org-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .org-name {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .org-capacity {
+            font-size: 9px;
+            margin-top: 4px;
+            padding: 2px 6px;
+            background: #e9ecef;
+            border-radius: 8px;
+        }
+
+        /* Assignment History */
+        .assignment-history {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 11px;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-date {
+            color: #666;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .history-action {
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .history-reason {
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Action Buttons */
+        .action-button {
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+
+        .action-button:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        .action-button.primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .action-button.success {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .action-button.warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #333;
+        }
+
+        .action-button.danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .action-icon {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3d9aef;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-info {
+            background: #cce5ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Search & Filter */
+        .search-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .search-group {
+            margin-bottom: 10px;
+        }
+
+        .search-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .assignment-layout {
+                grid-template-columns: 320px 1fr 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .assignment-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .staff-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">DA</div>
+                <span>(Department Administrator)</span>
+            </div>
+            <span style="margin-right: 15px;">Select Language</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Patient Registration</span></div>
+                <div class="nav-item"><span>Patient Search</span></div>
+                <div class="nav-item"><span>Admission/Discharge</span></div>
+                <div class="nav-item"><span>Emergency Triage</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Medical Records</span></div>
+                <div class="nav-item"><span>Vital Signs</span></div>
+                <div class="nav-item"><span>Procedure Scheduling</span></div>
+                <div class="nav-item"><span>Discharge Planning</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Test Orders</span></div>
+                <div class="nav-item"><span>Sample Tracking</span></div>
+                <div class="nav-item"><span>Results Entry</span></div>
+                <div class="nav-item"><span>Lab Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Prescription Management</span></div>
+                <div class="nav-item"><span>Drug Inventory</span></div>
+                <div class="nav-item"><span>Dispensing</span></div>
+                <div class="nav-item"><span>Drug Interactions</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Invoice Generation</span></div>
+                <div class="nav-item"><span>Insurance Claims</span></div>
+                <div class="nav-item"><span>Payment Tracking</span></div>
+                <div class="nav-item"><span>Financial Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item">
+                    <span>Employee Records</span>
+                </div>
+                <div class="nav-item">
+                    <span>Schedule Management</span>
+                </div>
+                <div class="nav-item active">
+                    <span>Department Assignment</span>
+                </div>
+                <div class="nav-item">
+                    <span>Performance Tracking</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Risk Predictions</span></div>
+                <div class="nav-item"><span>Diagnostic Assistance</span></div>
+                <div class="nav-item"><span>Model Performance</span></div>
+                <div class="nav-item"><span>Classification Results</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>System Configuration</span></div>
+                <div class="nav-item"><span>User Management</span></div>
+                <div class="nav-item"><span>Audit Reports</span></div>
+                <div class="nav-item"><span>Security Settings</span></div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Staff Management</a> › Department Assignment
+                    </div>
+                    <h1 class="page-title">Department Assignment</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="bulkAssignment()">
+                        👥 Bulk Assignment
+                    </button>
+                    <button class="btn btn-warning" onclick="generateReport()">
+                        📊 Generate Report
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportData()">
+                        📥 Export Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Three-column Assignment Layout -->
+                <div class="assignment-layout">
+                    <!-- Left Panel - Department Hierarchy & Staff -->
+                    <div class="department-panel">
+                        <div class="region-header">
+                            <span class="icon">🏥</span>
+                            Department Structure
+                        </div>
+                        
+                        <div class="search-section">
+                            <div class="search-group">
+                                <label class="search-label">Search Staff</label>
+                                <input type="text" class="search-input" placeholder="Name, ID, or Role..." 
+                                       id="staffSearchInput" oninput="searchStaff()">
+                            </div>
+                            
+                            <div class="search-group">
+                                <label class="search-label">Filter by Status</label>
+                                <select class="search-input" id="statusFilter" onchange="filterStaff()">
+                                    <option value="ALL" selected>All Status</option>
+                                    <option value="ASSIGNED">Assigned</option>
+                                    <option value="AVAILABLE">Available</option>
+                                    <option value="TEMPORARY">Temporary</option>
+                                    <option value="TRANSFER">In Transfer</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="department-tree" id="departmentTree">
+                            <div class="tree-node expandable selected" onclick="selectDepartment(this, 'HOSPITAL')" data-level="0">
+                                <span class="department-icon">🏥</span>
+                                <span>Cairo General Hospital</span>
+                                <span class="staff-count">284</span>
+                            </div>
+                            <div class="tree-children expanded">
+                                <div class="tree-node expandable" onclick="selectDepartment(this, 'MEDICAL')" data-level="1">
+                                    <span class="department-icon">🩺</span>
+                                    <span>Medical Division</span>
+                                    <span class="staff-count">156</span>
+                                </div>
+                                <div class="tree-children">
+                                    <div class="tree-node" onclick="selectDepartment(this, 'CARDIOLOGY')" data-level="2">
+                                        <span class="department-icon">❤️</span>
+                                        <span>Cardiology</span>
+                                        <span class="staff-count">28</span>
+                                    </div>
+                                    <div class="tree-node" onclick="selectDepartment(this, 'EMERGENCY')" data-level="2">
+                                        <span class="department-icon">🚨</span>
+                                        <span>Emergency Medicine</span>
+                                        <span class="staff-count">42</span>
+                                    </div>
+                                    <div class="tree-node" onclick="selectDepartment(this, 'INTERNAL')" data-level="2">
+                                        <span class="department-icon">🔬</span>
+                                        <span>Internal Medicine</span>
+                                        <span class="staff-count">35</span>
+                                    </div>
+                                    <div class="tree-node" onclick="selectDepartment(this, 'PEDIATRICS')" data-level="2">
+                                        <span class="department-icon">👶</span>
+                                        <span>Pediatrics</span>
+                                        <span class="staff-count">24</span>
+                                    </div>
+                                    <div class="tree-node" onclick="selectDepartment(this, 'NEUROLOGY')" data-level="2">
+                                        <span class="department-icon">🧠</span>
+                                        <span>Neurology</span>
+                                        <span class="staff-count">18</span>
+                                    </div>
+                                </div>
+
+                                <div class="tree-node expandable" onclick="selectDepartment(this, 'SURGICAL')" data-level="1">
+                                    <span class="department-icon">🔪</span>
+                                    <span>Surgical Division</span>
+                                    <span class="staff-count">78</span>
+                                </div>
+                                <div class="tree-children">
+                                    <div class="tree-node" onclick="selectDepartment(this, 'GENERAL_SURGERY')" data-level="2">
+                                        <span class="department-icon">🏥</span>
+                                        <span>General Surgery</span>
+                                        <span class="staff-count">32</span>
+                                    </div>
+                                    <div class="tree-node" onclick="selectDepartment(this, 'ORTHOPEDICS')" data-level="2">
+                                        <span class="department-icon">🦴</span>
+                                        <span>Orthopedics</span>
+                                        <span class="staff-count">26</span>
+                                    </div>
+                                    <div class="tree-node" onclick="selectDepartment(this, 'CARDIAC_SURGERY')" data-level="2">
+                                        <span class="department-icon">💗</span>
+                                        <span>Cardiac Surgery</span>
+                                        <span class="staff-count">20</span>
+                                    </div>
+                                </div>
+
+                                <div class="tree-node expandable" onclick="selectDepartment(this, 'SUPPORT')" data-level="1">
+                                    <span class="department-icon">🛠️</span>
+                                    <span>Support Services</span>
+                                    <span class="staff-count">50</span>
+                                </div>
+                                <div class="tree-children">
+                                    <div class="tree-node" onclick="selectDepartment(this, 'LABORATORY')" data-level="2">
+                                        <span class="department-icon">🔬</span>
+                                        <span>Laboratory</span>
+                                        <span class="staff-count">18</span>
+                                    </div>
+                                    <div class="tree-node" onclick="selectDepartment(this, 'RADIOLOGY')" data-level="2">
+                                        <span class="department-icon">📡</span>
+                                        <span>Radiology</span>
+                                        <span class="staff-count">16</span>
+                                    </div>
+                                    <div class="tree-node" onclick="selectDepartment(this, 'PHARMACY')" data-level="2">
+                                        <span class="department-icon">💊</span>
+                                        <span>Pharmacy</span>
+                                        <span class="staff-count">12</span>
+                                    </div>
+                                    <div class="tree-node" onclick="selectDepartment(this, 'NURSING')" data-level="2">
+                                        <span class="department-icon">👩‍⚕️</span>
+                                        <span>Nursing Administration</span>
+                                        <span class="staff-count">4</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center Panel - Assignment Management -->
+                    <div class="assignment-content">
+                        <div class="assignment-tabs">
+                            <div class="assignment-tab active" onclick="switchAssignmentTab('staff', this)">Staff Assignment</div>
+                            <div class="assignment-tab" onclick="switchAssignmentTab('org', this)">Org Chart</div>
+                            <div class="assignment-tab" onclick="switchAssignmentTab('transfers', this)">Transfers</div>
+                            <div class="assignment-tab" onclick="switchAssignmentTab('history', this)">History</div>
+                        </div>
+
+                        <div class="assignment-workspace" id="assignmentWorkspace">
+                            <div id="staffContent">
+                                <div style="margin-bottom: 20px; padding: 10px; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px;">
+                                    <h4 style="margin-bottom: 10px; color: #333;">Current Department: <span style="color: #3d9aef;">Cairo General Hospital</span></h4>
+                                    <p style="font-size: 12px; color: #666; margin: 0;">Drag and drop staff cards to reassign departments. Click on staff cards for detailed assignment options.</p>
+                                </div>
+
+                                <div class="staff-grid" id="staffGrid">
+                                    <div class="staff-card" draggable="true" ondragstart="dragStart(event)" onclick="editAssignment('EMP001')">
+                                        <div class="staff-status status-assigned">Assigned</div>
+                                        <div class="staff-header">
+                                            <div class="staff-avatar">AH</div>
+                                            <div class="staff-info">
+                                                <div class="staff-name">Dr. Ahmed Hassan</div>
+                                                <div class="staff-role">Senior Cardiologist</div>
+                                            </div>
+                                        </div>
+                                        <div class="staff-details">
+                                            <strong>Current:</strong> Cardiology<br>
+                                            <strong>Start Date:</strong> Jan 15, 2020<br>
+                                            <strong>Status:</strong> Full-time Permanent
+                                        </div>
+                                    </div>
+
+                                    <div class="staff-card" draggable="true" ondragstart="dragStart(event)" onclick="editAssignment('EMP002')">
+                                        <div class="staff-status status-assigned">Assigned</div>
+                                        <div class="staff-header">
+                                            <div class="staff-avatar">SC</div>
+                                            <div class="staff-info">
+                                                <div class="staff-name">Dr. Sarah Chen</div>
+                                                <div class="staff-role">Emergency Physician</div>
+                                            </div>
+                                        </div>
+                                        <div class="staff-details">
+                                            <strong>Current:</strong> Emergency Medicine<br>
+                                            <strong>Start Date:</strong> Mar 8, 2019<br>
+                                            <strong>Status:</strong> Full-time Permanent
+                                        </div>
+                                    </div>
+
+                                    <div class="staff-card" draggable="true" ondragstart="dragStart(event)" onclick="editAssignment('EMP003')">
+                                        <div class="staff-status status-temporary">Temporary</div>
+                                        <div class="staff-header">
+                                            <div class="staff-avatar">LJ</div>
+                                            <div class="staff-info">
+                                                <div class="staff-name">Lisa Johnson</div>
+                                                <div class="staff-role">Head Nurse</div>
+                                            </div>
+                                        </div>
+                                        <div class="staff-details">
+                                            <strong>Current:</strong> ICU (Temporary)<br>
+                                            <strong>Start Date:</strong> Sep 1, 2025<br>
+                                            <strong>Status:</strong> 6-month Assignment
+                                        </div>
+                                    </div>
+
+                                    <div class="staff-card" draggable="true" ondragstart="dragStart(event)" onclick="editAssignment('EMP004')">
+                                        <div class="staff-status status-available">Available</div>
+                                        <div class="staff-header">
+                                            <div class="staff-avatar">MT</div>
+                                            <div class="staff-info">
+                                                <div class="staff-name">Michael Torres</div>
+                                                <div class="staff-role">Lab Technician</div>
+                                            </div>
+                                        </div>
+                                        <div class="staff-details">
+                                            <strong>Current:</strong> Unassigned<br>
+                                            <strong>Available:</strong> Immediately<br>
+                                            <strong>Status:</strong> Full-time Permanent
+                                        </div>
+                                    </div>
+
+                                    <div class="staff-card" draggable="true" ondragstart="dragStart(event)" onclick="editAssignment('EMP005')">
+                                        <div class="staff-status status-transfer">Transfer</div>
+                                        <div class="staff-header">
+                                            <div class="staff-avatar">RK</div>
+                                            <div class="staff-info">
+                                                <div class="staff-name">Dr. Ravi Kumar</div>
+                                                <div class="staff-role">Radiologist</div>
+                                            </div>
+                                        </div>
+                                        <div class="staff-details">
+                                            <strong>From:</strong> Radiology<br>
+                                            <strong>To:</strong> Interventional Radiology<br>
+                                            <strong>Status:</strong> Transfer in Progress
+                                        </div>
+                                    </div>
+
+                                    <div class="staff-card" draggable="true" ondragstart="dragStart(event)" onclick="editAssignment('EMP006')">
+                                        <div class="staff-status status-assigned">Assigned</div>
+                                        <div class="staff-header">
+                                            <div class="staff-avatar">MB</div>
+                                            <div class="staff-info">
+                                                <div class="staff-name">Maria Bautista</div>
+                                                <div class="staff-role">Pharmacist</div>
+                                            </div>
+                                        </div>
+                                        <div class="staff-details">
+                                            <strong>Current:</strong> Pharmacy<br>
+                                            <strong>Start Date:</strong> Jun 12, 2021<br>
+                                            <strong>Status:</strong> Full-time Permanent
+                                        </div>
+                                    </div>
+
+                                    <div class="staff-card" draggable="true" ondragstart="dragStart(event)" onclick="editAssignment('EMP007')">
+                                        <div class="staff-status status-assigned">Assigned</div>
+                                        <div class="staff-header">
+                                            <div class="staff-avatar">DW</div>
+                                            <div class="staff-info">
+                                                <div class="staff-name">Dr. David Wilson</div>
+                                                <div class="staff-role">Cardiac Surgeon</div>
+                                            </div>
+                                        </div>
+                                        <div class="staff-details">
+                                            <strong>Current:</strong> Cardiac Surgery<br>
+                                            <strong>Start Date:</strong> Aug 5, 2018<br>
+                                            <strong>Status:</strong> Full-time Permanent
+                                        </div>
+                                    </div>
+
+                                    <div class="staff-card" draggable="true" ondragstart="dragStart(event)" onclick="editAssignment('EMP008')">
+                                        <div class="staff-status status-available">Available</div>
+                                        <div class="staff-header">
+                                            <div class="staff-avatar">NK</div>
+                                            <div class="staff-info">
+                                                <div class="staff-name">Nancy Kim</div>
+                                                <div class="staff-role">Unit Secretary</div>
+                                            </div>
+                                        </div>
+                                        <div class="staff-details">
+                                            <strong>Current:</strong> Float Pool<br>
+                                            <strong>Available:</strong> Immediately<br>
+                                            <strong>Status:</strong> Part-time Contract
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="drop-zone" ondrop="drop(event)" ondragover="allowDrop(event)" ondragleave="dragLeave(event)">
+                                    <span>Drop staff here to reassign to selected department</span>
+                                </div>
+                            </div>
+
+                            <div id="orgContent" style="display: none;">
+                                <div class="org-chart">
+                                    <div class="org-level">
+                                        <div class="org-node ceo">
+                                            <div class="org-title">Chief Executive Officer</div>
+                                            <div class="org-name">Dr. Hassan Al-Rashid</div>
+                                            <div class="org-capacity">1/1</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="org-level">
+                                        <div class="org-node director">
+                                            <div class="org-title">Chief Medical Officer</div>
+                                            <div class="org-name">Dr. Sarah Mitchell</div>
+                                            <div class="org-capacity">156/180</div>
+                                        </div>
+                                        <div class="org-node director">
+                                            <div class="org-title">Chief Nursing Officer</div>
+                                            <div class="org-name">Lisa Patterson</div>
+                                            <div class="org-capacity">78/85</div>
+                                        </div>
+                                        <div class="org-node director">
+                                            <div class="org-title">Chief Operations Officer</div>
+                                            <div class="org-name">Michael Chen</div>
+                                            <div class="org-capacity">50/55</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="org-level">
+                                        <div class="org-node manager">
+                                            <div class="org-title">Cardiology Director</div>
+                                            <div class="org-name">Dr. Ahmed Hassan</div>
+                                            <div class="org-capacity">28/30</div>
+                                        </div>
+                                        <div class="org-node manager">
+                                            <div class="org-title">Emergency Director</div>
+                                            <div class="org-name">Dr. Sarah Chen</div>
+                                            <div class="org-capacity">42/45</div>
+                                        </div>
+                                        <div class="org-node manager">
+                                            <div class="org-title">Surgery Director</div>
+                                            <div class="org-name">Dr. David Wilson</div>
+                                            <div class="org-capacity">32/35</div>
+                                        </div>
+                                        <div class="org-node manager">
+                                            <div class="org-title">Lab Director</div>
+                                            <div class="org-name">Dr. Maria Rodriguez</div>
+                                            <div class="org-capacity">18/20</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="org-level">
+                                        <div class="org-node staff">
+                                            <div class="org-title">Senior Staff</div>
+                                            <div class="org-name">Various Physicians</div>
+                                            <div class="org-capacity">45/50</div>
+                                        </div>
+                                        <div class="org-node staff">
+                                            <div class="org-title">Nursing Staff</div>
+                                            <div class="org-name">RNs & LPNs</div>
+                                            <div class="org-capacity">125/140</div>
+                                        </div>
+                                        <div class="org-node staff">
+                                            <div class="org-title">Support Staff</div>
+                                            <div class="org-name">Technicians</div>
+                                            <div class="org-capacity">89/94</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <div style="font-size: 16px;">ℹ️</div>
+                                    <div>
+                                        <strong>Organizational Capacity Overview</strong><br>
+                                        Current staffing levels shown as Current/Budgeted. Green indicates optimal staffing, yellow shows areas needing attention.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="transfersContent" style="display: none;">
+                                <div class="alert alert-warning">
+                                    <div style="font-size: 16px;">⚠️</div>
+                                    <div>
+                                        <strong>Pending Transfers</strong><br>
+                                        3 staff transfers are currently pending approval. Review and approve transfers to complete departmental assignments.
+                                    </div>
+                                </div>
+
+                                <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <strong>Transfer Request #TR-2025-001</strong>
+                                        <span style="background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 10px; font-size: 10px;">Pending</span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                                        <strong>Staff:</strong> Dr. Ravi Kumar (Radiologist)<br>
+                                        <strong>From:</strong> Radiology Department<br>
+                                        <strong>To:</strong> Interventional Radiology<br>
+                                        <strong>Requested:</strong> Sept 10, 2025<br>
+                                        <strong>Reason:</strong> Specialization in interventional procedures
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-success" onclick="approveTransfer('TR-2025-001')">Approve</button>
+                                        <button class="btn btn-danger" onclick="rejectTransfer('TR-2025-001')">Reject</button>
+                                        <button class="btn btn-secondary" onclick="viewTransferDetails('TR-2025-001')">View Details</button>
+                                    </div>
+                                </div>
+
+                                <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <strong>Transfer Request #TR-2025-002</strong>
+                                        <span style="background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 10px; font-size: 10px;">Pending</span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                                        <strong>Staff:</strong> Lisa Johnson (Head Nurse)<br>
+                                        <strong>From:</strong> ICU (Temporary)<br>
+                                        <strong>To:</strong> Emergency Department<br>
+                                        <strong>Requested:</strong> Sept 12, 2025<br>
+                                        <strong>Reason:</strong> End of temporary ICU assignment
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-success" onclick="approveTransfer('TR-2025-002')">Approve</button>
+                                        <button class="btn btn-danger" onclick="rejectTransfer('TR-2025-002')">Reject</button>
+                                        <button class="btn btn-secondary" onclick="viewTransferDetails('TR-2025-002')">View Details</button>
+                                    </div>
+                                </div>
+
+                                <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                        <strong>Transfer Request #TR-2025-003</strong>
+                                        <span style="background: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 10px; font-size: 10px;">Pending</span>
+                                    </div>
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                                        <strong>Staff:</strong> Michael Torres (Lab Technician)<br>
+                                        <strong>From:</strong> Unassigned<br>
+                                        <strong>To:</strong> Microbiology Lab<br>
+                                        <strong>Requested:</strong> Sept 14, 2025<br>
+                                        <strong>Reason:</strong> New hire department assignment
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-success" onclick="approveTransfer('TR-2025-003')">Approve</button>
+                                        <button class="btn btn-danger" onclick="rejectTransfer('TR-2025-003')">Reject</button>
+                                        <button class="btn btn-secondary" onclick="viewTransferDetails('TR-2025-003')">View Details</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="historyContent" style="display: none;">
+                                <div class="assignment-history">
+                                    <div class="history-item">
+                                        <div class="history-date">September 15, 2025 - 2:30 PM</div>
+                                        <div class="history-action">Dr. Ahmed Hassan assigned to Cardiology Department</div>
+                                        <div class="history-reason">Permanent assignment as Senior Cardiologist</div>
+                                    </div>
+                                    
+                                    <div class="history-item">
+                                        <div class="history-date">September 14, 2025 - 10:15 AM</div>
+                                        <div class="history-action">Lisa Johnson transferred from Nursing Administration to ICU</div>
+                                        <div class="history-reason">Temporary 6-month assignment to address staffing shortage</div>
+                                    </div>
+                                    
+                                    <div class="history-item">
+                                        <div class="history-date">September 12, 2025 - 4:45 PM</div>
+                                        <div class="history-action">Michael Torres hired and placed in available pool</div>
+                                        <div class="history-reason">New employee pending department assignment</div>
+                                    </div>
+                                    
+                                    <div class="history-item">
+                                        <div class="history-date">September 10, 2025 - 1:20 PM</div>
+                                        <div class="history-action">Dr. Ravi Kumar transfer requested to Interventional Radiology</div>
+                                        <div class="history-reason">Specialization in interventional procedures - pending approval</div>
+                                    </div>
+                                    
+                                    <div class="history-item">
+                                        <div class="history-date">September 8, 2025 - 11:30 AM</div>
+                                        <div class="history-action">Nancy Kim assigned to Float Pool</div>
+                                        <div class="history-reason">Part-time contract work across multiple departments</div>
+                                    </div>
+                                    
+                                    <div class="history-item">
+                                        <div class="history-date">September 5, 2025 - 9:00 AM</div>
+                                        <div class="history-action">Dr. Sarah Chen promoted to Emergency Department Director</div>
+                                        <div class="history-reason">Leadership role with continued clinical duties</div>
+                                    </div>
+                                    
+                                    <div class="history-item">
+                                        <div class="history-date">September 1, 2025 - 8:00 AM</div>
+                                        <div class="history-action">Maria Bautista confirmed permanent assignment to Pharmacy</div>
+                                        <div class="history-reason">Completion of probationary period - excellent performance</div>
+                                    </div>
+                                    
+                                    <div class="history-item">
+                                        <div class="history-date">August 28, 2025 - 3:15 PM</div>
+                                        <div class="history-action">Dr. David Wilson appointed as Cardiac Surgery Director</div>
+                                        <div class="history-reason">Administrative role in addition to surgical duties</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Actions & Monitoring -->
+                    <div class="actions-panel">
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">⚡</span>
+                                Quick Actions
+                            </h4>
+                            <button class="action-button primary" onclick="newAssignment()">
+                                <span class="action-icon">➕</span>
+                                New Assignment
+                            </button>
+                            <button class="action-button success" onclick="bulkTransfer()">
+                                <span class="action-icon">👥</span>
+                                Bulk Transfer
+                            </button>
+                            <button class="action-button warning" onclick="temporaryAssignment()">
+                                <span class="action-icon">⏰</span>
+                                Temporary Assignment
+                            </button>
+                            <button class="action-button" onclick="floatPool()">
+                                <span class="action-icon">🔄</span>
+                                Manage Float Pool
+                            </button>
+                            <button class="action-button" onclick="complianceCheck()">
+                                <span class="action-icon">📋</span>
+                                Compliance Check
+                            </button>
+                            <button class="action-button danger" onclick="emergencyReassignment()">
+                                <span class="action-icon">🚨</span>
+                                Emergency Reassignment
+                            </button>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📊</span>
+                                Department Summary
+                            </h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <span class="stat-value">284</span>
+                                    <span class="stat-label">Total Staff</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">276</span>
+                                    <span class="stat-label">Assigned</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">5</span>
+                                    <span class="stat-label">Available</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">3</span>
+                                    <span class="stat-label">In Transfer</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">⚠️</span>
+                                Capacity Alerts
+                            </h4>
+                            <div style="font-size: 11px;">
+                                <div style="margin-bottom: 8px; padding: 8px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 3px;">
+                                    <div style="font-weight: 600; color: #856404;">ICU Understaffed</div>
+                                    <div style="color: #856404;">2 positions below optimal level</div>
+                                </div>
+                                <div style="margin-bottom: 8px; padding: 8px; background: #d4edda; border: 1px solid #c3e6cb; border-radius: 3px;">
+                                    <div style="font-weight: 600; color: #155724;">Emergency Fully Staffed</div>
+                                    <div style="color: #155724;">All positions filled</div>
+                                </div>
+                                <div style="margin-bottom: 8px; padding: 8px; background: #cce5ff; border: 1px solid #b3d7ff; border-radius: 3px;">
+                                    <div style="font-weight: 600; color: #004085;">Lab Expansion Ready</div>
+                                    <div style="color: #004085;">2 new positions approved</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📋</span>
+                                Compliance Status
+                            </h4>
+                            <div style="font-size: 11px;">
+                                <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" checked disabled>
+                                    <span>Minimum Staffing Met</span>
+                                </div>
+                                <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" checked disabled>
+                                    <span>Licensing Requirements</span>
+                                </div>
+                                <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" checked disabled>
+                                    <span>Joint Commission Standards</span>
+                                </div>
+                                <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" disabled>
+                                    <span style="color: #856404;">Training Compliance</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" checked disabled>
+                                    <span>Documentation Complete</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📈</span>
+                                Assignment Metrics
+                            </h4>
+                            <div style="font-size: 11px; line-height: 1.8;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>Fill Rate:</span>
+                                    <span style="font-weight: 600; color: #28a745;">97.2%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>Avg Assignment Time:</span>
+                                    <span style="font-weight: 600;">2.3 days</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>Transfer Success Rate:</span>
+                                    <span style="font-weight: 600; color: #28a745;">94.8%</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span>Compliance Score:</span>
+                                    <span style="font-weight: 600; color: #ffc107;">89.5%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">🔔</span>
+                                Recent Activity
+                            </h4>
+                            <div style="font-size: 11px;">
+                                <div style="margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
+                                    <div style="color: #666; margin-bottom: 2px;">15 min ago</div>
+                                    <div>Dr. Hassan assigned to Cardiology</div>
+                                </div>
+                                <div style="margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
+                                    <div style="color: #666; margin-bottom: 2px;">1 hour ago</div>
+                                    <div>Transfer request submitted for Dr. Kumar</div>
+                                </div>
+                                <div style="margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
+                                    <div style="color: #666; margin-bottom: 2px;">3 hours ago</div>
+                                    <div>Lisa Johnson temporary assignment approved</div>
+                                </div>
+                                <div style="margin-bottom: 8px;">
+                                    <div style="color: #666; margin-bottom: 2px;">1 day ago</div>
+                                    <div>Compliance check completed - 89.5%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignment Modal -->
+    <div id="assignmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Edit Department Assignment</span>
+                <button class="modal-close" onclick="closeAssignmentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Staff Member</label>
+                    <input type="text" class="form-input" id="modalStaffName" value="Dr. Ahmed Hassan" readonly>
+                </div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Current Department</label>
+                        <input type="text" class="form-input" id="modalCurrentDept" value="Cardiology" readonly>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">New Department</label>
+                        <select class="form-select" id="modalNewDept">
+                            <option value="CARDIOLOGY" selected>Cardiology</option>
+                            <option value="EMERGENCY">Emergency Medicine</option>
+                            <option value="INTERNAL">Internal Medicine</option>
+                            <option value="SURGERY">General Surgery</option>
+                            <option value="PEDIATRICS">Pediatrics</option>
+                            <option value="RADIOLOGY">Radiology</option>
+                            <option value="LABORATORY">Laboratory</option>
+                            <option value="PHARMACY">Pharmacy</option>
+                            <option value="ICU">Intensive Care</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Assignment Type</label>
+                        <select class="form-select" id="modalAssignmentType">
+                            <option value="permanent" selected>Permanent</option>
+                            <option value="temporary">Temporary</option>
+                            <option value="rotation">Rotation</option>
+                            <option value="float">Float Pool</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Effective Date</label>
+                        <input type="date" class="form-input" id="modalEffectiveDate" value="2025-09-17">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Reason for Assignment/Transfer</label>
+                    <textarea class="form-textarea" id="modalReason" placeholder="Enter reason for department assignment or transfer...">Permanent assignment as Senior Cardiologist based on qualifications and departmental needs.</textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-success" onclick="saveAssignment()">Save Assignment</button>
+                    <button class="btn btn-warning" onclick="requestTransfer()">Request Transfer</button>
+                    <button class="btn btn-secondary" onclick="closeAssignmentModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAssignmentTab = 'staff';
+        let selectedDepartment = 'HOSPITAL';
+        let draggedStaffId = null;
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Department tree navigation
+        function selectDepartment(element, deptId) {
+            document.querySelectorAll('.tree-node').forEach(node => {
+                node.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+            selectedDepartment = deptId;
+            
+            // Toggle children if expandable
+            if (element.classList.contains('expandable')) {
+                const children = element.nextElementSibling;
+                if (children && children.classList.contains('tree-children')) {
+                    children.classList.toggle('expanded');
+                    element.classList.toggle('expanded');
+                }
+            }
+            
+            filterStaffByDepartment(deptId);
+            showNotification('info', `Selected department: ${element.textContent.trim()}`);
+        }
+
+        // Tab switching
+        function switchAssignmentTab(tabName, element) {
+            document.querySelectorAll('#assignmentWorkspace > div').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.assignment-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName + 'Content').style.display = 'block';
+            element.classList.add('active');
+            currentAssignmentTab = tabName;
+        }
+
+        // Search and filter functions
+        function searchStaff() {
+            const searchTerm = document.getElementById('staffSearchInput').value.toLowerCase();
+            showNotification('info', 'Searching staff members...');
+        }
+
+        function filterStaff() {
+            const status = document.getElementById('statusFilter').value;
+            showNotification('info', `Filtering by status: ${status}`);
+        }
+
+        function filterStaffByDepartment(deptId) {
+            // In a real application, this would filter staff cards based on department
+            console.log('Filtering staff for department:', deptId);
+        }
+
+        // Drag and drop functionality
+        function dragStart(event) {
+            draggedStaffId = event.target.closest('.staff-card').querySelector('.staff-name').textContent;
+            event.target.closest('.staff-card').classList.add('dragging');
+        }
+
+        function allowDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function dragLeave(event) {
+            event.currentTarget.classList.remove('drag-over');
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+            
+            if (draggedStaffId) {
+                showNotification('success', `${draggedStaffId} assigned to ${selectedDepartment}`);
+                draggedStaffId = null;
+            }
+            
+            // Remove dragging class from all cards
+            document.querySelectorAll('.staff-card').forEach(card => {
+                card.classList.remove('dragging');
+            });
+        }
+
+        // Assignment management
+        function editAssignment(staffId) {
+            showAssignmentModal(staffId);
+        }
+
+        function showAssignmentModal(staffId) {
+            const modal = document.getElementById('assignmentModal');
+            modal.style.display = 'block';
+        }
+
+        function closeAssignmentModal() {
+            document.getElementById('assignmentModal').style.display = 'none';
+        }
+
+        function saveAssignment() {
+            const staffName = document.getElementById('modalStaffName').value;
+            const newDept = document.getElementById('modalNewDept').value;
+            const assignmentType = document.getElementById('modalAssignmentType').value;
+            const effectiveDate = document.getElementById('modalEffectiveDate').value;
+            const reason = document.getElementById('modalReason').value;
+            
+            showNotification('success', `Assignment updated for ${staffName}`);
+            closeAssignmentModal();
+        }
+
+        function requestTransfer() {
+            const staffName = document.getElementById('modalStaffName').value;
+            const newDept = document.getElementById('modalNewDept').value;
+            
+            showNotification('info', `Transfer request submitted for ${staffName} to ${newDept}`);
+            closeAssignmentModal();
+        }
+
+        // Transfer management
+        function approveTransfer(transferId) {
+            showNotification('success', `Transfer ${transferId} approved`);
+        }
+
+        function rejectTransfer(transferId) {
+            if (confirm('Are you sure you want to reject this transfer request?')) {
+                showNotification('warning', `Transfer ${transferId} rejected`);
+            }
+        }
+
+        function viewTransferDetails(transferId) {
+            showNotification('info', `Opening transfer details for ${transferId}`);
+        }
+
+        // Header actions
+        function bulkAssignment() {
+            showNotification('info', 'Opening bulk assignment interface...');
+        }
+
+        function generateReport() {
+            showNotification('success', 'Generating department assignment report...');
+        }
+
+        function exportData() {
+            showNotification('success', 'Exporting assignment data...');
+        }
+
+        // Quick actions
+        function newAssignment() {
+            showNotification('info', 'Creating new staff assignment...');
+        }
+
+        function bulkTransfer() {
+            showNotification('info', 'Opening bulk transfer interface...');
+        }
+
+        function temporaryAssignment() {
+            showNotification('info', 'Creating temporary assignment...');
+        }
+
+        function floatPool() {
+            showNotification('info', 'Managing float pool assignments...');
+        }
+
+        function complianceCheck() {
+            showNotification('info', 'Running compliance verification...');
+        }
+
+        function emergencyReassignment() {
+            showNotification('warning', 'Emergency reassignment protocol activated');
+        }
+
+        // Notification system
+        function showNotification(type, message) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type}`;
+            notification.style.position = 'fixed';
+            notification.style.top = '80px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '300px';
+            notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            
+            const icons = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'warning': '⚠️',
+                'danger': '🚨'
+            };
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>${icons[type] || 'ℹ️'}</span>
+                    <span style="flex: 1;">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 16px;">
+                        ✕
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize system
+        document.addEventListener('DOMContentLoaded', function() {
+            showNotification('info', 'Department Assignment system initialized');
+        });
+
+        console.log('Department Assignment System Loaded');
+    </script>
+</body>
+</html>

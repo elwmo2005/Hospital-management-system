@@ -1,0 +1,1986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procedure Scheduling - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1600px;
+        }
+
+        /* APEX Region Style */
+        .apex-region {
+            background: #ffffff;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        .region-body {
+            padding: 20px;
+        }
+
+        /* Procedure Scheduling Layout */
+        .scheduling-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 300px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Procedure Search & Patient Selection */
+        .procedure-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .search-tab.active {
+            background: white;
+            border-bottom-color: #3d9aef;
+            font-weight: 600;
+        }
+
+        .search-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .filter-group {
+            margin-bottom: 10px;
+        }
+
+        .filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .results-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .result-item:hover {
+            background: #f8f9fa;
+        }
+
+        .result-item.selected {
+            background: #e8f4fd;
+            border-left: 3px solid #3d9aef;
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .result-details {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .procedure-duration {
+            background: #e8f4fd;
+            color: #3d9aef;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        /* Center Panel - Calendar & Scheduling */
+        .scheduling-content {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .calendar-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 6px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #e9ecef;
+        }
+
+        .current-date {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .view-options {
+            display: flex;
+            gap: 2px;
+        }
+
+        .view-btn {
+            padding: 6px 12px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .view-btn.active {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .view-btn:first-child {
+            border-radius: 3px 0 0 3px;
+        }
+
+        .view-btn:last-child {
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* Operating Rooms Grid */
+        .or-schedule-grid {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .or-grid-header {
+            display: grid;
+            grid-template-columns: 120px repeat(12, 1fr);
+            gap: 1px;
+            margin-bottom: 10px;
+        }
+
+        .time-slot {
+            background: #f8f9fa;
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid #dee2e6;
+        }
+
+        .or-grid-body {
+            display: grid;
+            grid-template-columns: 120px repeat(12, 1fr);
+            gap: 1px;
+        }
+
+        .or-label {
+            background: #f8f9fa;
+            padding: 15px 10px;
+            border: 1px solid #dee2e6;
+            font-weight: 600;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .time-block {
+            height: 60px;
+            border: 1px solid #dee2e6;
+            position: relative;
+            background: white;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .time-block:hover {
+            background: #f8f9fa;
+        }
+
+        .time-block.unavailable {
+            background: #f5f5f5;
+            cursor: not-allowed;
+        }
+
+        .procedure-block {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            border-radius: 3px;
+            padding: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .procedure-scheduled {
+            background: #3d9aef;
+            color: white;
+        }
+
+        .procedure-in-progress {
+            background: #28a745;
+            color: white;
+        }
+
+        .procedure-completed {
+            background: #6c757d;
+            color: white;
+        }
+
+        .procedure-emergency {
+            background: #dc3545;
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        /* Right Panel - Resources & Actions */
+        .resources-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quick-schedule {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .quick-action-btn {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .quick-action-btn:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        .quick-action-btn .icon {
+            margin-right: 8px;
+            width: 16px;
+            display: inline-block;
+        }
+
+        /* Resource Availability */
+        .resource-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .resource-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .resource-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .resource-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            margin-bottom: 4px;
+            background: #f8f9fa;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .resource-name {
+            font-weight: 600;
+        }
+
+        .resource-status {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+        }
+
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-busy {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-maintenance {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        /* Forms */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .form-input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 32px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3d9aef;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 32px;
+            background: white;
+        }
+
+        .form-textarea {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #2e7bc6;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background: #cce5ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Timeline View */
+        .timeline-view {
+            padding: 20px;
+        }
+
+        .timeline-day {
+            margin-bottom: 30px;
+        }
+
+        .timeline-date-header {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 4px 4px 0 0;
+            border: 1px solid #dee2e6;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .timeline-procedures {
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .timeline-procedure {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timeline-procedure:last-child {
+            border-bottom: none;
+        }
+
+        .procedure-info {
+            flex: 1;
+        }
+
+        .procedure-time {
+            font-weight: 600;
+            color: #3d9aef;
+            margin-bottom: 4px;
+        }
+
+        .procedure-name {
+            font-size: 13px;
+            margin-bottom: 2px;
+        }
+
+        .procedure-patient {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .procedure-location {
+            font-size: 11px;
+            color: #666;
+            text-align: right;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .scheduling-layout {
+                grid-template-columns: 300px 1fr 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .scheduling-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .or-grid-header,
+            .or-grid-body {
+                grid-template-columns: 100px repeat(8, 1fr);
+            }
+        }
+
+        /* Conflict Indicators */
+        .conflict-indicator {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-top: 15px solid #dc3545;
+        }
+
+        .equipment-required {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            background: #ffc107;
+            color: #000;
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">SC</div>
+                <span>(Surgery Coordinator)</span>
+            </div>
+            <span style="margin-right: 15px;">🌐 Select Language ▾</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Patient Registration</span></div>
+                <div class="nav-item"><span>Patient Search</span></div>
+                <div class="nav-item"><span>Admission/Discharge</span></div>
+                <div class="nav-item"><span>Emergency Triage</span></div>
+            </div>
+
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item">
+                    <span>Medical Records</span>
+                </div>
+                <div class="nav-item">
+                    <span>Vital Signs</span>
+                </div>
+                <div class="nav-item active">
+                    <span>Procedure Scheduling</span>
+                </div>
+                <div class="nav-item">
+                    <span>Discharge Planning</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Test Orders</span></div>
+                <div class="nav-item"><span>Sample Tracking</span></div>
+                <div class="nav-item"><span>Results Entry</span></div>
+                <div class="nav-item"><span>Lab Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Clinical Module</a> › Procedure Scheduling
+                    </div>
+                    <h1 class="page-title">Procedure Scheduling</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="scheduleEmergency()">
+                        🚨 Emergency Schedule
+                    </button>
+                    <button class="btn btn-primary" onclick="openScheduleModal()">
+                        🗓️ Schedule Procedure
+                    </button>
+                    <button class="btn btn-warning" onclick="manageResources()">
+                        🔧 Manage Resources
+                    </button>
+                    <button class="btn btn-secondary" onclick="printSchedule()">
+                        🖨️ Print Schedule
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Three-column Procedure Scheduling Layout -->
+                <div class="scheduling-layout">
+                    <!-- Left Panel - Procedure Search & Patient Selection -->
+                    <div class="procedure-panel">
+                        <div class="region-header">
+                            <span class="icon">🔍</span>
+                            Search & Select
+                        </div>
+                        
+                        <div class="search-tabs">
+                            <div class="search-tab active" onclick="switchSearchTab('procedures', this)">Procedures</div>
+                            <div class="search-tab" onclick="switchSearchTab('patients', this)">Patients</div>
+                        </div>
+
+                        <!-- Procedures Search -->
+                        <div id="proceduresSearch" class="search-section">
+                            <input type="text" class="search-input" placeholder="Search procedures..." 
+                                   oninput="searchProcedures(this.value)">
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Category</label>
+                                <select class="filter-select" onchange="filterProcedures()">
+                                    <option value="">All Categories</option>
+                                    <option value="CARDIAC">Cardiac Surgery</option>
+                                    <option value="ORTHOPEDIC">Orthopedic</option>
+                                    <option value="GENERAL">General Surgery</option>
+                                    <option value="NEUROSURGERY">Neurosurgery</option>
+                                    <option value="UROLOGY">Urology</option>
+                                    <option value="GYNECOLOGY">Gynecology</option>
+                                    <option value="PLASTIC">Plastic Surgery</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Duration</label>
+                                <select class="filter-select" onchange="filterProcedures()">
+                                    <option value="">Any Duration</option>
+                                    <option value="SHORT">< 2 hours</option>
+                                    <option value="MEDIUM">2-4 hours</option>
+                                    <option value="LONG">4+ hours</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Anesthesia Type</label>
+                                <select class="filter-select" onchange="filterProcedures()">
+                                    <option value="">Any Type</option>
+                                    <option value="GENERAL">General</option>
+                                    <option value="LOCAL">Local</option>
+                                    <option value="SPINAL">Spinal</option>
+                                    <option value="SEDATION">Sedation</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Patients Search (Hidden initially) -->
+                        <div id="patientsSearch" class="search-section" style="display: none;">
+                            <input type="text" class="search-input" placeholder="Search patients..." 
+                                   oninput="searchPatients(this.value)">
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Status</label>
+                                <select class="filter-select" onchange="filterPatients()">
+                                    <option value="">All Statuses</option>
+                                    <option value="ADMITTED">Admitted</option>
+                                    <option value="OUTPATIENT">Outpatient</option>
+                                    <option value="EMERGENCY">Emergency</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Department</label>
+                                <select class="filter-select" onchange="filterPatients()">
+                                    <option value="">All Departments</option>
+                                    <option value="CARDIOLOGY">Cardiology</option>
+                                    <option value="ORTHOPEDICS">Orthopedics</option>
+                                    <option value="NEUROLOGY">Neurology</option>
+                                    <option value="EMERGENCY">Emergency</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="results-container" id="searchResults">
+                            <!-- Search results will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Center Panel - Calendar & OR Schedule -->
+                    <div class="scheduling-content">
+                        <div class="calendar-header">
+                            <div class="calendar-nav">
+                                <button class="nav-btn" onclick="navigateDate(-1)">◀ Previous</button>
+                                <div class="current-date" id="currentDate">December 15, 2024</div>
+                                <button class="nav-btn" onclick="navigateDate(1)">Next ▶</button>
+                            </div>
+                            
+                            <div class="view-options">
+                                <button class="view-btn active" onclick="switchView('or', this)">OR Schedule</button>
+                                <button class="view-btn" onclick="switchView('timeline', this)">Timeline</button>
+                                <button class="view-btn" onclick="switchView('calendar', this)">Calendar</button>
+                            </div>
+                        </div>
+
+                        <!-- Operating Room Schedule Grid -->
+                        <div id="orScheduleView" class="or-schedule-grid">
+                            <div class="or-grid-header">
+                                <div class="time-slot">OR / Time</div>
+                                <div class="time-slot">7:00</div>
+                                <div class="time-slot">8:00</div>
+                                <div class="time-slot">9:00</div>
+                                <div class="time-slot">10:00</div>
+                                <div class="time-slot">11:00</div>
+                                <div class="time-slot">12:00</div>
+                                <div class="time-slot">13:00</div>
+                                <div class="time-slot">14:00</div>
+                                <div class="time-slot">15:00</div>
+                                <div class="time-slot">16:00</div>
+                                <div class="time-slot">17:00</div>
+                                <div class="time-slot">18:00</div>
+                            </div>
+
+                            <div class="or-grid-body" id="orGridBody">
+                                <!-- OR schedule grid will be generated here -->
+                            </div>
+                        </div>
+
+                        <!-- Timeline View (Hidden initially) -->
+                        <div id="timelineView" class="timeline-view" style="display: none;">
+                            <!-- Timeline content will be generated here -->
+                        </div>
+
+                        <!-- Calendar View (Hidden initially) -->
+                        <div id="calendarView" class="timeline-view" style="display: none;">
+                            <div class="loading">
+                                <div>📅 Monthly Calendar View</div>
+                                <div style="margin-top: 10px; font-size: 12px;">Full calendar implementation would go here</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Resources & Quick Actions -->
+                    <div class="resources-panel">
+                        <div class="region-header">
+                            <span class="icon">⚡</span>
+                            Quick Actions
+                        </div>
+                        
+                        <div class="quick-schedule">
+                            <button class="quick-action-btn" onclick="scheduleEmergency()">
+                                <span class="icon">🚨</span>
+                                Emergency Procedure
+                            </button>
+                            <button class="quick-action-btn" onclick="openScheduleModal()">
+                                <span class="icon">📅</span>
+                                Schedule New Procedure
+                            </button>
+                            <button class="quick-action-btn" onclick="reschedule()">
+                                <span class="icon">🔄</span>
+                                Reschedule Existing
+                            </button>
+                            <button class="quick-action-btn" onclick="cancelProcedure()">
+                                <span class="icon">❌</span>
+                                Cancel Procedure
+                            </button>
+                            <button class="quick-action-btn" onclick="viewConflicts()">
+                                <span class="icon">⚠️</span>
+                                View Conflicts
+                            </button>
+                            <button class="quick-action-btn" onclick="blockTime()">
+                                <span class="icon">🚫</span>
+                                Block OR Time
+                            </button>
+                        </div>
+
+                        <div class="resource-section">
+                            <div class="resource-title">Operating Rooms</div>
+                            <div class="resource-list" id="orAvailability">
+                                <div class="resource-item">
+                                    <div class="resource-name">OR-01</div>
+                                    <div class="resource-status status-available">Available</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">OR-02</div>
+                                    <div class="resource-status status-busy">In Use</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">OR-03</div>
+                                    <div class="resource-status status-available">Available</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">OR-04</div>
+                                    <div class="resource-status status-maintenance">Maintenance</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">OR-05</div>
+                                    <div class="resource-status status-available">Available</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="resource-section">
+                            <div class="resource-title">Surgeons Available</div>
+                            <div class="resource-list" id="surgeonAvailability">
+                                <div class="resource-item">
+                                    <div class="resource-name">Dr. Ahmed Nasser</div>
+                                    <div class="resource-status status-available">Available</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">Dr. Sarah Johnson</div>
+                                    <div class="resource-status status-busy">In Surgery</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">Dr. Mohamed Ali</div>
+                                    <div class="resource-status status-available">Available</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">Dr. Layla Hassan</div>
+                                    <div class="resource-status status-busy">Consultation</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="resource-section">
+                            <div class="resource-title">Anesthesia Team</div>
+                            <div class="resource-list" id="anesthesiaAvailability">
+                                <div class="resource-item">
+                                    <div class="resource-name">Dr. Omar Khaled</div>
+                                    <div class="resource-status status-available">Available</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">Dr. Fatima Al-Zahra</div>
+                                    <div class="resource-status status-busy">In OR</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">Dr. Youssef Mahmoud</div>
+                                    <div class="resource-status status-available">Available</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="resource-section">
+                            <div class="resource-title">Equipment Status</div>
+                            <div class="resource-list" id="equipmentStatus">
+                                <div class="resource-item">
+                                    <div class="resource-name">Laparoscope #1</div>
+                                    <div class="resource-status status-available">Available</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">C-Arm X-Ray</div>
+                                    <div class="resource-status status-busy">In Use</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">Neuro Microscope</div>
+                                    <div class="resource-status status-available">Available</div>
+                                </div>
+                                <div class="resource-item">
+                                    <div class="resource-name">Cardiac Monitor</div>
+                                    <div class="resource-status status-maintenance">Calibration</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="resource-section">
+                            <div class="resource-title">Today's Summary</div>
+                            <div style="padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 12px;">
+                                <div style="margin-bottom: 5px;"><strong>Scheduled:</strong> 12 procedures</div>
+                                <div style="margin-bottom: 5px;"><strong>Completed:</strong> 5 procedures</div>
+                                <div style="margin-bottom: 5px;"><strong>In Progress:</strong> 3 procedures</div>
+                                <div style="margin-bottom: 5px;"><strong>Cancelled:</strong> 1 procedure</div>
+                                <div style="margin-bottom: 5px;"><strong>Emergency:</strong> 2 procedures</div>
+                                <div style="color: #dc3545;"><strong>Conflicts:</strong> 1 scheduling conflict</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Procedure Modal -->
+    <div id="scheduleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Schedule New Procedure</h3>
+                <button class="modal-close" onclick="closeModal('scheduleModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleForm">
+                    <div class="alert alert-info">
+                        <strong>📋 Complete all required fields to schedule the procedure</strong>
+                    </div>
+                    
+                    <!-- Patient & Procedure Selection -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Patient *</label>
+                            <select class="form-select" name="patientId" required>
+                                <option value="">-- Select Patient --</option>
+                                <option value="1">Ahmed Hassan (MRN-001)</option>
+                                <option value="2">Fatima Al-Zahra (MRN-002)</option>
+                                <option value="3">Omar Khaled (MRN-045)</option>
+                                <option value="4">Layla Mohammed (MRN-023)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Procedure *</label>
+                            <select class="form-select" name="procedureId" required onchange="updateProcedureDetails(this)">
+                                <option value="">-- Select Procedure --</option>
+                                <option value="1" data-duration="180" data-anesthesia="GENERAL">Cardiac Bypass Surgery</option>
+                                <option value="2" data-duration="120" data-anesthesia="GENERAL">Knee Replacement</option>
+                                <option value="3" data-duration="90" data-anesthesia="LOCAL">Cataract Surgery</option>
+                                <option value="4" data-duration="240" data-anesthesia="GENERAL">Brain Tumor Removal</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Date & Time -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Procedure Date *</label>
+                            <input type="date" class="form-input" name="procedureDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Start Time *</label>
+                            <input type="time" class="form-input" name="startTime" required>
+                        </div>
+                    </div>
+
+                    <!-- Resources -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Operating Room *</label>
+                            <select class="form-select" name="operatingRoom" required>
+                                <option value="">-- Select OR --</option>
+                                <option value="OR-01">OR-01 (Cardiac Suite)</option>
+                                <option value="OR-02">OR-02 (General Surgery)</option>
+                                <option value="OR-03">OR-03 (Orthopedic)</option>
+                                <option value="OR-04">OR-04 (Neurosurgery)</option>
+                                <option value="OR-05">OR-05 (Minimally Invasive)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Primary Surgeon *</label>
+                            <select class="form-select" name="primarySurgeon" required>
+                                <option value="">-- Select Surgeon --</option>
+                                <option value="1">Dr. Ahmed Nasser (Cardiac)</option>
+                                <option value="2">Dr. Sarah Johnson (General)</option>
+                                <option value="3">Dr. Mohamed Ali (Orthopedic)</option>
+                                <option value="4">Dr. Layla Hassan (Neurosurgeon)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Anesthesiologist</label>
+                            <select class="form-select" name="anesthesiologist">
+                                <option value="">-- Auto Assign --</option>
+                                <option value="1">Dr. Omar Khaled</option>
+                                <option value="2">Dr. Fatima Al-Zahra</option>
+                                <option value="3">Dr. Youssef Mahmoud</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Estimated Duration</label>
+                            <input type="text" class="form-input" name="duration" readonly placeholder="Auto-calculated">
+                        </div>
+                    </div>
+
+                    <!-- Procedure Details -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Priority Level</label>
+                            <select class="form-select" name="priority">
+                                <option value="ROUTINE">Routine</option>
+                                <option value="URGENT">Urgent</option>
+                                <option value="EMERGENCY">Emergency</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Anesthesia Type</label>
+                            <input type="text" class="form-input" name="anesthesiaType" readonly placeholder="Auto-filled">
+                        </div>
+                    </div>
+
+                    <!-- Special Requirements -->
+                    <div class="form-group">
+                        <label class="form-label">Special Equipment Required</label>
+                        <textarea class="form-textarea" name="specialEquipment" rows="2"
+                                  placeholder="List any special equipment or setup requirements..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Pre-operative Instructions</label>
+                        <textarea class="form-textarea" name="preOpInstructions" rows="3"
+                                  placeholder="Fasting requirements, medication adjustments, special preparations..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Post-operative Plan</label>
+                        <textarea class="form-textarea" name="postOpPlan" rows="2"
+                                  placeholder="Recovery room assignment, monitoring requirements..."></textarea>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('scheduleModal')">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-warning" onclick="checkAvailability()">
+                            Check Availability
+                        </button>
+                        <button type="submit" class="btn btn-success" id="scheduleBtn">
+                            📅 Schedule Procedure
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const sampleProcedures = [
+            {
+                id: 1, code: 'CARD-001', name: 'Cardiac Bypass Surgery', category: 'CARDIAC',
+                duration: 180, anesthesia: 'GENERAL', description: 'Coronary artery bypass grafting'
+            },
+            {
+                id: 2, code: 'ORTH-002', name: 'Total Knee Replacement', category: 'ORTHOPEDIC',
+                duration: 120, anesthesia: 'SPINAL', description: 'Complete knee joint replacement'
+            },
+            {
+                id: 3, code: 'OPHT-003', name: 'Cataract Surgery', category: 'GENERAL',
+                duration: 45, anesthesia: 'LOCAL', description: 'Phacoemulsification with IOL implant'
+            },
+            {
+                id: 4, code: 'NEUR-004', name: 'Brain Tumor Removal', category: 'NEUROSURGERY',
+                duration: 240, anesthesia: 'GENERAL', description: 'Craniotomy for tumor resection'
+            },
+            {
+                id: 5, code: 'UROL-005', name: 'Prostatectomy', category: 'UROLOGY',
+                duration: 150, anesthesia: 'GENERAL', description: 'Radical prostatectomy'
+            }
+        ];
+
+        const samplePatients = [
+            {
+                id: 1, firstName: 'Ahmed', lastName: 'Hassan', mrn: 'MRN-001',
+                status: 'ADMITTED', department: 'CARDIOLOGY'
+            },
+            {
+                id: 2, firstName: 'Fatima', lastName: 'Al-Zahra', mrn: 'MRN-002',
+                status: 'OUTPATIENT', department: 'ORTHOPEDICS'
+            },
+            {
+                id: 3, firstName: 'Omar', lastName: 'Khaled', mrn: 'MRN-045',
+                status: 'EMERGENCY', department: 'EMERGENCY'
+            },
+            {
+                id: 4, firstName: 'Layla', lastName: 'Mohammed', mrn: 'MRN-023',
+                status: 'ADMITTED', department: 'NEUROLOGY'
+            }
+        ];
+
+        const sampleScheduledProcedures = [
+            {
+                id: 1, patientName: 'Ahmed Hassan', procedureName: 'Cardiac Bypass Surgery',
+                or: 'OR-01', date: '2024-12-15', startTime: '08:00', duration: 180,
+                surgeon: 'Dr. Ahmed Nasser', status: 'SCHEDULED'
+            },
+            {
+                id: 2, patientName: 'Fatima Al-Zahra', procedureName: 'Cataract Surgery',
+                or: 'OR-03', date: '2024-12-15', startTime: '09:30', duration: 45,
+                surgeon: 'Dr. Sarah Johnson', status: 'IN_PROGRESS'
+            },
+            {
+                id: 3, patientName: 'Omar Khaled', procedureName: 'Emergency Appendectomy',
+                or: 'OR-02', date: '2024-12-15', startTime: '14:00', duration: 90,
+                surgeon: 'Dr. Mohamed Ali', status: 'SCHEDULED', emergency: true
+            }
+        ];
+
+        let currentSearchTab = 'procedures';
+        let currentView = 'or';
+        let selectedDate = new Date('2024-12-15');
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProceduresList();
+            generateORSchedule();
+            updateCurrentDate();
+            
+            // Set default procedure date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.querySelector('[name="procedureDate"]').value = tomorrow.toISOString().split('T')[0];
+        });
+
+        // Switch search tabs
+        function switchSearchTab(tab, element) {
+            document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            
+            currentSearchTab = tab;
+            
+            if (tab === 'procedures') {
+                document.getElementById('proceduresSearch').style.display = 'block';
+                document.getElementById('patientsSearch').style.display = 'none';
+                loadProceduresList();
+            } else {
+                document.getElementById('proceduresSearch').style.display = 'none';
+                document.getElementById('patientsSearch').style.display = 'block';
+                loadPatientsList();
+            }
+        }
+
+        // Load procedures list
+        function loadProceduresList() {
+            const container = document.getElementById('searchResults');
+            
+            container.innerHTML = sampleProcedures.map(procedure => `
+                <div class="result-item" onclick="selectProcedure(${procedure.id})" data-id="${procedure.id}">
+                    <div class="result-title">${procedure.name}</div>
+                    <div class="result-details">
+                        Code: ${procedure.code}<br>
+                        Category: ${procedure.category}<br>
+                        Anesthesia: ${procedure.anesthesia}
+                    </div>
+                    <div class="procedure-duration">${procedure.duration} minutes</div>
+                </div>
+            `).join('');
+        }
+
+        // Load patients list
+        function loadPatientsList() {
+            const container = document.getElementById('searchResults');
+            
+            container.innerHTML = samplePatients.map(patient => `
+                <div class="result-item" onclick="selectPatient(${patient.id})" data-id="${patient.id}">
+                    <div class="result-title">${patient.firstName} ${patient.lastName}</div>
+                    <div class="result-details">
+                        MRN: ${patient.mrn}<br>
+                        Status: ${patient.status}<br>
+                        Department: ${patient.department}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Search functions
+        function searchProcedures(query) {
+            const filtered = sampleProcedures.filter(p =>
+                p.name.toLowerCase().includes(query.toLowerCase()) ||
+                p.code.toLowerCase().includes(query.toLowerCase()) ||
+                p.category.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            const container = document.getElementById('searchResults');
+            container.innerHTML = filtered.map(procedure => `
+                <div class="result-item" onclick="selectProcedure(${procedure.id})" data-id="${procedure.id}">
+                    <div class="result-title">${procedure.name}</div>
+                    <div class="result-details">
+                        Code: ${procedure.code}<br>
+                        Category: ${procedure.category}<br>
+                        Anesthesia: ${procedure.anesthesia}
+                    </div>
+                    <div class="procedure-duration">${procedure.duration} minutes</div>
+                </div>
+            `).join('');
+        }
+
+        function searchPatients(query) {
+            const filtered = samplePatients.filter(p =>
+                p.firstName.toLowerCase().includes(query.toLowerCase()) ||
+                p.lastName.toLowerCase().includes(query.toLowerCase()) ||
+                p.mrn.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            const container = document.getElementById('searchResults');
+            container.innerHTML = filtered.map(patient => `
+                <div class="result-item" onclick="selectPatient(${patient.id})" data-id="${patient.id}">
+                    <div class="result-title">${patient.firstName} ${patient.lastName}</div>
+                    <div class="result-details">
+                        MRN: ${patient.mrn}<br>
+                        Status: ${patient.status}<br>
+                        Department: ${patient.department}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Selection functions
+        function selectProcedure(procedureId) {
+            document.querySelectorAll('.result-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.querySelector(`[data-id="${procedureId}"]`).classList.add('selected');
+            
+            // Auto-open scheduling modal
+            setTimeout(() => {
+                openScheduleModal();
+                // Pre-select the procedure
+                document.querySelector('[name="procedureId"]').value = procedureId;
+                updateProcedureDetails(document.querySelector('[name="procedureId"]'));
+            }, 300);
+        }
+
+        function selectPatient(patientId) {
+            document.querySelectorAll('.result-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.querySelector(`[data-id="${patientId}"]`).classList.add('selected');
+            
+            // Auto-open scheduling modal
+            setTimeout(() => {
+                openScheduleModal();
+                // Pre-select the patient
+                document.querySelector('[name="patientId"]').value = patientId;
+            }, 300);
+        }
+
+        // View switching
+        function switchView(view, element) {
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            
+            currentView = view;
+            
+            // Hide all views
+            document.getElementById('orScheduleView').style.display = 'none';
+            document.getElementById('timelineView').style.display = 'none';
+            document.getElementById('calendarView').style.display = 'none';
+            
+            // Show selected view
+            if (view === 'or') {
+                document.getElementById('orScheduleView').style.display = 'block';
+                generateORSchedule();
+            } else if (view === 'timeline') {
+                document.getElementById('timelineView').style.display = 'block';
+                generateTimelineView();
+            } else {
+                document.getElementById('calendarView').style.display = 'block';
+            }
+        }
+
+        // Generate OR Schedule Grid
+        function generateORSchedule() {
+            const container = document.getElementById('orGridBody');
+            const operatingRooms = ['OR-01', 'OR-02', 'OR-03', 'OR-04', 'OR-05'];
+            const timeSlots = 12; // 7 AM to 6 PM
+            
+            let gridHTML = '';
+            
+            operatingRooms.forEach(or => {
+                // OR label
+                gridHTML += `<div class="or-label">${or}</div>`;
+                
+                // Time slots for this OR
+                for (let hour = 0; hour < timeSlots; hour++) {
+                    const timeSlot = 7 + hour;
+                    const slotId = `${or}-${timeSlot}`;
+                    
+                    // Check if there's a scheduled procedure
+                    const procedure = sampleScheduledProcedures.find(p => 
+                        p.or === or && 
+                        parseInt(p.startTime.split(':')[0]) === timeSlot
+                    );
+                    
+                    if (procedure) {
+                        const duration = procedure.duration;
+                        const slotsSpanned = Math.ceil(duration / 60);
+                        const statusClass = getStatusClass(procedure.status, procedure.emergency);
+                        
+                        gridHTML += `
+                            <div class="time-block" style="grid-column: span ${slotsSpanned};">
+                                <div class="procedure-block ${statusClass}" onclick="viewProcedureDetails(${procedure.id})">
+                                    <div style="font-size: 10px; font-weight: bold;">${procedure.patientName}</div>
+                                    <div style="font-size: 9px;">${procedure.procedureName}</div>
+                                    <div style="font-size: 8px; margin-top: 2px;">${procedure.surgeon}</div>
+                                    ${procedure.emergency ? '<div class="conflict-indicator"></div>' : ''}
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Skip the spanned slots
+                        hour += slotsSpanned - 1;
+                    } else {
+                        gridHTML += `
+                            <div class="time-block" onclick="scheduleAtTime('${or}', ${timeSlot})">
+                            </div>
+                        `;
+                    }
+                }
+            });
+            
+            container.innerHTML = gridHTML;
+        }
+
+        // Generate Timeline View
+        function generateTimelineView() {
+            const container = document.getElementById('timelineView');
+            
+            // Group procedures by date
+            const proceduresByDate = {};
+            sampleScheduledProcedures.forEach(proc => {
+                if (!proceduresByDate[proc.date]) {
+                    proceduresByDate[proc.date] = [];
+                }
+                proceduresByDate[proc.date].push(proc);
+            });
+            
+            let timelineHTML = '';
+            
+            Object.keys(proceduresByDate).forEach(date => {
+                const procedures = proceduresByDate[date].sort((a, b) => a.startTime.localeCompare(b.startTime));
+                
+                timelineHTML += `
+                    <div class="timeline-day">
+                        <div class="timeline-date-header">
+                            ${formatDate(date)} (${procedures.length} procedures)
+                        </div>
+                        <div class="timeline-procedures">
+                            ${procedures.map(proc => `
+                                <div class="timeline-procedure" onclick="viewProcedureDetails(${proc.id})">
+                                    <div class="procedure-info">
+                                        <div class="procedure-time">${proc.startTime} - ${getEndTime(proc.startTime, proc.duration)}</div>
+                                        <div class="procedure-name">${proc.procedureName}</div>
+                                        <div class="procedure-patient">Patient: ${proc.patientName} | Surgeon: ${proc.surgeon}</div>
+                                    </div>
+                                    <div class="procedure-location">
+                                        <div>${proc.or}</div>
+                                        <div class="resource-status ${getStatusClass(proc.status)}">${proc.status}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = timelineHTML;
+        }
+
+        // Date navigation
+        function navigateDate(direction) {
+            selectedDate.setDate(selectedDate.getDate() + direction);
+            updateCurrentDate();
+            
+            if (currentView === 'or') {
+                generateORSchedule();
+            } else if (currentView === 'timeline') {
+                generateTimelineView();
+            }
+        }
+
+        function updateCurrentDate() {
+            document.getElementById('currentDate').textContent = selectedDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Modal functions
+        function openScheduleModal() {
+            document.getElementById('scheduleModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Update procedure details in modal
+        function updateProcedureDetails(selectElement) {
+            const selectedOption = selectElement.selectedOptions[0];
+            if (!selectedOption) return;
+            
+            const duration = selectedOption.dataset.duration;
+            const anesthesia = selectedOption.dataset.anesthesia;
+            
+            document.querySelector('[name="duration"]').value = duration ? `${duration} minutes` : '';
+            document.querySelector('[name="anesthesiaType"]').value = anesthesia || '';
+        }
+
+        // Form submission
+        document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const scheduleData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                scheduleData[key] = value;
+            }
+            
+            const submitBtn = document.getElementById('scheduleBtn');
+            submitBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px; margin-right: 8px;"></div>Scheduling...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // Add to sample data
+                const newProcedure = {
+                    id: Date.now(),
+                    patientName: document.querySelector(`[name="patientId"] option:checked`).textContent.split('(')[0].trim(),
+                    procedureName: document.querySelector(`[name="procedureId"] option:checked`).textContent,
+                    or: scheduleData.operatingRoom,
+                    date: scheduleData.procedureDate,
+                    startTime: scheduleData.startTime,
+                    duration: parseInt(scheduleData.duration) || 120,
+                    surgeon: document.querySelector(`[name="primarySurgeon"] option:checked`).textContent,
+                    status: 'SCHEDULED'
+                };
+                
+                sampleScheduledProcedures.push(newProcedure);
+                
+                // Refresh the display
+                if (currentView === 'or') {
+                    generateORSchedule();
+                } else if (currentView === 'timeline') {
+                    generateTimelineView();
+                }
+                
+                submitBtn.innerHTML = '📅 Schedule Procedure';
+                submitBtn.disabled = false;
+                closeModal('scheduleModal');
+                
+                showAlert('success', 'Procedure has been scheduled successfully.');
+            }, 2000);
+        });
+
+        // Utility functions
+        function getStatusClass(status, emergency = false) {
+            if (emergency) return 'procedure-emergency';
+            
+            switch(status) {
+                case 'SCHEDULED': return 'procedure-scheduled';
+                case 'IN_PROGRESS': return 'procedure-in-progress';
+                case 'COMPLETED': return 'procedure-completed';
+                default: return 'procedure-scheduled';
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function getEndTime(startTime, duration) {
+            const [hours, minutes] = startTime.split(':').map(Number);
+            const startMinutes = hours * 60 + minutes;
+            const endMinutes = startMinutes + duration;
+            const endHours = Math.floor(endMinutes / 60);
+            const endMins = endMinutes % 60;
+            return `${endHours.toString().padStart(2, '0')}:${endMins.toString().padStart(2, '0')}`;
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            document.querySelector('.main-container').insertBefore(alertDiv, document.querySelector('.main-container').firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Quick action functions
+        function scheduleEmergency() {
+            openScheduleModal();
+            // Pre-set emergency priority
+            document.querySelector('[name="priority"]').value = 'EMERGENCY';
+            showAlert('warning', 'Emergency scheduling mode activated.');
+        }
+
+        function scheduleAtTime(or, hour) {
+            openScheduleModal();
+            // Pre-fill OR and time
+            document.querySelector('[name="operatingRoom"]').value = or;
+            document.querySelector('[name="startTime"]').value = `${hour.toString().padStart(2, '0')}:00`;
+        }
+
+        function viewProcedureDetails(procedureId) {
+            const procedure = sampleScheduledProcedures.find(p => p.id === procedureId);
+            if (procedure) {
+                alert(`Procedure Details:\n\nPatient: ${procedure.patientName}\nProcedure: ${procedure.procedureName}\nOR: ${procedure.or}\nTime: ${procedure.startTime}\nSurgeon: ${procedure.surgeon}\nStatus: ${procedure.status}`);
+            }
+        }
+
+        function reschedule() {
+            alert('Opening procedure rescheduling interface...');
+        }
+
+        function cancelProcedure() {
+            alert('Opening procedure cancellation interface...');
+        }
+
+        function viewConflicts() {
+            alert('Checking for scheduling conflicts...');
+        }
+
+        function blockTime() {
+            alert('Opening OR time blocking interface...');
+        }
+
+        function manageResources() {
+            alert('Opening resource management interface...');
+        }
+
+        function printSchedule() {
+            alert('Preparing schedule for printing...');
+        }
+
+        function checkAvailability() {
+            showAlert('info', 'Checking resource availability...');
+        }
+
+        function filterProcedures() {
+            // Implement filtering logic
+            loadProceduresList();
+        }
+
+        function filterPatients() {
+            // Implement filtering logic
+            loadPatientsList();
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        console.log('Procedure Scheduling System Initialized');
+    </script>
+</body>
+</html>

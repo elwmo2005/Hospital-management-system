@@ -1,0 +1,1911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admission/Discharge Management - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1400px;
+        }
+
+        /* APEX Region Style */
+        .apex-region {
+            background: #ffffff;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        .region-body {
+            padding: 20px;
+        }
+
+        /* Tab Navigation */
+        .tab-container {
+            background: #ffffff;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .tab-headers {
+            display: flex;
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+        }
+
+        .tab-header {
+            flex: 1;
+            padding: 12px 20px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            border-right: 1px solid #d0d0d0;
+            transition: all 0.2s;
+        }
+
+        .tab-header:last-child {
+            border-right: none;
+        }
+
+        .tab-header.active {
+            background: #ffffff;
+            color: #3d9aef;
+            border-bottom: 2px solid #3d9aef;
+        }
+
+        .tab-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form Elements */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-row.single {
+            grid-template-columns: 1fr;
+        }
+
+        .form-row.double {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .form-label .required {
+            color: #d42d2d;
+            margin-left: 2px;
+        }
+
+        .form-input {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+            background: #fff;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3d9aef;
+            box-shadow: 0 0 0 1px rgba(61, 154, 239, 0.3);
+        }
+
+        .form-textarea {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-select {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+            background: #fff;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #2e7bc6;
+            border-color: #2e7bc6;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            border-color: #ccc;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f5f5;
+        }
+
+        .btn-success {
+            background: #5cb85c;
+            border-color: #4cae4c;
+            color: #ffffff;
+        }
+
+        .btn-danger {
+            background: #d9534f;
+            border-color: #d43f3a;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #f0ad4e;
+            border-color: #eea236;
+            color: #ffffff;
+        }
+
+        /* Patient Search Component */
+        .patient-search {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            background: #f9f9f9;
+            margin-bottom: 15px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .patient-suggestions {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            background: white;
+            display: none;
+        }
+
+        .patient-suggestion {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .patient-suggestion:hover {
+            background: #f5f5f5;
+        }
+
+        .patient-suggestion:last-child {
+            border-bottom: none;
+        }
+
+        /* Selected Patient Display */
+        .selected-patient {
+            background: #e8f4fd;
+            border: 1px solid #3d9aef;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .patient-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 11px;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            font-size: 13px;
+            color: #333;
+        }
+
+        /* Bed Assignment */
+        .bed-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .bed-item {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+
+        .bed-item.available {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .bed-item.occupied {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .bed-item.selected {
+            background: #cce5ff;
+            border-color: #3d9aef;
+            color: #004085;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .status-admitted { background: #cce5ff; color: #004085; }
+        .status-discharged { background: #d4edda; color: #155724; }
+        .status-transferred { background: #fff3cd; color: #856404; }
+        .status-pending { background: #f8f9fa; color: #495057; }
+
+        /* Admission List */
+        .admission-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .admission-table th {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border: 1px solid #d0d0d0;
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .admission-table td {
+            border: 1px solid #d0d0d0;
+            padding: 8px 10px;
+            vertical-align: middle;
+        }
+
+        .admission-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .admission-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 4px 8px;
+            font-size: 11px;
+            margin-right: 5px;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .action-view {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .action-edit {
+            background: #28a745;
+            color: white;
+        }
+
+        .action-discharge {
+            background: #fd7e14;
+            color: white;
+        }
+
+        /* AI Assistant */
+        .ai-assistant {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .ai-assistant-header {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .ai-suggestions-content {
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border-radius: 3px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Success/Error Messages */
+        .alert {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .form-row,
+            .patient-info {
+                grid-template-columns: 1fr;
+            }
+
+            .content-header {
+                padding: 10px 15px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .tab-headers {
+                flex-direction: column;
+            }
+
+            .tab-header {
+                border-right: none;
+                border-bottom: 1px solid #d0d0d0;
+            }
+
+            .bed-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">AD</div>
+                <span>(Admin)</span>
+            </div>
+            <span style="margin-right: 15px;">🌐 Select Language ▾</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item">
+                    <span>Patient Registration</span>
+                </div>
+                <div class="nav-item">
+                    <span>Patient Search</span>
+                </div>
+                <div class="nav-item active">
+                    <span>Admission/Discharge</span>
+                </div>
+                <div class="nav-item">
+                    <span>Emergency Triage</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Medical Records</span></div>
+                <div class="nav-item"><span>Vital Signs</span></div>
+                <div class="nav-item"><span>Procedure Scheduling</span></div>
+                <div class="nav-item"><span>Discharge Planning</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Test Orders</span></div>
+                <div class="nav-item"><span>Sample Tracking</span></div>
+                <div class="nav-item"><span>Results Entry</span></div>
+                <div class="nav-item"><span>Lab Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Prescription Management</span></div>
+                <div class="nav-item"><span>Drug Inventory</span></div>
+                <div class="nav-item"><span>Dispensing</span></div>
+                <div class="nav-item"><span>Drug Interactions</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Invoice Generation</span></div>
+                <div class="nav-item"><span>Insurance Claims</span></div>
+                <div class="nav-item"><span>Payment Tracking</span></div>
+                <div class="nav-item"><span>Financial Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Employee Records</span></div>
+                <div class="nav-item"><span>Schedule Management</span></div>
+                <div class="nav-item"><span>Department Assignment</span></div>
+                <div class="nav-item"><span>Performance Tracking</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Risk Predictions</span></div>
+                <div class="nav-item"><span>Diagnostic Assistance</span></div>
+                <div class="nav-item"><span>Model Performance</span></div>
+                <div class="nav-item"><span>Classification Results</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>System Configuration</span></div>
+                <div class="nav-item"><span>User Management</span></div>
+                <div class="nav-item"><span>Audit Reports</span></div>
+                <div class="nav-item"><span>Security Settings</span></div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Patient Management</a> › Admission/Discharge
+                    </div>
+                    <h1 class="page-title">Admission & Discharge Management</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="window.location.href='#'">
+                        ➕ Quick Admission
+                    </button>
+                    <button class="btn btn-secondary" onclick="generateReport()">
+                        📊 Daily Report
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Success/Error Messages -->
+                <div id="successAlert" class="alert alert-success">
+                    <strong>Success!</strong> <span id="successMessage"></span>
+                </div>
+                <div id="errorAlert" class="alert alert-error">
+                    <strong>Error!</strong> <span id="errorMessage"></span>
+                </div>
+
+                <!-- AI Assistant -->
+                <div class="ai-assistant">
+                    <div class="ai-assistant-header">
+                        <span style="margin-right: 8px;">🤖</span>
+                        AI Admission Assistant
+                    </div>
+                    <div style="opacity: 0.9;">
+                        Smart bed assignment, risk assessment, and discharge planning with predictive analytics
+                    </div>
+                    <div id="aiSuggestionsContent" class="ai-suggestions-content">
+                        <!-- AI suggestions will appear here -->
+                    </div>
+                </div>
+
+                <!-- Tab Container -->
+                <div class="tab-container">
+                    <div class="tab-headers">
+                        <div class="tab-header active" onclick="switchTab('admission')">
+                            🏥 Patient Admission
+                        </div>
+                        <div class="tab-header" onclick="switchTab('discharge')">
+                            🚪 Patient Discharge
+                        </div>
+                        <div class="tab-header" onclick="switchTab('transfer')">
+                            🔄 Patient Transfer
+                        </div>
+                        <div class="tab-header" onclick="switchTab('current')">
+                            📋 Current Admissions
+                        </div>
+                    </div>
+
+                    <!-- Patient Admission Tab -->
+                    <div id="admissionTab" class="tab-content active">
+                        <form id="admissionForm">
+                            <!-- Patient Search -->
+                            <div class="apex-region">
+                                <div class="region-header">
+                                    <span class="icon">🔍</span>
+                                    Select Patient for Admission
+                                </div>
+                                <div class="region-body">
+                                    <div class="patient-search">
+                                        <input type="text" class="search-input" id="patientSearchInput" 
+                                               placeholder="Search by name, patient number, or MRN..." 
+                                               oninput="searchPatients(this.value)">
+                                        <div id="patientSuggestions" class="patient-suggestions"></div>
+                                    </div>
+                                    
+                                    <div id="selectedPatient" class="selected-patient" style="display: none;">
+                                        <div class="patient-info" id="patientInfo">
+                                            <!-- Selected patient info will appear here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Admission Details -->
+                            <div class="apex-region" id="admissionDetailsSection" style="display: none;">
+                                <div class="region-header">
+                                    <span class="icon">📝</span>
+                                    Admission Details
+                                </div>
+                                <div class="region-body">
+                                    <div class="form-row double">
+                                        <div class="form-group">
+                                            <label class="form-label">Admission Type <span class="required">*</span></label>
+                                            <select class="form-select" name="admissionType" required onchange="analyzeAdmission()">
+                                                <option value="">-- Select Type --</option>
+                                                <option value="EMERGENCY">Emergency</option>
+                                                <option value="ELECTIVE">Elective</option>
+                                                <option value="URGENT">Urgent</option>
+                                                <option value="OBSERVATION">Observation</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Department <span class="required">*</span></label>
+                                            <select class="form-select" name="department" required onchange="loadAvailableBeds()">
+                                                <option value="">-- Select Department --</option>
+                                                <option value="ED">Emergency Department</option>
+                                                <option value="IM">Internal Medicine</option>
+                                                <option value="SURG">Surgery</option>
+                                                <option value="CARD">Cardiology</option>
+                                                <option value="NEUR">Neurology</option>
+                                                <option value="PEDS">Pediatrics</option>
+                                                <option value="ICU">Intensive Care</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-row double">
+                                        <div class="form-group">
+                                            <label class="form-label">Attending Doctor <span class="required">*</span></label>
+                                            <select class="form-select" name="attendingDoctor" required>
+                                                <option value="">-- Select Doctor --</option>
+                                                <option value="1">Dr. Sarah Johnson - Cardiology</option>
+                                                <option value="2">Dr. Ahmed Hassan - Internal Medicine</option>
+                                                <option value="3">Dr. Mohamed Nasser - Emergency</option>
+                                                <option value="4">Dr. Amira Saleh - Obstetrics</option>
+                                                <option value="5">Dr. Hassan Ali - Neurology</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Admission Source</label>
+                                            <select class="form-select" name="admissionSource">
+                                                <option value="">-- Select Source --</option>
+                                                <option value="EMERGENCY">Emergency Department</option>
+                                                <option value="OUTPATIENT">Outpatient Clinic</option>
+                                                <option value="REFERRAL">External Referral</option>
+                                                <option value="TRANSFER">Transfer from Another Hospital</option>
+                                                <option value="DIRECT">Direct Admission</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row single">
+                                        <div class="form-group">
+                                            <label class="form-label">Chief Complaint <span class="required">*</span></label>
+                                            <textarea class="form-textarea" name="chiefComplaint" rows="3" required
+                                                      placeholder="Primary reason for admission..." 
+                                                      oninput="analyzeComplaint()"></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row single">
+                                        <div class="form-group">
+                                            <label class="form-label">Preliminary Diagnosis</label>
+                                            <textarea class="form-textarea" name="preliminaryDiagnosis" rows="2"
+                                                      placeholder="Initial diagnostic impression..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bed Assignment -->
+                            <div class="apex-region" id="bedAssignmentSection" style="display: none;">
+                                <div class="region-header">
+                                    <span class="icon">🛏️</span>
+                                    Bed Assignment
+                                    <button type="button" class="btn btn-secondary" onclick="loadAvailableBeds()" style="margin-left: auto; height: 24px; min-width: 60px;">Refresh</button>
+                                </div>
+                                <div class="region-body">
+                                    <div id="bedSelection">
+                                        <p style="color: #666; margin-bottom: 15px;">Please select a department first to view available beds.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="apex-region">
+                                <div style="padding: 15px; border-top: 1px solid #d0d0d0; background: #f8f8f8; display: flex; justify-content: flex-end; gap: 10px;">
+                                    <button type="button" class="btn btn-secondary" onclick="clearAdmissionForm()">
+                                        Clear Form
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="saveAsDraft()">
+                                        Save as Draft
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" id="admitPatientBtn">
+                                        🏥 Admit Patient
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Patient Discharge Tab -->
+                    <div id="dischargeTab" class="tab-content">
+                        <form id="dischargeForm">
+                            <!-- Select Patient for Discharge -->
+                            <div class="apex-region">
+                                <div class="region-header">
+                                    <span class="icon">🔍</span>
+                                    Select Patient for Discharge
+                                </div>
+                                <div class="region-body">
+                                    <div class="form-row double">
+                                        <div class="form-group">
+                                            <label class="form-label">Search Admitted Patient</label>
+                                            <input type="text" class="form-input" id="dischargePatientSearch" 
+                                                   placeholder="Search by name or room number..." 
+                                                   oninput="searchAdmittedPatients(this.value)">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Filter by Department</label>
+                                            <select class="form-select" id="dischargeDepartmentFilter" onchange="filterAdmittedPatients()">
+                                                <option value="">All Departments</option>
+                                                <option value="ED">Emergency Department</option>
+                                                <option value="IM">Internal Medicine</option>
+                                                <option value="SURG">Surgery</option>
+                                                <option value="CARD">Cardiology</option>
+                                                <option value="NEUR">Neurology</option>
+                                                <option value="PEDS">Pediatrics</option>
+                                                <option value="ICU">Intensive Care</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div id="admittedPatientsList">
+                                        <!-- List of admitted patients will appear here -->
+                                    </div>
+
+                                    <div id="selectedDischargePatient" class="selected-patient" style="display: none;">
+                                        <div class="patient-info" id="dischargePatientInfo">
+                                            <!-- Selected patient info will appear here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Discharge Details -->
+                            <div class="apex-region" id="dischargeDetailsSection" style="display: none;">
+                                <div class="region-header">
+                                    <span class="icon">📋</span>
+                                    Discharge Details
+                                </div>
+                                <div class="region-body">
+                                    <div class="form-row double">
+                                        <div class="form-group">
+                                            <label class="form-label">Discharge Date & Time <span class="required">*</span></label>
+                                            <input type="datetime-local" class="form-input" name="dischargeDateTime" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Discharge Disposition <span class="required">*</span></label>
+                                            <select class="form-select" name="dischargeDisposition" required onchange="analyzeDischarge()">
+                                                <option value="">-- Select Disposition --</option>
+                                                <option value="HOME">Home</option>
+                                                <option value="HOME_HEALTH">Home with Health Services</option>
+                                                <option value="REHABILITATION">Rehabilitation Facility</option>
+                                                <option value="NURSING_HOME">Nursing Home</option>
+                                                <option value="TRANSFER">Transfer to Another Hospital</option>
+                                                <option value="HOSPICE">Hospice Care</option>
+                                                <option value="AMA">Against Medical Advice</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row single">
+                                        <div class="form-group">
+                                            <label class="form-label">Final Diagnosis <span class="required">*</span></label>
+                                            <textarea class="form-textarea" name="finalDiagnosis" rows="3" required
+                                                      placeholder="Complete diagnosis at discharge..."></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row single">
+                                        <div class="form-group">
+                                            <label class="form-label">Discharge Summary</label>
+                                            <textarea class="form-textarea" name="dischargeSummary" rows="4"
+                                                      placeholder="Brief summary of hospitalization, treatment provided, and condition at discharge..."></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row single">
+                                        <div class="form-group">
+                                            <label class="form-label">Follow-up Instructions</label>
+                                            <textarea class="form-textarea" name="followupInstructions" rows="3"
+                                                      placeholder="Post-discharge care instructions, appointments, medications..."></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row double">
+                                        <div class="form-group">
+                                            <label class="form-label">Discharge Medications</label>
+                                            <textarea class="form-textarea" name="dischargeMedications" rows="2"
+                                                      placeholder="List of medications prescribed at discharge..."></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Diet Instructions</label>
+                                            <textarea class="form-textarea" name="dietInstructions" rows="2"
+                                                      placeholder="Dietary restrictions or recommendations..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="apex-region">
+                                <div style="padding: 15px; border-top: 1px solid #d0d0d0; background: #f8f8f8; display: flex; justify-content: flex-end; gap: 10px;">
+                                    <button type="button" class="btn btn-secondary" onclick="clearDischargeForm()">
+                                        Clear Form
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="generateDischargeSummary()">
+                                        📄 Generate Summary
+                                    </button>
+                                    <button type="submit" class="btn btn-warning" id="dischargePatientBtn">
+                                        🚪 Discharge Patient
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Patient Transfer Tab -->
+                    <div id="transferTab" class="tab-content">
+                        <form id="transferForm">
+                            <!-- Select Patient for Transfer -->
+                            <div class="apex-region">
+                                <div class="region-header">
+                                    <span class="icon">🔍</span>
+                                    Select Patient for Transfer
+                                </div>
+                                <div class="region-body">
+                                    <div id="transferPatientSearch">
+                                        <input type="text" class="search-input" placeholder="Search admitted patient for transfer..." 
+                                               oninput="searchTransferPatients(this.value)">
+                                        <div id="transferPatientSuggestions" class="patient-suggestions"></div>
+                                    </div>
+
+                                    <div id="selectedTransferPatient" class="selected-patient" style="display: none;">
+                                        <div class="patient-info" id="transferPatientInfo">
+                                            <!-- Selected patient info will appear here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Transfer Details -->
+                            <div class="apex-region" id="transferDetailsSection" style="display: none;">
+                                <div class="region-header">
+                                    <span class="icon">🔄</span>
+                                    Transfer Details
+                                </div>
+                                <div class="region-body">
+                                    <div class="form-row double">
+                                        <div class="form-group">
+                                            <label class="form-label">Transfer Type <span class="required">*</span></label>
+                                            <select class="form-select" name="transferType" required>
+                                                <option value="">-- Select Type --</option>
+                                                <option value="DEPARTMENT">Department Transfer</option>
+                                                <option value="ROOM">Room Transfer</option>
+                                                <option value="HOSPITAL">Hospital Transfer</option>
+                                                <option value="ICU">Transfer to ICU</option>
+                                                <option value="STEP_DOWN">Step Down Unit</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Transfer Date & Time <span class="required">*</span></label>
+                                            <input type="datetime-local" class="form-input" name="transferDateTime" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row double">
+                                        <div class="form-group">
+                                            <label class="form-label">New Department</label>
+                                            <select class="form-select" name="newDepartment" onchange="loadTransferBeds()">
+                                                <option value="">-- Select Department --</option>
+                                                <option value="ED">Emergency Department</option>
+                                                <option value="IM">Internal Medicine</option>
+                                                <option value="SURG">Surgery</option>
+                                                <option value="CARD">Cardiology</option>
+                                                <option value="NEUR">Neurology</option>
+                                                <option value="PEDS">Pediatrics</option>
+                                                <option value="ICU">Intensive Care</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Reason for Transfer <span class="required">*</span></label>
+                                            <select class="form-select" name="transferReason" required>
+                                                <option value="">-- Select Reason --</option>
+                                                <option value="CLINICAL_DETERIORATION">Clinical Deterioration</option>
+                                                <option value="SPECIALIZED_CARE">Need for Specialized Care</option>
+                                                <option value="STEP_DOWN_CARE">Step Down Care</option>
+                                                <option value="BED_AVAILABILITY">Bed Availability</option>
+                                                <option value="PATIENT_REQUEST">Patient/Family Request</option>
+                                                <option value="ADMINISTRATIVE">Administrative</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row single">
+                                        <div class="form-group">
+                                            <label class="form-label">Transfer Notes</label>
+                                            <textarea class="form-textarea" name="transferNotes" rows="3"
+                                                      placeholder="Additional notes about the transfer..."></textarea>
+                                        </div>
+                                    </div>
+
+                                    <!-- New Bed Selection -->
+                                    <div id="transferBedSelection" style="margin-top: 15px;">
+                                        <!-- Available beds for transfer will appear here -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="apex-region">
+                                <div style="padding: 15px; border-top: 1px solid #d0d0d0; background: #f8f8f8; display: flex; justify-content: flex-end; gap: 10px;">
+                                    <button type="button" class="btn btn-secondary" onclick="clearTransferForm()">
+                                        Clear Form
+                                    </button>
+                                    <button type="submit" class="btn btn-success" id="transferPatientBtn">
+                                        🔄 Transfer Patient
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Current Admissions Tab -->
+                    <div id="currentTab" class="tab-content">
+                        <div class="apex-region">
+                            <div class="region-header">
+                                <span class="icon">📋</span>
+                                Current Hospital Admissions
+                                <div style="margin-left: auto; display: flex; gap: 10px;">
+                                    <select class="form-select" id="admissionFilter" onchange="filterCurrentAdmissions()" 
+                                            style="height: 24px; font-size: 11px; min-width: 120px;">
+                                        <option value="">All Departments</option>
+                                        <option value="ED">Emergency</option>
+                                        <option value="IM">Internal Medicine</option>
+                                        <option value="SURG">Surgery</option>
+                                        <option value="CARD">Cardiology</option>
+                                        <option value="ICU">ICU</option>
+                                    </select>
+                                    <button type="button" class="btn btn-secondary" onclick="refreshAdmissions()" style="height: 24px; min-width: 60px;">Refresh</button>
+                                </div>
+                            </div>
+                            <div class="region-body" style="padding: 0; position: relative;">
+                                <div id="currentAdmissionsLoading" class="loading-overlay">
+                                    <div class="spinner"></div>
+                                    Loading current admissions...
+                                </div>
+
+                                <table class="admission-table" id="currentAdmissionsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Patient Info</th>
+                                            <th>Room/Bed</th>
+                                            <th>Department</th>
+                                            <th>Attending Doctor</th>
+                                            <th>Admission Date</th>
+                                            <th>Length of Stay</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="currentAdmissionsBody">
+                                        <!-- Current admissions will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Admission Statistics -->
+                        <div class="apex-region">
+                            <div class="region-header">
+                                <span class="icon">📊</span>
+                                Daily Admission Statistics
+                            </div>
+                            <div class="region-body">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                                    <div style="text-align: center; padding: 15px; background: #e8f4fd; border-radius: 4px;">
+                                        <div style="font-size: 24px; font-weight: bold; color: #3d9aef;" id="totalAdmissions">0</div>
+                                        <div style="font-size: 12px; color: #666;">Total Admissions Today</div>
+                                    </div>
+                                    <div style="text-align: center; padding: 15px; background: #fff3cd; border-radius: 4px;">
+                                        <div style="font-size: 24px; font-weight: bold; color: #856404;" id="totalDischarges">0</div>
+                                        <div style="font-size: 12px; color: #666;">Total Discharges Today</div>
+                                    </div>
+                                    <div style="text-align: center; padding: 15px; background: #d4edda; border-radius: 4px;">
+                                        <div style="font-size: 24px; font-weight: bold; color: #155724;" id="availableBeds">0</div>
+                                        <div style="font-size: 12px; color: #666;">Available Beds</div>
+                                    </div>
+                                    <div style="text-align: center; padding: 15px; background: #f8d7da; border-radius: 4px;">
+                                        <div style="font-size: 24px; font-weight: bold; color: #721c24;" id="occupancyRate">0%</div>
+                                        <div style="font-size: 12px; color: #666;">Occupancy Rate</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const samplePatients = [
+            {
+                id: 1, patientNumber: 'P-20241215-001', mrn: 'MRN-20241215-0001',
+                firstName: 'Ahmed', lastName: 'Hassan', age: 46, gender: 'M',
+                phone: '+20-12-345-6789', bloodType: 'A+', status: 'ACTIVE'
+            },
+            {
+                id: 2, patientNumber: 'P-20241215-002', mrn: 'MRN-20241215-0002',
+                firstName: 'Fatima', lastName: 'Al-Zahra', age: 29, gender: 'F',
+                phone: '+20-10-987-6543', bloodType: 'O+', status: 'ACTIVE'
+            },
+            {
+                id: 3, patientNumber: 'P-20241214-045', mrn: 'MRN-20241214-0045',
+                firstName: 'Omar', lastName: 'Khaled', age: 62, gender: 'M',
+                phone: '+20-11-555-7788', bloodType: 'B-', status: 'ACTIVE'
+            }
+        ];
+
+        const currentAdmissions = [
+            {
+                id: 1, patientId: 1, patientName: 'Ahmed Hassan', room: 'GEN-101', bed: 'A',
+                department: 'Cardiology', doctor: 'Dr. Sarah Johnson', admissionDate: '2024-12-15',
+                status: 'ADMITTED', condition: 'Stable', los: 1
+            },
+            {
+                id: 2, patientId: 2, patientName: 'Fatima Al-Zahra', room: 'OBS-205', bed: 'B',
+                department: 'Obstetrics', doctor: 'Dr. Amira Saleh', admissionDate: '2024-12-14',
+                status: 'ADMITTED', condition: 'Good', los: 2
+            }
+        ];
+
+        let selectedPatient = null;
+        let selectedBed = null;
+        let currentTab = 'admission';
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all headers
+            document.querySelectorAll('.tab-header').forEach(header => {
+                header.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            
+            // Add active class to selected header
+            event.target.classList.add('active');
+            
+            currentTab = tabName;
+            
+            // Load data based on tab
+            if (tabName === 'current') {
+                loadCurrentAdmissions();
+            } else if (tabName === 'discharge') {
+                loadAdmittedPatients();
+            }
+        }
+
+        // Patient search functionality
+        function searchPatients(query) {
+            const suggestions = document.getElementById('patientSuggestions');
+            
+            if (query.length < 2) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            const filtered = samplePatients.filter(p =>
+                p.firstName.toLowerCase().includes(query.toLowerCase()) ||
+                p.lastName.toLowerCase().includes(query.toLowerCase()) ||
+                p.patientNumber.toLowerCase().includes(query.toLowerCase()) ||
+                p.mrn.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            if (filtered.length > 0) {
+                suggestions.innerHTML = filtered.map(p => `
+                    <div class="patient-suggestion" onclick="selectPatient(${p.id})">
+                        <div style="font-weight: 600;">${p.firstName} ${p.lastName}</div>
+                        <div style="font-size: 11px; color: #666;">${p.patientNumber} | ${p.mrn} | Age: ${p.age}</div>
+                        <div style="font-size: 11px; color: #666;">Phone: ${p.phone} | Blood: ${p.bloodType}</div>
+                    </div>
+                `).join('');
+                suggestions.style.display = 'block';
+            } else {
+                suggestions.style.display = 'none';
+            }
+        }
+
+        // Select patient for admission
+        function selectPatient(patientId) {
+            selectedPatient = samplePatients.find(p => p.id === patientId);
+            const suggestions = document.getElementById('patientSuggestions');
+            const selectedDiv = document.getElementById('selectedPatient');
+            const patientInfo = document.getElementById('patientInfo');
+            
+            suggestions.style.display = 'none';
+            document.getElementById('patientSearchInput').value = `${selectedPatient.firstName} ${selectedPatient.lastName}`;
+            
+            patientInfo.innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Patient Name</div>
+                    <div class="info-value">${selectedPatient.firstName} ${selectedPatient.lastName}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Patient Number</div>
+                    <div class="info-value">${selectedPatient.patientNumber}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Medical Record Number</div>
+                    <div class="info-value">${selectedPatient.mrn}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Age & Gender</div>
+                    <div class="info-value">${selectedPatient.age} years, ${selectedPatient.gender === 'M' ? 'Male' : 'Female'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Phone</div>
+                    <div class="info-value">${selectedPatient.phone}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Blood Type</div>
+                    <div class="info-value">${selectedPatient.bloodType}</div>
+                </div>
+            `;
+            
+            selectedDiv.style.display = 'block';
+            document.getElementById('admissionDetailsSection').style.display = 'block';
+        }
+
+        // Load available beds
+        function loadAvailableBeds() {
+            const department = document.querySelector('[name="department"]').value;
+            const bedSelection = document.getElementById('bedSelection');
+            
+            if (!department) {
+                bedSelection.innerHTML = '<p style="color: #666;">Please select a department first.</p>';
+                document.getElementById('bedAssignmentSection').style.display = 'none';
+                return;
+            }
+            
+            document.getElementById('bedAssignmentSection').style.display = 'block';
+            
+            // Simulate available beds based on department
+            const availableBeds = generateAvailableBeds(department);
+            
+            bedSelection.innerHTML = `
+                <div style="margin-bottom: 10px; color: #666; font-size: 12px;">
+                    Available beds in ${department} department:
+                </div>
+                <div class="bed-grid">
+                    ${availableBeds.map(bed => `
+                        <div class="bed-item ${bed.status} ${bed.selected ? 'selected' : ''}" 
+                             onclick="selectBed('${bed.id}', this)">
+                            <div>${bed.room}</div>
+                            <div style="font-size: 10px;">${bed.bed}</div>
+                            <div style="font-size: 10px;">${bed.type}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Generate available beds
+        function generateAvailableBeds(department) {
+            const beds = [];
+            const roomPrefix = department === 'ICU' ? 'ICU' : department === 'ED' ? 'ER' : 'GEN';
+            const bedCount = department === 'ICU' ? 10 : 20;
+            
+            for (let i = 1; i <= bedCount; i++) {
+                const roomNum = roomPrefix + '-' + String(i).padStart(3, '0');
+                const bedStatus = Math.random() > 0.3 ? 'available' : 'occupied';
+                const bedType = department === 'ICU' ? 'ICU' : 'Standard';
+                
+                beds.push({
+                    id: roomNum + '-A',
+                    room: roomNum,
+                    bed: 'A',
+                    type: bedType,
+                    status: bedStatus,
+                    selected: false
+                });
+            }
+            
+            return beds.filter(bed => bed.status === 'available');
+        }
+
+        // Select bed
+        function selectBed(bedId, element) {
+            // Remove selection from all beds
+            document.querySelectorAll('.bed-item').forEach(bed => {
+                bed.classList.remove('selected');
+            });
+            
+            // Add selection to clicked bed
+            element.classList.add('selected');
+            selectedBed = bedId;
+            
+            showAISuggestion('bed_selected');
+        }
+
+        // AI Analysis functions
+        function analyzeAdmission() {
+            const admissionType = document.querySelector('[name="admissionType"]').value;
+            if (admissionType === 'EMERGENCY') {
+                showAISuggestion('emergency_admission');
+            }
+        }
+
+        function analyzeComplaint() {
+            const complaint = document.querySelector('[name="chiefComplaint"]').value.toLowerCase();
+            if (complaint.includes('chest pain') || complaint.includes('heart')) {
+                showAISuggestion('cardiac_complaint');
+            } else if (complaint.includes('accident') || complaint.includes('trauma')) {
+                showAISuggestion('trauma_complaint');
+            }
+        }
+
+        function showAISuggestion(type) {
+            const aiContent = document.getElementById('aiSuggestionsContent');
+            let suggestion = '';
+            
+            switch(type) {
+                case 'emergency_admission':
+                    suggestion = '🚨 Emergency admission detected. Recommend ICU or Emergency bed assignment with immediate vital signs monitoring.';
+                    break;
+                case 'cardiac_complaint':
+                    suggestion = '❤️ Cardiac-related complaint identified. Suggesting Cardiology department with telemetry monitoring capability.';
+                    break;
+                case 'trauma_complaint':
+                    suggestion = '🚑 Trauma case detected. Priority bed assignment in Emergency department with surgical consultation standby.';
+                    break;
+                case 'bed_selected':
+                    suggestion = '🛏️ Bed selected. System will automatically update bed status and generate admission paperwork.';
+                    break;
+                default:
+                    return;
+            }
+            
+            aiContent.textContent = suggestion;
+            aiContent.style.display = 'block';
+            
+            setTimeout(() => {
+                aiContent.style.display = 'none';
+            }, 5000);
+        }
+
+        // Load current admissions
+        function loadCurrentAdmissions() {
+            const tbody = document.getElementById('currentAdmissionsBody');
+            const loading = document.getElementById('currentAdmissionsLoading');
+            
+            loading.style.display = 'flex';
+            
+            setTimeout(() => {
+                                        tbody.innerHTML = currentAdmissions.map(admission => `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 600;">${admission.patientName}</div>
+                            <div style="font-size: 11px; color: #666;">ID: ${admission.patientId}</div>
+                        </td>
+                        <td>
+                            <div>${admission.room}</div>
+                            <div style="font-size: 11px; color: #666;">Bed ${admission.bed}</div>
+                        </td>
+                        <td>${admission.department}</td>
+                        <td>${admission.doctor}</td>
+                        <td>${admission.admissionDate}</td>
+                        <td>${admission.los} day${admission.los > 1 ? 's' : ''}</td>
+                        <td>
+                            <span class="status-badge status-${admission.status.toLowerCase()}">${admission.status}</span>
+                            <div style="font-size: 11px; margin-top: 2px;">${admission.condition}</div>
+                        </td>
+                        <td>
+                            <a href="#" class="action-btn action-view" onclick="viewAdmission(${admission.id})">View</a>
+                            <a href="#" class="action-btn action-edit" onclick="editAdmission(${admission.id})">Edit</a>
+                            <a href="#" class="action-btn action-discharge" onclick="initiateDischarge(${admission.id})">Discharge</a>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                loading.style.display = 'none';
+                updateAdmissionStats();
+            }, 1000);
+        }
+
+        // Update admission statistics
+        function updateAdmissionStats() {
+            document.getElementById('totalAdmissions').textContent = '12';
+            document.getElementById('totalDischarges').textContent = '8';
+            document.getElementById('availableBeds').textContent = '24';
+            document.getElementById('occupancyRate').textContent = '76%';
+        }
+
+        // Load admitted patients for discharge
+        function loadAdmittedPatients() {
+            const listDiv = document.getElementById('admittedPatientsList');
+            
+            listDiv.innerHTML = `
+                <div style="margin-top: 15px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Currently Admitted Patients:</div>
+                    ${currentAdmissions.map(admission => `
+                        <div class="patient-suggestion" onclick="selectDischargePatient(${admission.id})">
+                            <div style="font-weight: 600;">${admission.patientName}</div>
+                            <div style="font-size: 11px; color: #666;">Room: ${admission.room}-${admission.bed} | Dept: ${admission.department}</div>
+                            <div style="font-size: 11px; color: #666;">Admitted: ${admission.admissionDate} | LOS: ${admission.los} day(s)</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Select patient for discharge
+        function selectDischargePatient(admissionId) {
+            const admission = currentAdmissions.find(a => a.id === admissionId);
+            const selectedDiv = document.getElementById('selectedDischargePatient');
+            const patientInfo = document.getElementById('dischargePatientInfo');
+            
+            patientInfo.innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Patient Name</div>
+                    <div class="info-value">${admission.patientName}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Current Room</div>
+                    <div class="info-value">${admission.room}-${admission.bed}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Department</div>
+                    <div class="info-value">${admission.department}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Attending Doctor</div>
+                    <div class="info-value">${admission.doctor}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Admission Date</div>
+                    <div class="info-value">${admission.admissionDate}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Length of Stay</div>
+                    <div class="info-value">${admission.los} day(s)</div>
+                </div>
+            `;
+            
+            selectedDiv.style.display = 'block';
+            document.getElementById('dischargeDetailsSection').style.display = 'block';
+            
+            // Set default discharge date/time to current
+            const now = new Date();
+            document.querySelector('[name="dischargeDateTime"]').value = now.toISOString().slice(0, 16);
+        }
+
+        // Form submissions
+        document.getElementById('admissionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!selectedPatient) {
+                showAlert('error', 'Please select a patient first.');
+                return;
+            }
+            
+            if (!selectedBed) {
+                showAlert('error', 'Please select a bed for the patient.');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('admitPatientBtn');
+            submitBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px;"></div>Processing...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                showAlert('success', `Patient ${selectedPatient.firstName} ${selectedPatient.lastName} has been successfully admitted to bed ${selectedBed}.`);
+                submitBtn.innerHTML = '🏥 Admit Patient';
+                submitBtn.disabled = false;
+                clearAdmissionForm();
+            }, 2000);
+        });
+
+        document.getElementById('dischargeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('dischargePatientBtn');
+            submitBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px;"></div>Processing...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                showAlert('success', 'Patient has been successfully discharged. Bed is now available for new admission.');
+                submitBtn.innerHTML = '🚪 Discharge Patient';
+                submitBtn.disabled = false;
+                clearDischargeForm();
+            }, 2000);
+        });
+
+        document.getElementById('transferForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('transferPatientBtn');
+            submitBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px;"></div>Processing...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                showAlert('success', 'Patient transfer has been completed successfully.');
+                submitBtn.innerHTML = '🔄 Transfer Patient';
+                submitBtn.disabled = false;
+                clearTransferForm();
+            }, 2000);
+        });
+
+        // Utility functions
+        function showAlert(type, message) {
+            const alertDiv = document.getElementById(type === 'success' ? 'successAlert' : 'errorAlert');
+            const messageSpan = document.getElementById(type === 'success' ? 'successMessage' : 'errorMessage');
+            
+            messageSpan.textContent = message;
+            alertDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                alertDiv.style.display = 'none';
+            }, 5000);
+            
+            alertDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearAdmissionForm() {
+            document.getElementById('admissionForm').reset();
+            document.getElementById('selectedPatient').style.display = 'none';
+            document.getElementById('admissionDetailsSection').style.display = 'none';
+            document.getElementById('bedAssignmentSection').style.display = 'none';
+            document.getElementById('patientSearchInput').value = '';
+            selectedPatient = null;
+            selectedBed = null;
+        }
+
+        function clearDischargeForm() {
+            document.getElementById('dischargeForm').reset();
+            document.getElementById('selectedDischargePatient').style.display = 'none';
+            document.getElementById('dischargeDetailsSection').style.display = 'none';
+        }
+
+        function clearTransferForm() {
+            document.getElementById('transferForm').reset();
+            document.getElementById('selectedTransferPatient').style.display = 'none';
+            document.getElementById('transferDetailsSection').style.display = 'none';
+        }
+
+        // Action handlers
+        function viewAdmission(admissionId) {
+            const admission = currentAdmissions.find(a => a.id === admissionId);
+            alert(`Viewing admission details for: ${admission.patientName}\nRoom: ${admission.room}-${admission.bed}\nDepartment: ${admission.department}`);
+        }
+
+        function editAdmission(admissionId) {
+            const admission = currentAdmissions.find(a => a.id === admissionId);
+            alert(`Editing admission for: ${admission.patientName}`);
+        }
+
+        function initiateDischarge(admissionId) {
+            switchTab('discharge');
+            setTimeout(() => {
+                selectDischargePatient(admissionId);
+            }, 500);
+        }
+
+        function generateDischargeSummary() {
+            const finalDiagnosis = document.querySelector('[name="finalDiagnosis"]').value;
+            const summaryField = document.querySelector('[name="dischargeSummary"]');
+            
+            if (finalDiagnosis) {
+                summaryField.value = `Patient was admitted for ${finalDiagnosis}. Treatment was provided as per standard protocols. Patient's condition improved and is now stable for discharge. Patient has been educated about follow-up care and medication compliance.`;
+                showAlert('success', 'Discharge summary has been generated based on diagnosis.');
+            } else {
+                showAlert('error', 'Please enter final diagnosis first.');
+            }
+        }
+
+        function saveAsDraft() {
+            showAlert('success', 'Admission form has been saved as draft.');
+        }
+
+        function generateReport() {
+            alert('Generating daily admission/discharge report...');
+        }
+
+        function refreshAdmissions() {
+            loadCurrentAdmissions();
+        }
+
+        // Search functions for other tabs
+        function searchAdmittedPatients(query) {
+            // Implementation for searching admitted patients
+            console.log('Searching admitted patients:', query);
+        }
+
+        function searchTransferPatients(query) {
+            // Implementation for searching transfer patients
+            console.log('Searching transfer patients:', query);
+        }
+
+        function filterAdmittedPatients() {
+            // Implementation for filtering admitted patients
+            console.log('Filtering admitted patients');
+        }
+
+        function filterCurrentAdmissions() {
+            // Implementation for filtering current admissions
+            console.log('Filtering current admissions');
+        }
+
+        function loadTransferBeds() {
+            // Implementation for loading transfer beds
+            const transferBedSelection = document.getElementById('transferBedSelection');
+            const department = document.querySelector('[name="newDepartment"]').value;
+            
+            if (department) {
+                transferBedSelection.innerHTML = `
+                    <div style="margin-bottom: 10px; color: #666; font-size: 12px;">
+                        Available beds in ${department} department:
+                    </div>
+                    <div class="bed-grid">
+                        ${generateAvailableBeds(department).slice(0, 10).map(bed => `
+                            <div class="bed-item available" onclick="selectBed('${bed.id}', this)">
+                                <div>${bed.room}</div>
+                                <div style="font-size: 10px;">${bed.bed}</div>
+                                <div style="font-size: 10px;">${bed.type}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        }
+
+        function analyzeDischarge() {
+            const disposition = document.querySelector('[name="dischargeDisposition"]').value;
+            if (disposition === 'TRANSFER') {
+                showAISuggestion('transfer_discharge');
+            } else if (disposition === 'HOME') {
+                showAISuggestion('home_discharge');
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default current date/time for forms
+            const now = new Date();
+            const currentDateTime = now.toISOString().slice(0, 16);
+            
+            document.querySelectorAll('input[type="datetime-local"]').forEach(input => {
+                if (!input.value) {
+                    input.value = currentDateTime;
+                }
+            });
+            
+            // Load initial data
+            if (currentTab === 'current') {
+                loadCurrentAdmissions();
+            }
+            
+            console.log('Admission/Discharge Management System Initialized');
+        });
+
+        // Hide patient suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.patient-search')) {
+                document.querySelectorAll('.patient-suggestions').forEach(suggestions => {
+                    suggestions.style.display = 'none';
+                });
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+1-4 for quick tab switching
+            if (e.ctrlKey && e.key >= '1' && e.key <= '4') {
+                e.preventDefault();
+                const tabs = ['admission', 'discharge', 'transfer', 'current'];
+                switchTab(tabs[parseInt(e.key) - 1]);
+            }
+            
+            // Escape to clear current form
+            if (e.key === 'Escape') {
+                if (currentTab === 'admission') clearAdmissionForm();
+                else if (currentTab === 'discharge') clearDischargeForm();
+                else if (currentTab === 'transfer') clearTransferForm();
+            }
+        });
+    </script>
+</body>
+</html>

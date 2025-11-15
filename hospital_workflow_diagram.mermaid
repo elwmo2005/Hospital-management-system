@@ -1,0 +1,193 @@
+flowchart TD
+    %% Patient Entry and Registration Workflow
+    A[Patient Arrival] --> B{Emergency or Scheduled?}
+    B -->|Emergency| C[Emergency Triage]
+    B -->|Scheduled| D[Registration Desk]
+    
+    C --> E[EMERGENCY_TRIAGE_PKG]
+    E --> F[Create/Update PATIENTS]
+    
+    D --> G[Verify Insurance]
+    G --> H[PATIENT_INSURANCE validation]
+    H --> F
+    
+    F --> I[Generate PATIENT_ID]
+    I --> J[Check PATIENT_ALLERGIES]
+    J --> K[Create PATIENT_ADMISSIONS]
+    
+    %% Bed Assignment and Admission
+    K --> L[BED_ASSIGNMENT_PKG]
+    L --> M{Bed Available?}
+    M -->|Yes| N[Assign BEDS record]
+    M -->|No| O[Wait List / Transfer]
+    N --> P[Update ROOMS occupancy]
+    
+    %% Clinical Assessment Workflow
+    P --> Q[Clinical Assessment]
+    Q --> R[STAFF_MEMBERS assigned]
+    R --> S[Record VITAL_SIGNS]
+    S --> T[Create MEDICAL_RECORDS]
+    
+    %% AI Classification Integration
+    T --> U[AI_CLASSIFICATIONS trigger]
+    U --> V[NLP Processing of clinical notes]
+    V --> W[ML_MODEL_METADATA lookup]
+    W --> X[Generate ICD-10 codes]
+    X --> Y[Update DIAGNOSES with AI results]
+    
+    %% Laboratory Workflow
+    Y --> Z[Doctor Orders Tests]
+    Z --> AA[Create LAB_ORDERS]
+    AA --> AB[LAB_TESTS validation]
+    AB --> AC[Specimen Collection]
+    AC --> AD[Laboratory Processing]
+    AD --> AE[Generate LAB_RESULTS]
+    AE --> AF[AI Result Analysis]
+    AF --> AG[Update MEDICAL_RECORDS]
+    
+    %% Medication and Pharmacy Workflow
+    AG --> AH[Prescription Orders]
+    AH --> AI[PRESCRIPTIONS creation]
+    AI --> AJ[DRUG_INTERACTION_PKG check]
+    AJ --> AK{Drug Interactions?}
+    AK -->|Yes| AL[Alert Doctor]
+    AK -->|No| AM[MEDICATIONS inventory check]
+    AL --> AN[Modify Prescription]
+    AN --> AM
+    AM --> AO[Pharmacy Dispensing]
+    AO --> AP[Update MEDICATIONS stock]
+    
+    %% Procedure and Surgery Workflow
+    AP --> AQ{Surgery Required?}
+    AQ -->|Yes| AR[SURGERY_SCHEDULING_PKG]
+    AQ -->|No| AS[Continue Treatment]
+    AR --> AT[Book PROCEDURES]
+    AT --> AU[Assign OR and STAFF_MEMBERS]
+    AU --> AV[Create PATIENT_PROCEDURES]
+    AV --> AW[Surgery Execution]
+    AW --> AX[Post-op MEDICAL_RECORDS]
+    
+    %% AI Prediction Integration
+    AS --> AY[AI_PREDICTIONS trigger]
+    AX --> AY
+    AY --> AZ[Patient Data Analysis]
+    AZ --> BA[ML Risk Calculation]
+    BA --> BB{High Risk Patient?}
+    BB -->|Yes| BC[Generate Alerts]
+    BB -->|No| BD[Continue Monitoring]
+    BC --> BE[Notify STAFF_MEMBERS]
+    
+    %% Financial and Billing Workflow
+    BD --> BF[Treatment Completion Check]
+    BE --> BF
+    BF --> BG[AUTOMATED_BILLING_PKG]
+    BG --> BH[Create BILLING record]
+    BH --> BI[Generate BILLING_ITEMS]
+    BI --> BJ[Insurance Processing]
+    BJ --> BK[PATIENT_INSURANCE claims]
+    BK --> BL[Payment Collection]
+    
+    %% Discharge Workflow
+    BL --> BM[Discharge Planning]
+    BM --> BN[DISCHARGE_PLANNING_PKG]
+    BN --> BO[Final MEDICAL_RECORDS]
+    BO --> BP[Update BEDS availability]
+    BP --> BQ[Update PATIENT_ADMISSIONS]
+    BQ --> BR[Generate Discharge Summary]
+    
+    %% Equipment and Resource Management
+    subgraph Equipment["Equipment Management"]
+        CA[MEDICAL_EQUIPMENT tracking]
+        CB[Maintenance Scheduling]
+        CC[Usage Monitoring]
+        CA --> CB --> CC --> CA
+    end
+    
+    %% Staff Scheduling
+    subgraph Staffing["Staff Management"]
+        DA[STAFF_SCHEDULES creation]
+        DB[Duty Assignment]
+        DC[Performance Tracking]
+        DA --> DB --> DC --> DA
+    end
+    
+    %% Audit and Compliance
+    subgraph Audit["Audit & Compliance"]
+        EA[AUDIT_TRAIL logging]
+        EB[Compliance Monitoring]
+        EC[SYSTEM_CONFIGURATIONS]
+        EA --> EB --> EC --> EA
+    end
+    
+    %% AI Model Management
+    subgraph AIManagement["AI Model Lifecycle"]
+        FA[Model Training Data]
+        FB[ML_MODEL_METADATA update]
+        FC[Model Performance Monitoring]
+        FD[Continuous Learning]
+        FA --> FB --> FC --> FD --> FA
+    end
+    
+    %% Integration Points
+    R -.-> Staffing
+    N -.-> Equipment
+    F -.-> Audit
+    U -.-> AIManagement
+    AY -.-> AIManagement
+    
+    %% Emergency Workflow Branch
+    subgraph Emergency["Emergency Department Flow"]
+        GA[Emergency Assessment]
+        GB[Rapid Triage AI]
+        GC[Critical Care Protocols]
+        GD[Fast Track Processing]
+        GA --> GB --> GC --> GD
+    end
+    
+    C -.-> Emergency
+    
+    %% Multi-Hospital Data Flow
+    subgraph MultiHospital["Multi-Hospital Coordination"]
+        HA[HOSPITAL_ID verification]
+        HB[Inter-hospital Transfers]
+        HC[Shared Resource Management]
+        HD[Consolidated Reporting]
+        HA --> HB --> HC --> HD
+    end
+    
+    F -.-> MultiHospital
+    
+    %% Data Analytics and Reporting
+    subgraph Analytics["Analytics & Reporting"]
+        IA[Real-time Dashboards]
+        IB[Performance Metrics]
+        IC[Predictive Analytics]
+        ID[Financial Reports]
+        IA --> IB --> IC --> ID
+    end
+    
+    BR -.-> Analytics
+    
+    %% External System Integration
+    subgraph External["External Integrations"]
+        JA[Insurance Verification APIs]
+        JB[Government Health Registries]
+        JC[Medical Device Integration]
+        JD[Telemedicine Platforms]
+    end
+    
+    G -.-> External
+    AD -.-> External
+    
+    %% Styling
+    classDef patientFlow fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef aiProcess fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef clinicalProcess fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef financialProcess fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef systemProcess fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    
+    class A,B,C,D,F,I,K,N,P patientFlow
+    class U,V,W,X,Y,AY,AZ,BA,BB,BC aiProcess
+    class Q,R,S,T,Z,AA,AB,AC,AD,AE,AF,AG,AH,AI,AJ clinicalProcess
+    class BG,BH,BI,BJ,BK,BL financialProcess
+    class EA,EB,EC,FA,FB,FC,FD systemProcess

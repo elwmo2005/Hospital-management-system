@@ -1,0 +1,1957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Reports - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1600px;
+        }
+
+        /* Three-column layout for lab reports */
+        .reports-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 320px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Report Search & Queue */
+        .reports-search {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-filters {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .filter-group {
+            margin-bottom: 12px;
+        }
+
+        .filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-row .filter-input,
+        .filter-row .filter-select {
+            flex: 1;
+        }
+
+        .search-button {
+            width: 100%;
+            padding: 8px 12px;
+            background: #3d9aef;
+            border: 1px solid #3d9aef;
+            border-radius: 3px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .reports-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .report-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .report-item:hover {
+            background: #f8f9fa;
+        }
+
+        .report-item.selected {
+            background: #e8f4fd;
+            border-left: 3px solid #3d9aef;
+        }
+
+        .report-item.critical {
+            border-left: 3px solid #dc3545;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .report-patient {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .report-status {
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .status-final { background: #d4edda; color: #155724; }
+        .status-preliminary { background: #fff3cd; color: #856404; }
+        .status-corrected { background: #cce5ff; color: #004085; }
+        .status-pending { background: #e2e8f0; color: #4a5568; }
+
+        .report-details {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .report-tests {
+            font-size: 11px;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .report-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .critical-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dc3545;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        /* Center Panel - Report Viewer */
+        .report-viewer {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viewer-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .viewer-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .viewer-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .report-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: white;
+        }
+
+        /* Medical Report Styling */
+        .medical-report {
+            font-family: "Times New Roman", serif;
+            line-height: 1.4;
+            color: #000;
+        }
+
+        .report-letterhead {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .hospital-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .hospital-details {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.3;
+        }
+
+        .report-title-header {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .patient-info-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-value {
+            color: #666;
+        }
+
+        .results-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        .results-table th {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .results-table td {
+            border: 1px solid #dee2e6;
+            padding: 8px 12px;
+            vertical-align: top;
+        }
+
+        .results-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .result-normal { color: #28a745; }
+        .result-abnormal { color: #dc3545; font-weight: 600; }
+        .result-critical { 
+            color: #dc3545; 
+            font-weight: bold; 
+            background: #fff5f5;
+        }
+
+        .flag-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 5px;
+        }
+
+        .flag-normal { background: #28a745; }
+        .flag-abnormal { background: #ffc107; }
+        .flag-critical { background: #dc3545; }
+
+        .critical-values-alert {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: #721c24;
+        }
+
+        .alert-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .comments-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .report-footer {
+            border-top: 1px solid #dee2e6;
+            padding-top: 15px;
+            margin-top: 25px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .signature-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .signature-block {
+            text-align: center;
+        }
+
+        .signature-line {
+            border-bottom: 1px solid #333;
+            margin-bottom: 5px;
+            height: 40px;
+        }
+
+        .signature-label {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* Right Panel - Actions & Delivery */
+        .report-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title-panel {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Action Buttons */
+        .action-button {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+
+        .action-button:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        .action-button.primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .action-button.success {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .action-button.warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #333;
+        }
+
+        .action-button.danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .action-icon {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        /* Report Types */
+        .report-types {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .report-type-btn {
+            padding: 8px 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 11px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .report-type-btn.active {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .report-type-btn:hover:not(.active) {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        /* Delivery Options */
+        .delivery-options {
+            margin-bottom: 15px;
+        }
+
+        .delivery-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .delivery-option input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .delivery-details {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 8px;
+            margin-top: 8px;
+            font-size: 11px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-info {
+            background: #cce5ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Region Header */
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar, .header-actions, .viewer-header, .report-panel {
+                display: none !important;
+            }
+            
+            .reports-layout {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .report-content {
+                padding: 0 !important;
+            }
+            
+            .medical-report {
+                font-size: 12px;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .reports-layout {
+                grid-template-columns: 330px 1fr 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .reports-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .signature-section {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">LR</div>
+                <span>(Lab Reporter)</span>
+            </div>
+            <span style="margin-right: 15px;">🌐 Select Language ▾</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Patient Registration</span></div>
+                <div class="nav-item"><span>Patient Search</span></div>
+                <div class="nav-item"><span>Admission/Discharge</span></div>
+                <div class="nav-item"><span>Emergency Triage</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Medical Records</span></div>
+                <div class="nav-item"><span>Vital Signs</span></div>
+                <div class="nav-item"><span>Procedure Scheduling</span></div>
+                <div class="nav-item"><span>Discharge Planning</span></div>
+            </div>
+
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item">
+                    <span>Test Orders</span>
+                </div>
+                <div class="nav-item">
+                    <span>Sample Tracking</span>
+                </div>
+                <div class="nav-item">
+                    <span>Results Entry</span>
+                </div>
+                <div class="nav-item active">
+                    <span>Lab Reports</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Prescription Management</span></div>
+                <div class="nav-item"><span>Drug Inventory</span></div>
+                <div class="nav-item"><span>Dispensing</span></div>
+                <div class="nav-item"><span>Drug Interactions</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Invoice Generation</span></div>
+                <div class="nav-item"><span>Insurance Claims</span></div>
+                <div class="nav-item"><span>Payment Tracking</span></div>
+                <div class="nav-item"><span>Financial Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Employee Records</span></div>
+                <div class="nav-item"><span>Schedule Management</span></div>
+                <div class="nav-item"><span>Department Assignment</span></div>
+                <div class="nav-item"><span>Performance Tracking</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Risk Predictions</span></div>
+                <div class="nav-item"><span>Diagnostic Assistance</span></div>
+                <div class="nav-item"><span>Model Performance</span></div>
+                <div class="nav-item"><span>Classification Results</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>System Configuration</span></div>
+                <div class="nav-item"><span>User Management</span></div>
+                <div class="nav-item"><span>Audit Reports</span></div>
+                <div class="nav-item"><span>Security Settings</span></div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Laboratory</a> › Lab Reports
+                    </div>
+                    <h1 class="page-title">Laboratory Reports</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="generateBatchReports()">
+                        📊 Batch Reports
+                    </button>
+                    <button class="btn btn-warning" onclick="openReportBuilder()">
+                        🛠️ Report Builder
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportToCSV()">
+                        📤 Export Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Three-column Lab Reports Layout -->
+                <div class="reports-layout">
+                    <!-- Left Panel - Report Search & Queue -->
+                    <div class="reports-search">
+                        <div class="region-header">
+                            <span class="icon">🔍</span>
+                            Report Search & Queue
+                        </div>
+                        <div class="search-filters">
+                            <div class="filter-group">
+                                <label class="filter-label">Patient Search</label>
+                                <input type="text" class="filter-input" placeholder="Name, MRN, or ID..." 
+                                       id="patientSearchInput" oninput="searchReports()">
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Date Range</label>
+                                <div class="filter-row">
+                                    <input type="date" class="filter-input" id="dateFrom" 
+                                           onchange="searchReports()">
+                                    <input type="date" class="filter-input" id="dateTo" 
+                                           onchange="searchReports()">
+                                </div>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Filters</label>
+                                <div class="filter-row">
+                                    <select class="filter-select" id="statusFilter" onchange="searchReports()">
+                                        <option value="">All Status</option>
+                                        <option value="FINAL">Final</option>
+                                        <option value="PRELIMINARY">Preliminary</option>
+                                        <option value="CORRECTED">Corrected</option>
+                                        <option value="PENDING">Pending</option>
+                                    </select>
+                                    <select class="filter-select" id="departmentFilter" onchange="searchReports()">
+                                        <option value="">All Departments</option>
+                                        <option value="HEMATOLOGY">Hematology</option>
+                                        <option value="CHEMISTRY">Chemistry</option>
+                                        <option value="MICROBIOLOGY">Microbiology</option>
+                                        <option value="IMMUNOLOGY">Immunology</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <div class="filter-row">
+                                    <select class="filter-select" id="priorityFilter" onchange="searchReports()">
+                                        <option value="">All Priority</option>
+                                        <option value="STAT">STAT</option>
+                                        <option value="URGENT">Urgent</option>
+                                        <option value="ROUTINE">Routine</option>
+                                    </select>
+                                    <select class="filter-select" id="criticalFilter" onchange="searchReports()">
+                                        <option value="">All</option>
+                                        <option value="CRITICAL">Critical Values Only</option>
+                                        <option value="NORMAL">Normal Only</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button class="search-button" onclick="searchReports()">
+                                🔍 Search Reports
+                            </button>
+                        </div>
+                        <div class="reports-container" id="reportsContainer">
+                            <!-- Report queue items will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Center Panel - Report Viewer -->
+                    <div class="report-viewer">
+                        <div class="viewer-header">
+                            <h3 class="viewer-title">Laboratory Report Viewer</h3>
+                            <div class="viewer-actions">
+                                <button class="btn btn-primary" onclick="printReport()" id="printBtn" disabled>
+                                    🖨️ Print
+                                </button>
+                                <button class="btn btn-success" onclick="signReport()" id="signBtn" disabled>
+                                    ✍️ Sign
+                                </button>
+                                <button class="btn btn-warning" onclick="amendReport()" id="amendBtn" disabled>
+                                    ✏️ Amend
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="report-content" id="reportContent">
+                            <div id="defaultContent">
+                                <div class="alert alert-info">
+                                    <strong>📋 Laboratory Reports Dashboard</strong><br>
+                                    Search and select a report from the left panel to view detailed results, print reports, or manage electronic delivery.
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6;">
+                                        <h4 style="margin-bottom: 10px; color: #333;">Today's Reports</h4>
+                                        <div style="font-size: 12px; line-height: 1.6;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Generated:</span>
+                                                <span style="font-weight: 600;">156</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Signed:</span>
+                                                <span style="font-weight: 600; color: #28a745;">142</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Pending Signature:</span>
+                                                <span style="font-weight: 600; color: #ffc107;">14</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span>Critical Values:</span>
+                                                <span style="font-weight: 600; color: #dc3545;">5</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6;">
+                                        <h4 style="margin-bottom: 10px; color: #333;">Report Types</h4>
+                                        <div style="font-size: 12px; line-height: 1.6;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Individual Tests:</span>
+                                                <span style="font-weight: 600;">89</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Panel Reports:</span>
+                                                <span style="font-weight: 600;">45</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Cumulative:</span>
+                                                <span style="font-weight: 600;">22</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span>Corrected:</span>
+                                                <span style="font-weight: 600;">3</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6;">
+                                        <h4 style="margin-bottom: 10px; color: #333;">Delivery Status</h4>
+                                        <div style="font-size: 12px; line-height: 1.6;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Electronic Delivery:</span>
+                                                <span style="font-weight: 600; color: #28a745;">134</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Printed Reports:</span>
+                                                <span style="font-weight: 600;">22</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Faxed:</span>
+                                                <span style="font-weight: 600;">8</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span>Delivery Rate:</span>
+                                                <span style="font-weight: 600; color: #28a745;">99.2%</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="reportDisplay" style="display: none;">
+                                <!-- Medical report will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Actions & Delivery -->
+                    <div class="report-panel">
+                        <div class="panel-section">
+                            <h4 class="section-title-panel">
+                                <span class="section-icon">📄</span>
+                                Report Types
+                            </h4>
+                            <div class="report-types">
+                                <button class="report-type-btn active" onclick="setReportType('individual', this)">
+                                    Individual
+                                </button>
+                                <button class="report-type-btn" onclick="setReportType('panel', this)">
+                                    Panel
+                                </button>
+                                <button class="report-type-btn" onclick="setReportType('cumulative', this)">
+                                    Cumulative
+                                </button>
+                                <button class="report-type-btn" onclick="setReportType('summary', this)">
+                                    Summary
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title-panel">
+                                <span class="section-icon">⚡</span>
+                                Quick Actions
+                            </h4>
+                            <button class="action-button primary" onclick="generateReport()">
+                                <span class="action-icon">📊</span>
+                                Generate Report
+                            </button>
+                            <button class="action-button success" onclick="finalizeReport()">
+                                <span class="action-icon">✓</span>
+                                Finalize Report
+                            </button>
+                            <button class="action-button warning" onclick="addendum()">
+                                <span class="action-icon">📝</span>
+                                Add Addendum
+                            </button>
+                            <button class="action-button" onclick="duplicateReport()">
+                                <span class="action-icon">📋</span>
+                                Duplicate Report
+                            </button>
+                            <button class="action-button" onclick="viewHistory()">
+                                <span class="action-icon">📜</span>
+                                View History
+                            </button>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title-panel">
+                                <span class="section-icon">📧</span>
+                                Electronic Delivery
+                            </h4>
+                            <div class="delivery-options">
+                                <div class="delivery-option">
+                                    <input type="checkbox" id="deliverEmail" checked>
+                                    <label for="deliverEmail">Email to Physician</label>
+                                </div>
+                                <div class="delivery-option">
+                                    <input type="checkbox" id="deliverEMR">
+                                    <label for="deliverEMR">EMR Integration</label>
+                                </div>
+                                <div class="delivery-option">
+                                    <input type="checkbox" id="deliverPortal">
+                                    <label for="deliverPortal">Patient Portal</label>
+                                </div>
+                                <div class="delivery-option">
+                                    <input type="checkbox" id="deliverHL7">
+                                    <label for="deliverHL7">HL7 Interface</label>
+                                </div>
+                            </div>
+                            <div class="delivery-details" id="deliveryDetails">
+                                <strong>Primary Physician:</strong> Dr. Johnson<br>
+                                <strong>Email:</strong> dr.johnson@hospital.com<br>
+                                <strong>Department:</strong> Internal Medicine
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title-panel">
+                                <span class="section-icon">🖨️</span>
+                                Print Options
+                            </h4>
+                            <div class="form-group">
+                                <label class="form-label">Print Format</label>
+                                <select class="form-select" id="printFormat">
+                                    <option value="standard">Standard Report</option>
+                                    <option value="detailed">Detailed with QC</option>
+                                    <option value="summary">Summary Only</option>
+                                    <option value="flowsheet">Flowsheet Format</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Copies</label>
+                                <select class="form-select" id="printCopies">
+                                    <option value="1">1 Copy</option>
+                                    <option value="2">2 Copies</option>
+                                    <option value="3">3 Copies</option>
+                                    <option value="chart">Chart Copy</option>
+                                </select>
+                            </div>
+                            <button class="action-button" onclick="configurePrint()">
+                                <span class="action-icon">⚙️</span>
+                                Print Settings
+                            </button>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title-panel">
+                                <span class="section-icon">🔒</span>
+                                Signature & Authorization
+                            </h4>
+                            <div class="form-group">
+                                <label class="form-label">Authorized By</label>
+                                <select class="form-select" id="authorizedBy">
+                                    <option value="">Select Pathologist</option>
+                                    <option value="DR_PATHOLOGIST">Dr. Smith, MD</option>
+                                    <option value="DR_DIRECTOR">Dr. Johnson, Lab Director</option>
+                                    <option value="DR_RESIDENT">Dr. Ahmed, Resident</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Digital Signature</label>
+                                <input type="password" class="form-input" placeholder="Enter PIN" id="digitalPin">
+                            </div>
+                            <button class="action-button success" onclick="applyDigitalSignature()">
+                                <span class="action-icon">🔏</span>
+                                Apply Signature
+                            </button>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title-panel">
+                                <span class="section-icon">📋</span>
+                                Report Notes
+                            </h4>
+                            <textarea class="form-textarea" id="reportNotes" 
+                                      placeholder="Add clinical comments or interpretation notes..." rows="3"></textarea>
+                            <button class="btn btn-secondary" onclick="saveNotes()" style="margin-top: 8px; width: 100%;">
+                                Save Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const reportsData = [
+            {
+                id: 'RPT-2024-1215-001',
+                patientName: 'Ahmed Hassan',
+                patientId: 'MRN-20241215-0001',
+                age: 46,
+                gender: 'Male',
+                dob: '1978-05-15',
+                sampleId: 'SPE-2024-1215-044',
+                reportDate: '2024-12-15 16:30',
+                collectionDate: '2024-12-15 14:30',
+                department: 'HEMATOLOGY',
+                testName: 'Complete Blood Count',
+                status: 'FINAL',
+                priority: 'STAT',
+                hasCritical: true,
+                physicianName: 'Dr. Johnson',
+                results: [
+                    { parameter: 'WBC', value: '2.8', unit: '10³/µL', range: '4.0-11.0', flag: 'low' },
+                    { parameter: 'RBC', value: '4.2', unit: '10⁶/µL', range: '4.2-5.8', flag: 'normal' },
+                    { parameter: 'Hemoglobin', value: '12.8', unit: 'g/dL', range: '12.0-16.0', flag: 'normal' },
+                    { parameter: 'Hematocrit', value: '38.5', unit: '%', range: '36.0-48.0', flag: 'normal' },
+                    { parameter: 'Platelets', value: '450', unit: '10³/µL', range: '150-450', flag: 'normal' }
+                ]
+            },
+            {
+                id: 'RPT-2024-1215-002',
+                patientName: 'Fatima Al-Zahra',
+                patientId: 'MRN-20241215-0002',
+                age: 29,
+                gender: 'Female',
+                dob: '1995-08-22',
+                sampleId: 'SPE-2024-1215-045',
+                reportDate: '2024-12-15 15:45',
+                collectionDate: '2024-12-15 13:45',
+                department: 'CHEMISTRY',
+                testName: 'Basic Metabolic Panel',
+                status: 'FINAL',
+                priority: 'URGENT',
+                hasCritical: false,
+                physicianName: 'Dr. Smith',
+                results: [
+                    { parameter: 'Glucose', value: '95', unit: 'mg/dL', range: '70-100', flag: 'normal' },
+                    { parameter: 'Creatinine', value: '1.8', unit: 'mg/dL', range: '0.6-1.2', flag: 'high' },
+                    { parameter: 'BUN', value: '25', unit: 'mg/dL', range: '7-20', flag: 'high' },
+                    { parameter: 'Sodium', value: '142', unit: 'mEq/L', range: '136-145', flag: 'normal' }
+                ]
+            },
+            {
+                id: 'RPT-2024-1215-003',
+                patientName: 'Omar Khaled',
+                patientId: 'MRN-20241214-0045',
+                age: 62,
+                gender: 'Male',
+                dob: '1962-12-03',
+                sampleId: 'SPE-2024-1215-046',
+                reportDate: '2024-12-15 14:20',
+                collectionDate: '2024-12-15 12:30',
+                department: 'IMMUNOLOGY',
+                testName: 'Thyroid Stimulating Hormone',
+                status: 'FINAL',
+                priority: 'ROUTINE',
+                hasCritical: false,
+                physicianName: 'Dr. Ahmed',
+                results: [
+                    { parameter: 'TSH', value: '2.1', unit: 'mIU/L', range: '0.4-4.0', flag: 'normal' }
+                ]
+            }
+        ];
+
+        let selectedReport = null;
+        let filteredReports = [...reportsData];
+        let currentReportType = 'individual';
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReportsQueue();
+            
+            // Set default date range to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateFrom').value = today;
+            document.getElementById('dateTo').value = today;
+        });
+
+        // Load reports queue
+        function loadReportsQueue() {
+            const container = document.getElementById('reportsContainer');
+            
+            container.innerHTML = filteredReports.map(report => `
+                <div class="report-item ${report.hasCritical ? 'critical' : ''} ${selectedReport?.id === report.id ? 'selected' : ''}" 
+                     onclick="selectReport('${report.id}')" data-report-id="${report.id}">
+                    ${report.hasCritical ? '<div class="critical-indicator"></div>' : ''}
+                    <div class="report-header">
+                        <div class="report-patient">${report.patientName}</div>
+                        <div class="report-status status-${report.status.toLowerCase()}">${report.status}</div>
+                    </div>
+                    <div class="report-details">${report.patientId} • Age: ${report.age}</div>
+                    <div class="report-tests">${report.testName} (${report.department})</div>
+                    <div class="report-meta">
+                        <span>${formatDate(report.reportDate)}</span>
+                        <span>${report.priority}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Select report
+        function selectReport(reportId) {
+            selectedReport = reportsData.find(r => r.id === reportId);
+            
+            // Update UI selection
+            document.querySelectorAll('.report-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.querySelector(`[data-report-id="${reportId}"]`).classList.add('selected');
+            
+            // Generate and display report
+            generateMedicalReport();
+            updateButtonStates();
+            updateDeliveryDetails();
+        }
+
+        // Generate medical report
+        function generateMedicalReport() {
+            if (!selectedReport) return;
+            
+            const defaultContent = document.getElementById('defaultContent');
+            const reportDisplay = document.getElementById('reportDisplay');
+            
+            defaultContent.style.display = 'none';
+            reportDisplay.style.display = 'block';
+            
+            const criticalResults = selectedReport.results.filter(r => r.flag === 'critical' || (r.flag === 'low' && r.parameter === 'WBC'));
+            
+            reportDisplay.innerHTML = `
+                <div class="medical-report">
+                    <div class="report-letterhead">
+                        <div class="hospital-name">Cairo General Hospital</div>
+                        <div class="hospital-details">
+                            Department of Laboratory Medicine<br>
+                            123 Medical Center Drive, Cairo, Egypt<br>
+                            Phone: +20-2-123-4567 | Fax: +20-2-123-4568<br>
+                            Email: lab@cairogh.edu.eg
+                        </div>
+                    </div>
+
+                    <div class="report-title-header">Laboratory Report</div>
+
+                    <div class="patient-info-section">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <span class="info-label">Patient Name:</span>
+                                <span class="info-value">${selectedReport.patientName}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Medical Record #:</span>
+                                <span class="info-value">${selectedReport.patientId}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Date of Birth:</span>
+                                <span class="info-value">${formatDate(selectedReport.dob)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Age/Gender:</span>
+                                <span class="info-value">${selectedReport.age} years / ${selectedReport.gender}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Sample ID:</span>
+                                <span class="info-value">${selectedReport.sampleId}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Collection Date:</span>
+                                <span class="info-value">${formatDateTime(selectedReport.collectionDate)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Report Date:</span>
+                                <span class="info-value">${formatDateTime(selectedReport.reportDate)}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Ordering Physician:</span>
+                                <span class="info-value">${selectedReport.physicianName}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${criticalResults.length > 0 ? `
+                        <div class="critical-values-alert">
+                            <div class="alert-title">
+                                <span class="alert-icon">🚨</span>
+                                CRITICAL VALUES ALERT
+                            </div>
+                            <p><strong>The following critical values require immediate physician notification:</strong></p>
+                            ${criticalResults.map(r => `
+                                <div style="margin: 5px 0;">
+                                    • <strong>${r.parameter}:</strong> ${r.value} ${r.unit} 
+                                    (Reference: ${r.range} ${r.unit})
+                                </div>
+                            `).join('')}
+                            <p style="margin-top: 10px; font-size: 12px;">
+                                <strong>Physician notified:</strong> ${selectedReport.physicianName} at ${formatDateTime(selectedReport.reportDate)}
+                            </p>
+                        </div>
+                    ` : ''}
+
+                    <div class="results-section">
+                        <div class="section-title">${selectedReport.testName}</div>
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Result</th>
+                                    <th>Units</th>
+                                    <th>Reference Range</th>
+                                    <th>Flag</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${selectedReport.results.map(result => `
+                                    <tr class="${result.flag !== 'normal' ? 'result-abnormal' : ''}">
+                                        <td><strong>${result.parameter}</strong></td>
+                                        <td class="result-${result.flag}">
+                                            ${result.value}
+                                            ${result.flag !== 'normal' ? `<span class="flag-indicator flag-${result.flag}"></span>` : ''}
+                                        </td>
+                                        <td>${result.unit}</td>
+                                        <td>${result.range} ${result.unit}</td>
+                                        <td>
+                                            ${result.flag === 'normal' ? '' : 
+                                              result.flag === 'high' ? 'H' : 
+                                              result.flag === 'low' ? 'L' : 
+                                              result.flag === 'critical' ? 'CRITICAL' : result.flag.toUpperCase()}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="comments-section">
+                        <div class="section-title">Clinical Comments</div>
+                        <div style="font-size: 13px; line-height: 1.5;">
+                            ${selectedReport.testName === 'Complete Blood Count' && criticalResults.length > 0 ? 
+                                'Low white blood cell count (leukopenia) detected. Recommend clinical correlation and possible repeat testing. Consider evaluation for underlying causes including viral infections, autoimmune conditions, or bone marrow disorders.' :
+                                'All results are within expected ranges for the patient demographic. No immediate clinical concerns identified from these laboratory values.'
+                            }
+                        </div>
+                    </div>
+
+                    <div class="report-footer">
+                        <div style="margin-bottom: 10px;">
+                            <strong>Report Status:</strong> ${selectedReport.status} | 
+                            <strong>Priority:</strong> ${selectedReport.priority} | 
+                            <strong>Department:</strong> ${selectedReport.department}
+                        </div>
+                        <div style="margin-bottom: 15px; font-size: 11px; color: #666;">
+                            This report has been reviewed and approved by the laboratory medical staff. 
+                            Critical values have been communicated to the ordering physician as per laboratory protocol.
+                            For questions regarding this report, please contact the laboratory at +20-2-123-4567.
+                        </div>
+
+                        <div class="signature-section">
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <div class="signature-label">Laboratory Technologist</div>
+                                <div style="font-size: 11px; margin-top: 5px;">
+                                    Sarah Ahmed, MT(ASCP)<br>
+                                    License #: LAB-2023-0456
+                                </div>
+                            </div>
+                            <div class="signature-block">
+                                <div class="signature-line"></div>
+                                <div class="signature-label">Medical Director</div>
+                                <div style="font-size: 11px; margin-top: 5px;">
+                                    Dr. Mohamed Hassan, MD<br>
+                                    Laboratory Medicine Director<br>
+                                    License #: MD-2018-1234
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #666;">
+                            Report generated electronically on ${formatDateTime(new Date().toISOString())}<br>
+                            Report ID: ${selectedReport.id} | Page 1 of 1
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update button states
+        function updateButtonStates() {
+            const printBtn = document.getElementById('printBtn');
+            const signBtn = document.getElementById('signBtn');
+            const amendBtn = document.getElementById('amendBtn');
+            
+            if (selectedReport) {
+                printBtn.disabled = false;
+                signBtn.disabled = selectedReport.status === 'FINAL';
+                amendBtn.disabled = false;
+            } else {
+                printBtn.disabled = true;
+                signBtn.disabled = true;
+                amendBtn.disabled = true;
+            }
+        }
+
+        // Update delivery details
+        function updateDeliveryDetails() {
+            const deliveryDetails = document.getElementById('deliveryDetails');
+            
+            if (selectedReport) {
+                deliveryDetails.innerHTML = `
+                    <strong>Primary Physician:</strong> ${selectedReport.physicianName}<br>
+                    <strong>Email:</strong> ${selectedReport.physicianName.toLowerCase().replace(' ', '.')}@hospital.com<br>
+                    <strong>Department:</strong> ${selectedReport.department}
+                `;
+            }
+        }
+
+        // Search reports
+        function searchReports() {
+            const patientSearch = document.getElementById('patientSearchInput').value.toLowerCase();
+            const dateFrom = document.getElementById('dateFrom').value;
+            const dateTo = document.getElementById('dateTo').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const departmentFilter = document.getElementById('departmentFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            const criticalFilter = document.getElementById('criticalFilter').value;
+            
+            filteredReports = reportsData.filter(report => {
+                const matchesPatient = !patientSearch || 
+                    report.patientName.toLowerCase().includes(patientSearch) ||
+                    report.patientId.toLowerCase().includes(patientSearch);
+                
+                const matchesDateRange = (!dateFrom || report.reportDate >= dateFrom) &&
+                    (!dateTo || report.reportDate <= dateTo + 'T23:59:59');
+                
+                const matchesStatus = !statusFilter || report.status === statusFilter;
+                const matchesDepartment = !departmentFilter || report.department === departmentFilter;
+                const matchesPriority = !priorityFilter || report.priority === priorityFilter;
+                const matchesCritical = !criticalFilter || 
+                    (criticalFilter === 'CRITICAL' && report.hasCritical) ||
+                    (criticalFilter === 'NORMAL' && !report.hasCritical);
+                
+                return matchesPatient && matchesDateRange && matchesStatus && 
+                       matchesDepartment && matchesPriority && matchesCritical;
+            });
+            
+            loadReportsQueue();
+        }
+
+        // Set report type
+        function setReportType(type, element) {
+            currentReportType = type;
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.report-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to selected button
+            element.classList.add('active');
+            
+            // Regenerate report if one is selected
+            if (selectedReport) {
+                generateMedicalReport();
+            }
+        }
+
+        // Action functions
+        function printReport() {
+            if (!selectedReport) {
+                showAlert('warning', 'Please select a report to print.');
+                return;
+            }
+            
+            window.print();
+            showAlert('success', `Report ${selectedReport.id} sent to printer.`);
+        }
+
+        function signReport() {
+            if (!selectedReport) {
+                showAlert('warning', 'Please select a report to sign.');
+                return;
+            }
+            
+            const pin = document.getElementById('digitalPin').value;
+            const authorizedBy = document.getElementById('authorizedBy').value;
+            
+            if (!pin || !authorizedBy) {
+                showAlert('warning', 'Please enter digital PIN and select authorized signatory.');
+                return;
+            }
+            
+            selectedReport.status = 'FINAL';
+            loadReportsQueue();
+            updateButtonStates();
+            showAlert('success', `Report ${selectedReport.id} signed and finalized.`);
+        }
+
+        function amendReport() {
+            if (!selectedReport) {
+                showAlert('warning', 'Please select a report to amend.');
+                return;
+            }
+            
+            const reason = prompt('Enter reason for amendment:');
+            if (reason) {
+                selectedReport.status = 'CORRECTED';
+                loadReportsQueue();
+                showAlert('success', `Amendment recorded for report ${selectedReport.id}.`);
+            }
+        }
+
+        function generateReport() {
+            showAlert('info', 'Report generation initiated...');
+        }
+
+        function finalizeReport() {
+            if (!selectedReport) {
+                showAlert('warning', 'Please select a report to finalize.');
+                return;
+            }
+            
+            showAlert('success', 'Report finalized and ready for delivery.');
+        }
+
+        function addendum() {
+            if (!selectedReport) {
+                showAlert('warning', 'Please select a report to add addendum.');
+                return;
+            }
+            
+            const addendum = prompt('Enter addendum text:');
+            if (addendum) {
+                showAlert('success', 'Addendum added to report.');
+            }
+        }
+
+        function duplicateReport() {
+            if (!selectedReport) {
+                showAlert('warning', 'Please select a report to duplicate.');
+                return;
+            }
+            
+            showAlert('success', 'Report duplicated successfully.');
+        }
+
+        function viewHistory() {
+            if (!selectedReport) {
+                showAlert('warning', 'Please select a report to view history.');
+                return;
+            }
+            
+            showAlert('info', 'Report history viewer would open here.');
+        }
+
+        function configurePrint() {
+            showAlert('info', 'Print configuration dialog would open here.');
+        }
+
+        function applyDigitalSignature() {
+            const pin = document.getElementById('digitalPin').value;
+            const authorizedBy = document.getElementById('authorizedBy').value;
+            
+            if (!pin || !authorizedBy) {
+                showAlert('warning', 'Please enter PIN and select authorized signatory.');
+                return;
+            }
+            
+            showAlert('success', 'Digital signature applied successfully.');
+        }
+
+        function saveNotes() {
+            const notes = document.getElementById('reportNotes').value;
+            if (notes.trim()) {
+                showAlert('success', 'Report notes saved successfully.');
+            }
+        }
+
+        function generateBatchReports() {
+            showAlert('info', 'Batch report generation starting...');
+        }
+
+        function openReportBuilder() {
+            showAlert('info', 'Report builder interface would open here.');
+        }
+
+        function exportToCSV() {
+            showAlert('info', 'Exporting data to CSV format...');
+        }
+
+        // Utility functions
+        function formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            document.querySelector('.main-container').insertBefore(alertDiv, document.querySelector('.main-container').firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        console.log('Laboratory Reports System Initialized');
+    </script>
+</body>
+</html>

@@ -1,0 +1,1755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing & Finance - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1600px;
+        }
+
+        /* Three-column layout for billing */
+        .billing-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 380px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Account Search & Filters */
+        .account-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Center Panel - Billing Details */
+        .billing-content {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .billing-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .billing-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .billing-tab.active {
+            background: white;
+            border-bottom-color: #3d9aef;
+            color: #3d9aef;
+        }
+
+        .billing-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .billing-workflow {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Right Panel - Financial Summary */
+        .financial-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Region Header */
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Search and Filters */
+        .search-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .search-group {
+            margin-bottom: 10px;
+        }
+
+        .search-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .search-button {
+            width: 100%;
+            padding: 8px 12px;
+            background: #3d9aef;
+            border: 1px solid #3d9aef;
+            border-radius: 3px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        /* Account List */
+        .account-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .account-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .account-item:hover {
+            background: #f8f9fa;
+        }
+
+        .account-item.selected {
+            background: #e8f4fd;
+            border-left: 3px solid #3d9aef;
+        }
+
+        .account-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .account-number {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .account-status {
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .status-active { background: #d4edda; color: #155724; }
+        .status-overdue { background: #f8d7da; color: #721c24; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-paid { background: #d1ecf1; color: #0c5460; }
+
+        .account-patient {
+            font-size: 12px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .account-balance {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .account-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #666;
+        }
+
+        /* Financial Summary Cards */
+        .financial-summary {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .summary-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .summary-amount {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .summary-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-card.revenue .summary-amount {
+            color: #28a745;
+        }
+
+        .summary-card.outstanding .summary-amount {
+            color: #dc3545;
+        }
+
+        .summary-card.pending .summary-amount {
+            color: #ffc107;
+        }
+
+        .summary-card.collections .summary-amount {
+            color: #6f42c1;
+        }
+
+        /* Tables */
+        .billing-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .billing-table th {
+            background: #f8f9fa;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .billing-table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: top;
+        }
+
+        .billing-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Invoice Details */
+        .invoice-header {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .invoice-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .meta-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .meta-value {
+            color: #666;
+        }
+
+        /* Payment Processing */
+        .payment-section {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .payment-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0c5460;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .payment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        /* Action Buttons */
+        .action-button {
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+
+        .action-button:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        .action-button.primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .action-button.success {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .action-button.warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #333;
+        }
+
+        .action-button.danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .action-icon {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-info {
+            background: #cce5ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Charts and Progress */
+        .chart-container {
+            height: 200px;
+            background: #f8f9fa;
+            border: 1px dashed #dee2e6;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 15px 0;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-success {
+            background: #28a745;
+        }
+
+        .progress-warning {
+            background: #ffc107;
+        }
+
+        .progress-danger {
+            background: #dc3545;
+        }
+
+        /* Status Indicators */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+        }
+
+        .indicator-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .indicator-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .indicator-overdue {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .billing-layout {
+                grid-template-columns: 320px 1fr 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .billing-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .invoice-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">FM</div>
+                <span>(Finance Manager)</span>
+            </div>
+            <span style="margin-right: 15px;">Select Language</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Patient Registration</span></div>
+                <div class="nav-item"><span>Patient Search</span></div>
+                <div class="nav-item"><span>Admission/Discharge</span></div>
+                <div class="nav-item"><span>Emergency Triage</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Medical Records</span></div>
+                <div class="nav-item"><span>Vital Signs</span></div>
+                <div class="nav-item"><span>Procedure Scheduling</span></div>
+                <div class="nav-item"><span>Discharge Planning</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Test Orders</span></div>
+                <div class="nav-item"><span>Sample Tracking</span></div>
+                <div class="nav-item"><span>Results Entry</span></div>
+                <div class="nav-item"><span>Lab Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Prescription Management</span></div>
+                <div class="nav-item"><span>Drug Inventory</span></div>
+                <div class="nav-item"><span>Dispensing</span></div>
+                <div class="nav-item"><span>Drug Interactions</span></div>
+            </div>
+
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item active">
+                    <span>Invoice Generation</span>
+                </div>
+                <div class="nav-item">
+                    <span>Insurance Claims</span>
+                </div>
+                <div class="nav-item">
+                    <span>Payment Tracking</span>
+                </div>
+                <div class="nav-item">
+                    <span>Financial Reports</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Employee Records</span></div>
+                <div class="nav-item"><span>Schedule Management</span></div>
+                <div class="nav-item"><span>Department Assignment</span></div>
+                <div class="nav-item"><span>Performance Tracking</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Risk Predictions</span></div>
+                <div class="nav-item"><span>Diagnostic Assistance</span></div>
+                <div class="nav-item"><span>Model Performance</span></div>
+                <div class="nav-item"><span>Classification Results</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>System Configuration</span></div>
+                <div class="nav-item"><span>User Management</span></div>
+                <div class="nav-item"><span>Audit Reports</span></div>
+                <div class="nav-item"><span>Security Settings</span></div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Billing & Finance</a> › Invoice Generation
+                    </div>
+                    <h1 class="page-title">Billing & Financial Management</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="generateInvoice()">
+                        📄 New Invoice
+                    </button>
+                    <button class="btn btn-warning" onclick="processPayment()">
+                        💳 Process Payment
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportReports()">
+                        📊 Financial Reports
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Three-column Billing Layout -->
+                <div class="billing-layout">
+                    <!-- Left Panel - Account Search & Management -->
+                    <div class="account-panel">
+                        <div class="region-header">
+                            <span class="icon">🔍</span>
+                            Patient Accounts
+                        </div>
+                        
+                        <div class="financial-summary">
+                            <div class="summary-grid">
+                                <div class="summary-card revenue">
+                                    <div class="summary-amount">$847K</div>
+                                    <div class="summary-label">Monthly Revenue</div>
+                                </div>
+                                <div class="summary-card outstanding">
+                                    <div class="summary-amount">$124K</div>
+                                    <div class="summary-label">Outstanding</div>
+                                </div>
+                                <div class="summary-card pending">
+                                    <div class="summary-amount">$67K</div>
+                                    <div class="summary-label">Pending Claims</div>
+                                </div>
+                                <div class="summary-card collections">
+                                    <div class="summary-amount">$32K</div>
+                                    <div class="summary-label">In Collections</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="search-section">
+                            <div class="search-group">
+                                <label class="search-label">Account Search</label>
+                                <input type="text" class="search-input" placeholder="Name, Account #, MRN..." 
+                                       id="accountSearchInput" oninput="searchAccounts()">
+                            </div>
+                            
+                            <div class="search-group">
+                                <label class="search-label">Status & Balance</label>
+                                <div style="display: flex; gap: 5px;">
+                                    <select class="form-select" style="flex: 1;" id="statusFilter" onchange="filterAccounts()">
+                                        <option value="">All Status</option>
+                                        <option value="ACTIVE">Active</option>
+                                        <option value="OVERDUE">Overdue</option>
+                                        <option value="PENDING">Pending</option>
+                                        <option value="PAID">Paid</option>
+                                    </select>
+                                    <select class="form-select" style="flex: 1;" id="balanceFilter" onchange="filterAccounts()">
+                                        <option value="">All Balances</option>
+                                        <option value="HIGH">$5,000+</option>
+                                        <option value="MEDIUM">$1,000-$5,000</option>
+                                        <option value="LOW">Under $1,000</option>
+                                        <option value="ZERO">$0</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button class="search-button" onclick="searchAccounts()">
+                                🔍 Search Accounts
+                            </button>
+                        </div>
+
+                        <div class="account-container" id="accountContainer">
+                            <div class="account-item selected" onclick="selectAccount(this, 'ACC-2024-001')">
+                                <div class="account-header">
+                                    <div class="account-number">ACC-2024-001</div>
+                                    <div class="account-status status-overdue">OVERDUE</div>
+                                </div>
+                                <div class="account-patient">Sarah Johnson</div>
+                                <div class="account-balance">Balance: $3,247.50</div>
+                                <div class="account-meta">
+                                    <span>Last Payment: Sept 1</span>
+                                    <span>Days Overdue: 45</span>
+                                </div>
+                            </div>
+
+                            <div class="account-item" onclick="selectAccount(this, 'ACC-2024-002')">
+                                <div class="account-header">
+                                    <div class="account-number">ACC-2024-002</div>
+                                    <div class="account-status status-active">ACTIVE</div>
+                                </div>
+                                <div class="account-patient">Ahmed Hassan</div>
+                                <div class="account-balance">Balance: $1,895.75</div>
+                                <div class="account-meta">
+                                    <span>Insurance: Pending</span>
+                                    <span>Created: Sept 10</span>
+                                </div>
+                            </div>
+
+                            <div class="account-item" onclick="selectAccount(this, 'ACC-2024-003')">
+                                <div class="account-header">
+                                    <div class="account-number">ACC-2024-003</div>
+                                    <div class="account-status status-pending">PENDING</div>
+                                </div>
+                                <div class="account-patient">Fatima Al-Zahra</div>
+                                <div class="account-balance">Balance: $567.25</div>
+                                <div class="account-meta">
+                                    <span>Insurance: Processing</span>
+                                    <span>Est. Payment: Sept 20</span>
+                                </div>
+                            </div>
+
+                            <div class="account-item" onclick="selectAccount(this, 'ACC-2024-004')">
+                                <div class="account-header">
+                                    <div class="account-number">ACC-2024-004</div>
+                                    <div class="account-status status-paid">PAID</div>
+                                </div>
+                                <div class="account-patient">Omar Khaled</div>
+                                <div class="account-balance">Balance: $0.00</div>
+                                <div class="account-meta">
+                                    <span>Paid: Sept 12</span>
+                                    <span>Payment: $2,150.00</span>
+                                </div>
+                            </div>
+
+                            <div class="account-item" onclick="selectAccount(this, 'ACC-2024-005')">
+                                <div class="account-header">
+                                    <div class="account-number">ACC-2024-005</div>
+                                    <div class="account-status status-active">ACTIVE</div>
+                                </div>
+                                <div class="account-patient">Mona Abdel-Rahman</div>
+                                <div class="account-balance">Balance: $4,723.80</div>
+                                <div class="account-meta">
+                                    <span>Payment Plan: Active</span>
+                                    <span>Next Due: Sept 25</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center Panel - Billing Details -->
+                    <div class="billing-content">
+                        <div class="billing-tabs">
+                            <div class="billing-tab active" onclick="switchBillingTab('invoice', this)">Invoice Details</div>
+                            <div class="billing-tab" onclick="switchBillingTab('payments', this)">Payment History</div>
+                            <div class="billing-tab" onclick="switchBillingTab('insurance', this)">Insurance Claims</div>
+                            <div class="billing-tab" onclick="switchBillingTab('adjustments', this)">Adjustments</div>
+                        </div>
+
+                        <div class="billing-workflow" id="billingWorkflow">
+                            <div id="invoiceContent">
+                                <div class="invoice-header">
+                                    <div class="invoice-meta">
+                                        <div>
+                                            <div class="meta-item">
+                                                <span class="meta-label">Patient:</span>
+                                                <span class="meta-value">Sarah Johnson</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <span class="meta-label">MRN:</span>
+                                                <span class="meta-value">PAT-2024-001523</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <span class="meta-label">Account #:</span>
+                                                <span class="meta-value">ACC-2024-001</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="meta-item">
+                                                <span class="meta-label">Service Date:</span>
+                                                <span class="meta-value">Sept 12, 2025</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <span class="meta-label">Invoice Date:</span>
+                                                <span class="meta-value">Sept 15, 2025</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <span class="meta-label">Due Date:</span>
+                                                <span class="meta-value" style="color: #dc3545;">Aug 30, 2025</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="meta-item">
+                                                <span class="meta-label">Insurance:</span>
+                                                <span class="meta-value">Egyptian Health Insurance</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <span class="meta-label">Policy #:</span>
+                                                <span class="meta-value">EHI-2024-4567</span>
+                                            </div>
+                                            <div class="meta-item">
+                                                <span class="meta-label">Status:</span>
+                                                <span class="meta-value" style="color: #dc3545;">45 Days Overdue</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-danger">
+                                    <div style="font-size: 16px;">⚠️</div>
+                                    <div>
+                                        <strong>OVERDUE ACCOUNT</strong><br>
+                                        This account is 45 days past due. Insurance claim was denied. Patient responsible for $3,247.50.
+                                    </div>
+                                </div>
+
+                                <table class="billing-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Service Code</th>
+                                            <th>Description</th>
+                                            <th>Date</th>
+                                            <th>Qty</th>
+                                            <th>Rate</th>
+                                            <th>Insurance</th>
+                                            <th>Patient</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>99213</strong></td>
+                                            <td>Office Visit - Level 3</td>
+                                            <td>Sept 12</td>
+                                            <td>1</td>
+                                            <td>$185.00</td>
+                                            <td>$148.00</td>
+                                            <td>$37.00</td>
+                                            <td>$185.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>85025</strong></td>
+                                            <td>Complete Blood Count</td>
+                                            <td>Sept 12</td>
+                                            <td>1</td>
+                                            <td>$42.50</td>
+                                            <td>$34.00</td>
+                                            <td>$8.50</td>
+                                            <td>$42.50</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>80053</strong></td>
+                                            <td>Comprehensive Metabolic Panel</td>
+                                            <td>Sept 12</td>
+                                            <td>1</td>
+                                            <td>$67.25</td>
+                                            <td>$53.80</td>
+                                            <td>$13.45</td>
+                                            <td>$67.25</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>93000</strong></td>
+                                            <td>Electrocardiogram</td>
+                                            <td>Sept 12</td>
+                                            <td>1</td>
+                                            <td>$125.00</td>
+                                            <td>$100.00</td>
+                                            <td>$25.00</td>
+                                            <td>$125.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>71020</strong></td>
+                                            <td>Chest X-Ray, 2 Views</td>
+                                            <td>Sept 12</td>
+                                            <td>1</td>
+                                            <td>$95.75</td>
+                                            <td>$76.60</td>
+                                            <td>$19.15</td>
+                                            <td>$95.75</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>J2001</strong></td>
+                                            <td>Injection, Lidocaine</td>
+                                            <td>Sept 12</td>
+                                            <td>2</td>
+                                            <td>$15.00</td>
+                                            <td>$24.00</td>
+                                            <td>$6.00</td>
+                                            <td>$30.00</td>
+                                        </tr>
+                                        <tr style="background: #f8f9fa; font-weight: 600;">
+                                            <td colspan="7" style="text-align: right; padding-right: 20px;">Total Charges:</td>
+                                            <td>$545.50</td>
+                                        </tr>
+                                        <tr style="background: #f8f9fa;">
+                                            <td colspan="7" style="text-align: right; padding-right: 20px;">Insurance Adjustments:</td>
+                                            <td>-$436.40</td>
+                                        </tr>
+                                        <tr style="background: #f8f9fa;">
+                                            <td colspan="7" style="text-align: right; padding-right: 20px;">Insurance Payments:</td>
+                                            <td>$0.00</td>
+                                        </tr>
+                                        <tr style="background: #fff3cd; font-weight: bold;">
+                                            <td colspan="7" style="text-align: right; padding-right: 20px;">Patient Responsibility:</td>
+                                            <td style="color: #dc3545;">$3,247.50</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div id="paymentsContent" style="display: none;">
+                                <div class="payment-section">
+                                    <div class="payment-header">
+                                        💳 Payment Processing
+                                    </div>
+                                    <div class="payment-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">Payment Amount</label>
+                                            <input type="number" class="form-input" id="paymentAmount" placeholder="0.00" step="0.01">
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Payment Method</label>
+                                            <select class="form-select" id="paymentMethod">
+                                                <option value="">Select method...</option>
+                                                <option value="cash">Cash</option>
+                                                <option value="card">Credit/Debit Card</option>
+                                                <option value="check">Check</option>
+                                                <option value="bank_transfer">Bank Transfer</option>
+                                                <option value="insurance">Insurance Payment</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Reference Number</label>
+                                            <input type="text" class="form-input" id="referenceNumber" placeholder="Transaction ID">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <table class="billing-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Payment Method</th>
+                                            <th>Reference</th>
+                                            <th>Amount</th>
+                                            <th>Balance After</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Sept 1, 2025</td>
+                                            <td>Credit Card</td>
+                                            <td>TXN-2024-8901</td>
+                                            <td>$500.00</td>
+                                            <td>$3,247.50</td>
+                                            <td><span class="status-indicator indicator-paid">Processed</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Aug 15, 2025</td>
+                                            <td>Bank Transfer</td>
+                                            <td>BT-2024-5567</td>
+                                            <td>$300.00</td>
+                                            <td>$3,747.50</td>
+                                            <td><span class="status-indicator indicator-paid">Processed</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Aug 1, 2025</td>
+                                            <td>Cash</td>
+                                            <td>CSH-2024-3344</td>
+                                            <td>$200.00</td>
+                                            <td>$4,047.50</td>
+                                            <td><span class="status-indicator indicator-paid">Processed</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div id="insuranceContent" style="display: none;">
+                                <div class="alert alert-warning">
+                                    <div style="font-size: 16px;">📋</div>
+                                    <div>
+                                        <strong>INSURANCE CLAIM STATUS</strong><br>
+                                        Claim #CLM-2024-7890 was denied on Sept 8, 2025. Reason: Pre-authorization required for procedure 93000. Appeal deadline: Oct 8, 2025.
+                                    </div>
+                                </div>
+
+                                <table class="billing-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Claim #</th>
+                                            <th>Submission Date</th>
+                                            <th>Insurance</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Response Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>CLM-2024-7890</strong></td>
+                                            <td>Sept 3, 2025</td>
+                                            <td>Egyptian Health Insurance</td>
+                                            <td>$436.40</td>
+                                            <td><span class="status-indicator indicator-overdue">Denied</span></td>
+                                            <td>Sept 8, 2025</td>
+                                            <td>
+                                                <button class="btn btn-warning" style="font-size: 10px; padding: 2px 6px;" onclick="appealClaim()">
+                                                    Appeal
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>CLM-2024-7889</strong></td>
+                                            <td>Aug 28, 2025</td>
+                                            <td>Egyptian Health Insurance</td>
+                                            <td>$109.10</td>
+                                            <td><span class="status-indicator indicator-pending">Processing</span></td>
+                                            <td>-</td>
+                                            <td>
+                                                <button class="btn btn-secondary" style="font-size: 10px; padding: 2px 6px;" onclick="checkClaimStatus()">
+                                                    Check Status
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div id="adjustmentsContent" style="display: none;">
+                                <div class="form-group">
+                                    <label class="form-label">Adjustment Type</label>
+                                    <select class="form-select" id="adjustmentType">
+                                        <option value="">Select adjustment type...</option>
+                                        <option value="write_off">Write-off</option>
+                                        <option value="discount">Patient Discount</option>
+                                        <option value="refund">Refund</option>
+                                        <option value="correction">Billing Correction</option>
+                                        <option value="charity">Charity Care</option>
+                                    </select>
+                                </div>
+
+                                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                                    <div class="form-group" style="flex: 1;">
+                                        <label class="form-label">Amount</label>
+                                        <input type="number" class="form-input" id="adjustmentAmount" placeholder="0.00" step="0.01">
+                                    </div>
+                                    <div class="form-group" style="flex: 2;">
+                                        <label class="form-label">Reason</label>
+                                        <input type="text" class="form-input" id="adjustmentReason" placeholder="Adjustment reason">
+                                    </div>
+                                </div>
+
+                                <table class="billing-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Amount</th>
+                                            <th>Reason</th>
+                                            <th>Authorized By</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Sept 10, 2025</td>
+                                            <td>Patient Discount</td>
+                                            <td>-$247.50</td>
+                                            <td>Financial hardship - 10% discount</td>
+                                            <td>Dr. Finance Manager</td>
+                                            <td><span class="status-indicator indicator-paid">Applied</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Sept 5, 2025</td>
+                                            <td>Billing Correction</td>
+                                            <td>-$50.00</td>
+                                            <td>Duplicate charge correction</td>
+                                            <td>Billing Supervisor</td>
+                                            <td><span class="status-indicator indicator-paid">Applied</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Financial Summary & Actions -->
+                    <div class="financial-panel">
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">💰</span>
+                                Account Summary
+                            </h4>
+                            <div style="font-size: 11px; line-height: 1.8;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>Total Charges:</span>
+                                    <span style="font-weight: 600;">$4,247.50</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>Insurance Paid:</span>
+                                    <span style="font-weight: 600; color: #28a745;">$0.00</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>Patient Payments:</span>
+                                    <span style="font-weight: 600; color: #28a745;">$1,000.00</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span>Adjustments:</span>
+                                    <span style="font-weight: 600; color: #ffc107;">-$297.50</span>
+                                </div>
+                                <hr style="margin: 8px 0; border: none; border-top: 1px solid #dee2e6;">
+                                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 13px;">
+                                    <span>Current Balance:</span>
+                                    <span style="color: #dc3545;">$3,247.50</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">⚡</span>
+                                Quick Actions
+                            </h4>
+                            <button class="action-button primary" onclick="processPayment()">
+                                <span class="action-icon">💳</span>
+                                Process Payment
+                            </button>
+                            <button class="action-button success" onclick="setupPaymentPlan()">
+                                <span class="action-icon">📅</span>
+                                Payment Plan
+                            </button>
+                            <button class="action-button warning" onclick="sendStatement()">
+                                <span class="action-icon">📧</span>
+                                Send Statement
+                            </button>
+                            <button class="action-button" onclick="printInvoice()">
+                                <span class="action-icon">🖨️</span>
+                                Print Invoice
+                            </button>
+                            <button class="action-button" onclick="contactPatient()">
+                                <span class="action-icon">📞</span>
+                                Contact Patient
+                            </button>
+                            <button class="action-button danger" onclick="sendToCollections()">
+                                <span class="action-icon">⚠️</span>
+                                Send to Collections
+                            </button>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📊</span>
+                                Payment Analytics
+                            </h4>
+                            <div style="margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span style="font-size: 11px;">Collection Rate</span>
+                                    <span style="font-size: 11px; font-weight: 600; color: #28a745;">78%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill progress-success" style="width: 78%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span style="font-size: 11px;">Days Sales Outstanding</span>
+                                    <span style="font-size: 11px; font-weight: 600; color: #ffc107;">45 days</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill progress-warning" style="width: 60%;"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span style="font-size: 11px;">Risk Score</span>
+                                    <span style="font-size: 11px; font-weight: 600; color: #dc3545;">High</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill progress-danger" style="width: 85%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📈</span>
+                                Revenue Metrics
+                            </h4>
+                            <div class="chart-container">
+                                <div style="text-align: center; color: #6c757d; font-size: 11px;">
+                                    <div style="font-size: 24px; margin-bottom: 8px;">📈</div>
+                                    <div>Revenue Trend Chart</div>
+                                    <div style="font-size: 10px; color: #999;">Last 6 Months</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📝</span>
+                                Account Notes
+                            </h4>
+                            <div style="font-size: 11px; line-height: 1.5; margin-bottom: 10px;">
+                                <div style="margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #f0f0f0;">
+                                    <div style="font-weight: 600; color: #dc3545;">Sept 10 - Billing Dept</div>
+                                    <div>Patient called regarding payment options. Set up payment plan discussion for Sept 20.</div>
+                                </div>
+                                <div style="margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #f0f0f0;">
+                                    <div style="font-weight: 600; color: #495057;">Sept 8 - Insurance</div>
+                                    <div>Claim denied - pre-auth required. Contacted patient about appeal process.</div>
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600; color: #495057;">Sept 1 - Collections</div>
+                                    <div>First payment reminder sent via email and SMS.</div>
+                                </div>
+                            </div>
+                            <textarea class="form-textarea" id="accountNotes" 
+                                      placeholder="Add account notes..." rows="2" style="font-size: 11px;"></textarea>
+                            <button class="btn btn-secondary" onclick="saveAccountNotes()" style="margin-top: 6px; width: 100%; font-size: 11px;">
+                                Save Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedAccount = 'ACC-2024-001';
+        let currentBillingTab = 'invoice';
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Tab switching
+        function switchBillingTab(tabName, element) {
+            // Hide all content
+            document.querySelectorAll('#billingWorkflow > div').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.billing-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected content and activate tab
+            document.getElementById(tabName + 'Content').style.display = 'block';
+            element.classList.add('active');
+            currentBillingTab = tabName;
+        }
+
+        // Account selection
+        function selectAccount(element, accountId) {
+            document.querySelectorAll('.account-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            selectedAccount = accountId;
+            
+            showNotification('success', `Selected account ${accountId} for review.`);
+        }
+
+        // Search and filter functions
+        function searchAccounts() {
+            const searchTerm = document.getElementById('accountSearchInput').value.toLowerCase();
+            // Implementation would filter account list
+            showNotification('info', 'Searching patient accounts...');
+            console.log('Searching accounts:', searchTerm);
+        }
+
+        function filterAccounts() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const balanceFilter = document.getElementById('balanceFilter').value;
+            // Implementation would filter account list
+            console.log('Filtering by status:', statusFilter, 'balance:', balanceFilter);
+        }
+
+        // Header actions
+        function generateInvoice() {
+            showNotification('info', 'Opening new invoice creation form...');
+        }
+
+        function processPayment() {
+            if (!selectedAccount) {
+                showNotification('warning', 'Please select an account first.');
+                return;
+            }
+            showNotification('info', `Processing payment for account ${selectedAccount}...`);
+        }
+
+        function exportReports() {
+            showNotification('info', 'Generating financial reports...');
+        }
+
+        // Quick actions
+        function setupPaymentPlan() {
+            showNotification('info', 'Opening payment plan setup...');
+        }
+
+        function sendStatement() {
+            showNotification('success', 'Patient statement sent via email and mail.');
+        }
+
+        function printInvoice() {
+            showNotification('info', 'Preparing invoice for printing...');
+        }
+
+        function contactPatient() {
+            showNotification('info', 'Opening patient contact interface...');
+        }
+
+        function sendToCollections() {
+            showNotification('warning', 'Account flagged for collections review.');
+        }
+
+        // Insurance actions
+        function appealClaim() {
+            showNotification('info', 'Opening insurance claim appeal form...');
+        }
+
+        function checkClaimStatus() {
+            showNotification('info', 'Checking claim status with insurance provider...');
+        }
+
+        // Account notes
+        function saveAccountNotes() {
+            const notes = document.getElementById('accountNotes').value;
+            if (notes.trim()) {
+                showNotification('success', 'Account notes saved successfully.');
+                document.getElementById('accountNotes').value = '';
+            } else {
+                showNotification('warning', 'Please enter notes before saving.');
+            }
+        }
+
+        // Notification system
+        function showNotification(type, message) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type}`;
+            notification.style.position = 'fixed';
+            notification.style.top = '80px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '300px';
+            notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            
+            const icons = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'warning': '⚠️',
+                'danger': '🚨'
+            };
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>${icons[type] || 'ℹ️'}</span>
+                    <span style="flex: 1;">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 16px;">
+                        ✕
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Real-time updates simulation
+        function simulateFinancialUpdates() {
+            setInterval(() => {
+                // Update financial metrics
+                console.log('Financial metrics updated');
+                
+                // In real implementation, would update summary cards with live data
+            }, 60000); // Update every minute
+        }
+
+        // Initialize system
+        document.addEventListener('DOMContentLoaded', function() {
+            simulateFinancialUpdates();
+            showNotification('info', 'Billing & Finance system initialized successfully.');
+        });
+
+        console.log('Billing & Finance Management System Loaded');
+    </script>
+</body>
+</html>

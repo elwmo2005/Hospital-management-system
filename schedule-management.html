@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Management - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1600px;
+        }
+
+        /* Three-column layout for schedule management */
+        .schedule-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 380px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Department & Staff Selection */
+        .department-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Center Panel - Schedule Grid */
+        .schedule-content {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .schedule-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .schedule-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .schedule-tab.active {
+            background: white;
+            border-bottom-color: #3d9aef;
+            color: #3d9aef;
+        }
+
+        .schedule-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .schedule-grid-container {
+            flex: 1;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        /* Right Panel - Actions & Information */
+        .actions-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Region Header */
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Department & Filter Section */
+        .filter-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .filter-group {
+            margin-bottom: 10px;
+        }
+
+        .filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        /* Staff List */
+        .staff-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .staff-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .staff-item:hover {
+            background: #f8f9fa;
+        }
+
+        .staff-item.selected {
+            background: #e8f4fd;
+            border-left: 3px solid #3d9aef;
+        }
+
+        .staff-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .staff-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .staff-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1px;
+        }
+
+        .staff-role {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .staff-status {
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .status-available { background: #d4edda; color: #155724; }
+        .status-scheduled { background: #cce5ff; color: #004085; }
+        .status-unavailable { background: #f8d7da; color: #721c24; }
+
+        /* Schedule Grid */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 100px repeat(7, 1fr);
+            gap: 1px;
+            background: #dee2e6;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .grid-header {
+            background: #f8f9fa;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            color: #495057;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .grid-time {
+            background: #f8f9fa;
+            padding: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            text-align: center;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-cell {
+            background: white;
+            min-height: 40px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .grid-cell:hover {
+            background: #f8f9fa;
+        }
+
+        .shift-block {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            border-radius: 2px;
+            font-size: 9px;
+            padding: 2px 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .shift-block:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .shift-regular { background: #3d9aef; color: white; }
+        .shift-overtime { background: #ffc107; color: #333; }
+        .shift-oncall { background: #28a745; color: white; }
+        .shift-leave { background: #dc3545; color: white; }
+
+        /* Calendar Navigation */
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+
+        .date-range {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .nav-btn {
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Action Buttons */
+        .action-button {
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+
+        .action-button:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        .action-button.primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .action-button.success {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .action-button.warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #333;
+        }
+
+        .action-button.danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .action-icon {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3d9aef;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-info {
+            background: #cce5ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .schedule-layout {
+                grid-template-columns: 320px 1fr 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .schedule-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .schedule-grid {
+                grid-template-columns: 80px repeat(7, 1fr);
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">SM</div>
+                <span>(Schedule Manager)</span>
+            </div>
+            <span style="margin-right: 15px;">Select Language</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Patient Registration</span></div>
+                <div class="nav-item"><span>Patient Search</span></div>
+                <div class="nav-item"><span>Admission/Discharge</span></div>
+                <div class="nav-item"><span>Emergency Triage</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Medical Records</span></div>
+                <div class="nav-item"><span>Vital Signs</span></div>
+                <div class="nav-item"><span>Procedure Scheduling</span></div>
+                <div class="nav-item"><span>Discharge Planning</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Test Orders</span></div>
+                <div class="nav-item"><span>Sample Tracking</span></div>
+                <div class="nav-item"><span>Results Entry</span></div>
+                <div class="nav-item"><span>Lab Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Prescription Management</span></div>
+                <div class="nav-item"><span>Drug Inventory</span></div>
+                <div class="nav-item"><span>Dispensing</span></div>
+                <div class="nav-item"><span>Drug Interactions</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Invoice Generation</span></div>
+                <div class="nav-item"><span>Insurance Claims</span></div>
+                <div class="nav-item"><span>Payment Tracking</span></div>
+                <div class="nav-item"><span>Financial Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item">
+                    <span>Employee Records</span>
+                </div>
+                <div class="nav-item active">
+                    <span>Schedule Management</span>
+                </div>
+                <div class="nav-item">
+                    <span>Department Assignment</span>
+                </div>
+                <div class="nav-item">
+                    <span>Performance Tracking</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Risk Predictions</span></div>
+                <div class="nav-item"><span>Diagnostic Assistance</span></div>
+                <div class="nav-item"><span>Model Performance</span></div>
+                <div class="nav-item"><span>Classification Results</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>System Configuration</span></div>
+                <div class="nav-item"><span>User Management</span></div>
+                <div class="nav-item"><span>Audit Reports</span></div>
+                <div class="nav-item"><span>Security Settings</span></div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Staff Management</a> › Schedule Management
+                    </div>
+                    <h1 class="page-title">Schedule Management</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="addShift()">
+                        📅 Add Shift
+                    </button>
+                    <button class="btn btn-warning" onclick="manageRequests()">
+                        📝 Manage Requests
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportSchedule()">
+                        📊 Export Schedule
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Three-column Schedule Layout -->
+                <div class="schedule-layout">
+                    <!-- Left Panel - Department & Staff Selection -->
+                    <div class="department-panel">
+                        <div class="region-header">
+                            <span class="icon">🏥</span>
+                            Department & Staff
+                        </div>
+                        
+                        <div class="filter-section">
+                            <div class="filter-group">
+                                <label class="filter-label">Department</label>
+                                <select class="filter-input" id="departmentFilter" onchange="filterStaff()">
+                                    <option value="CARDIOLOGY" selected>Cardiology</option>
+                                    <option value="EMERGENCY">Emergency</option>
+                                    <option value="SURGERY">Surgery</option>
+                                    <option value="PEDIATRICS">Pediatrics</option>
+                                    <option value="RADIOLOGY">Radiology</option>
+                                    <option value="LABORATORY">Laboratory</option>
+                                    <option value="PHARMACY">Pharmacy</option>
+                                    <option value="NURSING">Nursing</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Staff Type</label>
+                                <select class="filter-input" id="staffTypeFilter" onchange="filterStaff()">
+                                    <option value="ALL" selected>All Staff</option>
+                                    <option value="PHYSICIAN">Physicians</option>
+                                    <option value="NURSE">Nurses</option>
+                                    <option value="TECHNICIAN">Technicians</option>
+                                    <option value="SUPPORT">Support Staff</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Availability</label>
+                                <select class="filter-input" id="availabilityFilter" onchange="filterStaff()">
+                                    <option value="ALL" selected>All</option>
+                                    <option value="AVAILABLE">Available</option>
+                                    <option value="SCHEDULED">Scheduled</option>
+                                    <option value="UNAVAILABLE">Unavailable</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="staff-list" id="staffList">
+                            <div class="staff-item selected" onclick="selectStaff(this, 'EMP001')">
+                                <div class="staff-avatar">AH</div>
+                                <div class="staff-info">
+                                    <div class="staff-name">Dr. Ahmed Hassan</div>
+                                    <div class="staff-role">Senior Cardiologist</div>
+                                </div>
+                                <span class="staff-status status-scheduled">Scheduled</span>
+                            </div>
+
+                            <div class="staff-item" onclick="selectStaff(this, 'EMP002')">
+                                <div class="staff-avatar">SC</div>
+                                <div class="staff-info">
+                                    <div class="staff-name">Dr. Sarah Chen</div>
+                                    <div class="staff-role">Cardiologist</div>
+                                </div>
+                                <span class="staff-status status-available">Available</span>
+                            </div>
+
+                            <div class="staff-item" onclick="selectStaff(this, 'EMP003')">
+                                <div class="staff-avatar">LJ</div>
+                                <div class="staff-info">
+                                    <div class="staff-name">Lisa Johnson</div>
+                                    <div class="staff-role">Cardiac Nurse</div>
+                                </div>
+                                <span class="staff-status status-scheduled">Scheduled</span>
+                            </div>
+
+                            <div class="staff-item" onclick="selectStaff(this, 'EMP004')">
+                                <div class="staff-avatar">MT</div>
+                                <div class="staff-info">
+                                    <div class="staff-name">Michael Torres</div>
+                                    <div class="staff-role">Echo Technician</div>
+                                </div>
+                                <span class="staff-status status-available">Available</span>
+                            </div>
+
+                            <div class="staff-item" onclick="selectStaff(this, 'EMP005')">
+                                <div class="staff-avatar">RK</div>
+                                <div class="staff-info">
+                                    <div class="staff-name">Dr. Ravi Kumar</div>
+                                    <div class="staff-role">Interventional Cardiologist</div>
+                                </div>
+                                <span class="staff-status status-unavailable">On Leave</span>
+                            </div>
+
+                            <div class="staff-item" onclick="selectStaff(this, 'EMP006')">
+                                <div class="staff-avatar">MB</div>
+                                <div class="staff-info">
+                                    <div class="staff-name">Maria Bautista</div>
+                                    <div class="staff-role">Cardiac Nurse</div>
+                                </div>
+                                <span class="staff-status status-available">Available</span>
+                            </div>
+
+                            <div class="staff-item" onclick="selectStaff(this, 'EMP007')">
+                                <div class="staff-avatar">DW</div>
+                                <div class="staff-info">
+                                    <div class="staff-name">David Wilson</div>
+                                    <div class="staff-role">Cardiac Surgeon</div>
+                                </div>
+                                <span class="staff-status status-scheduled">Scheduled</span>
+                            </div>
+
+                            <div class="staff-item" onclick="selectStaff(this, 'EMP008')">
+                                <div class="staff-avatar">NK</div>
+                                <div class="staff-info">
+                                    <div class="staff-name">Nancy Kim</div>
+                                    <div class="staff-role">Unit Secretary</div>
+                                </div>
+                                <span class="staff-status status-available">Available</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center Panel - Schedule Grid -->
+                    <div class="schedule-content">
+                        <div class="schedule-tabs">
+                            <div class="schedule-tab active" onclick="switchScheduleTab('weekly', this)">Weekly View</div>
+                            <div class="schedule-tab" onclick="switchScheduleTab('monthly', this)">Monthly View</div>
+                            <div class="schedule-tab" onclick="switchScheduleTab('coverage', this)">Coverage Analysis</div>
+                        </div>
+
+                        <div class="schedule-grid-container" id="scheduleGrid">
+                            <div id="weeklyContent">
+                                <div class="calendar-nav">
+                                    <div class="nav-buttons">
+                                        <button class="nav-btn" onclick="previousWeek()">◀ Previous</button>
+                                        <button class="nav-btn" onclick="currentWeek()">Today</button>
+                                        <button class="nav-btn" onclick="nextWeek()">Next ▶</button>
+                                    </div>
+                                    <div class="date-range">
+                                        September 15 - September 21, 2025
+                                    </div>
+                                    <div class="nav-buttons">
+                                        <button class="nav-btn" onclick="printSchedule()">🖨️ Print</button>
+                                        <button class="nav-btn" onclick="shareSchedule()">📤 Share</button>
+                                    </div>
+                                </div>
+
+                                <div class="schedule-grid">
+                                    <!-- Header Row -->
+                                    <div class="grid-header">Time</div>
+                                    <div class="grid-header">Sunday<br><small>Sep 15</small></div>
+                                    <div class="grid-header">Monday<br><small>Sep 16</small></div>
+                                    <div class="grid-header">Tuesday<br><small>Sep 17</small></div>
+                                    <div class="grid-header">Wednesday<br><small>Sep 18</small></div>
+                                    <div class="grid-header">Thursday<br><small>Sep 19</small></div>
+                                    <div class="grid-header">Friday<br><small>Sep 20</small></div>
+                                    <div class="grid-header">Saturday<br><small>Sep 21</small></div>
+
+                                    <!-- 7:00 AM Row -->
+                                    <div class="grid-time">07:00</div>
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('AH', 'MON', '07:00')">AH</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('AH', 'TUE', '07:00')">AH</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('SC', 'WED', '07:00')">SC</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('AH', 'THU', '07:00')">AH</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('AH', 'FRI', '07:00')">AH</div>
+                                    </div>
+                                    <div class="grid-cell"></div>
+
+                                    <!-- 8:00 AM Row -->
+                                    <div class="grid-time">08:00</div>
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('AH', 'MON', '08:00')">AH</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-oncall" onclick="editShift('AH', 'TUE', '08:00')">AH+</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('SC', 'WED', '08:00')">SC</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('DW', 'THU', '08:00')">DW</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('AH', 'FRI', '08:00')">AH</div>
+                                    </div>
+                                    <div class="grid-cell"></div>
+
+                                    <!-- 9:00 AM Row -->
+                                    <div class="grid-time">09:00</div>
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('LJ', 'MON', '09:00')">LJ</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('LJ', 'TUE', '09:00')">LJ</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('LJ', 'WED', '09:00')">LJ</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('MB', 'THU', '09:00')">MB</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('LJ', 'FRI', '09:00')">LJ</div>
+                                    </div>
+                                    <div class="grid-cell"></div>
+
+                                    <!-- 10:00 AM Row -->
+                                    <div class="grid-time">10:00</div>
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('MT', 'MON', '10:00')">MT</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('MT', 'TUE', '10:00')">MT</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('MT', 'WED', '10:00')">MT</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('MT', 'THU', '10:00')">MT</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('MT', 'FRI', '10:00')">MT</div>
+                                    </div>
+                                    <div class="grid-cell"></div>
+
+                                    <!-- 11:00 AM Row -->
+                                    <div class="grid-time">11:00</div>
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('NK', 'MON', '11:00')">NK</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('NK', 'TUE', '11:00')">NK</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('NK', 'WED', '11:00')">NK</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('NK', 'THU', '11:00')">NK</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('NK', 'FRI', '11:00')">NK</div>
+                                    </div>
+                                    <div class="grid-cell"></div>
+
+                                    <!-- 12:00 PM Row -->
+                                    <div class="grid-time">12:00</div>
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('SC', 'MON', '12:00')">SC</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('SC', 'TUE', '12:00')">SC</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('AH', 'WED', '12:00')">AH</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('SC', 'THU', '12:00')">SC</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('SC', 'FRI', '12:00')">SC</div>
+                                    </div>
+                                    <div class="grid-cell"></div>
+
+                                    <!-- 1:00 PM Row -->
+                                    <div class="grid-time">13:00</div>
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('MB', 'MON', '13:00')">MB</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('MB', 'TUE', '13:00')">MB</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('MB', 'WED', '13:00')">MB</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('MB', 'THU', '13:00')">MB</div>
+                                    </div>
+                                    <div class="grid-cell">
+                                        <div class="shift-block shift-regular" onclick="editShift('MB', 'FRI', '13:00')">MB</div>
+                                    </div>
+                                    <div class="grid-cell"></div>
+
+                                    <!-- 2:00 PM Row -->
+                                    <div class="grid-time">14:00</div>
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('MON', '14:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('TUE', '14:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('WED', '14:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('THU', '14:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('FRI', '14:00')"></div>
+                                    <div class="grid-cell"></div>
+
+                                    <!-- 3:00 PM Row -->
+                                    <div class="grid-time">15:00</div>
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('MON', '15:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('TUE', '15:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('WED', '15:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('THU', '15:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('FRI', '15:00')"></div>
+                                    <div class="grid-cell"></div>
+
+                                    <!-- Evening shifts would continue similarly -->
+                                    <div class="grid-time">16:00</div>
+                                    <div class="grid-cell"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('MON', '16:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('TUE', '16:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('WED', '16:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('THU', '16:00')"></div>
+                                    <div class="grid-cell" onclick="addShiftToGrid('FRI', '16:00')"></div>
+                                    <div class="grid-cell"></div>
+                                </div>
+
+                                <div class="alert alert-info" style="margin-top: 15px;">
+                                    <div style="font-size: 16px;">ℹ️</div>
+                                    <div>
+                                        <strong>Legend:</strong> Regular Shift (Blue) • On-Call (Green) • Overtime (Yellow) • Leave (Red)<br>
+                                        Click on empty cells to add shifts, click on existing shifts to edit or remove.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="monthlyContent" style="display: none;">
+                                <div class="loading">
+                                    <div class="spinner"></div>
+                                    Monthly view loading...
+                                </div>
+                            </div>
+
+                            <div id="coverageContent" style="display: none;">
+                                <div class="loading">
+                                    <div class="spinner"></div>
+                                    Coverage analysis loading...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Actions & Information -->
+                    <div class="actions-panel">
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">⚡</span>
+                                Quick Actions
+                            </h4>
+                            <button class="action-button primary" onclick="addShift()">
+                                <span class="action-icon">➕</span>
+                                Add New Shift
+                            </button>
+                            <button class="action-button success" onclick="assignCoverage()">
+                                <span class="action-icon">👥</span>
+                                Assign Coverage
+                            </button>
+                            <button class="action-button warning" onclick="manageTimeOff()">
+                                <span class="action-icon">🏖️</span>
+                                Manage Time Off
+                            </button>
+                            <button class="action-button" onclick="swapShifts()">
+                                <span class="action-icon">🔄</span>
+                                Shift Swaps
+                            </button>
+                            <button class="action-button" onclick="viewRequests()">
+                                <span class="action-icon">📋</span>
+                                View Requests
+                            </button>
+                            <button class="action-button danger" onclick="emergencyStaffing()">
+                                <span class="action-icon">🚨</span>
+                                Emergency Staffing
+                            </button>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📊</span>
+                                Department Summary
+                            </h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <span class="stat-value">8</span>
+                                    <span class="stat-label">Staff On Duty</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">42</span>
+                                    <span class="stat-label">Total Hours</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">95%</span>
+                                    <span class="stat-label">Coverage Rate</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">3</span>
+                                    <span class="stat-label">Open Shifts</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">⚠️</span>
+                                Schedule Alerts
+                            </h4>
+                            <div style="font-size: 11px;">
+                                <div style="margin-bottom: 8px; padding: 8px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 3px;">
+                                    <div style="font-weight: 600; color: #856404;">Understaffed</div>
+                                    <div style="color: #856404;">Thursday 2PM - Need 1 more nurse</div>
+                                </div>
+                                <div style="margin-bottom: 8px; padding: 8px; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 3px;">
+                                    <div style="font-weight: 600; color: #721c24;">Overtime Alert</div>
+                                    <div style="color: #721c24;">Dr. Hassan: 48 hours this week</div>
+                                </div>
+                                <div style="margin-bottom: 8px; padding: 8px; background: #cce5ff; border: 1px solid #b3d7ff; border-radius: 3px;">
+                                    <div style="font-weight: 600; color: #004085;">Shift Request</div>
+                                    <div style="color: #004085;">Maria B. requested Friday off</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">👤</span>
+                                Selected Staff Info
+                            </h4>
+                            <div style="font-size: 11px; line-height: 1.8;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>Name:</span>
+                                    <span style="font-weight: 600;">Dr. Ahmed Hassan</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>This Week Hours:</span>
+                                    <span style="font-weight: 600;">48 hours</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>Status:</span>
+                                    <span style="font-weight: 600; color: #3d9aef;">Scheduled</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span>Next Available:</span>
+                                    <span style="font-weight: 600;">Saturday 8AM</span>
+                                </div>
+                                <hr style="margin: 8px 0; border: none; border-top: 1px solid #dee2e6;">
+                                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 13px;">
+                                    <span>On-Call Tonight:</span>
+                                    <span style="color: #28a745;">Yes</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📋</span>
+                                Pending Approvals
+                            </h4>
+                            <div style="font-size: 11px;">
+                                <div style="margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
+                                    <div style="font-weight: 600; margin-bottom: 2px;">Vacation Request</div>
+                                    <div style="color: #666; margin-bottom: 2px;">Lisa Johnson - Oct 15-20</div>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button class="btn btn-success" style="font-size: 9px; height: 20px; padding: 2px 6px;">Approve</button>
+                                        <button class="btn btn-danger" style="font-size: 9px; height: 20px; padding: 2px 6px;">Deny</button>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
+                                    <div style="font-weight: 600; margin-bottom: 2px;">Shift Swap</div>
+                                    <div style="color: #666; margin-bottom: 2px;">M. Torres ↔ N. Kim - Wed</div>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button class="btn btn-success" style="font-size: 9px; height: 20px; padding: 2px 6px;">Approve</button>
+                                        <button class="btn btn-danger" style="font-size: 9px; height: 20px; padding: 2px 6px;">Deny</button>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 8px;">
+                                    <div style="font-weight: 600; margin-bottom: 2px;">Overtime Request</div>
+                                    <div style="color: #666; margin-bottom: 2px;">Dr. Chen - Extra 4 hours Fri</div>
+                                    <div style="display: flex; gap: 4px;">
+                                        <button class="btn btn-success" style="font-size: 9px; height: 20px; padding: 2px 6px;">Approve</button>
+                                        <button class="btn btn-danger" style="font-size: 9px; height: 20px; padding: 2px 6px;">Deny</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📈</span>
+                                Weekly Statistics
+                            </h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <span class="stat-value">156</span>
+                                    <span class="stat-label">Total Hours</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">24</span>
+                                    <span class="stat-label">Overtime</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">3</span>
+                                    <span class="stat-label">Call-Ins</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">12</span>
+                                    <span class="stat-label">On-Call</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shift Edit Modal -->
+    <div id="shiftModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Edit Shift Details</span>
+                <button class="modal-close" onclick="closeShiftModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Staff Member</label>
+                    <select class="form-select" id="modalStaff">
+                        <option value="AH">Dr. Ahmed Hassan</option>
+                        <option value="SC">Dr. Sarah Chen</option>
+                        <option value="LJ">Lisa Johnson</option>
+                        <option value="MT">Michael Torres</option>
+                        <option value="MB">Maria Bautista</option>
+                        <option value="DW">David Wilson</option>
+                        <option value="NK">Nancy Kim</option>
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">Start Time</label>
+                        <input type="time" class="form-input" id="modalStartTime" value="08:00">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label class="form-label">End Time</label>
+                        <input type="time" class="form-input" id="modalEndTime" value="17:00">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Shift Type</label>
+                    <select class="form-select" id="modalShiftType">
+                        <option value="regular">Regular Shift</option>
+                        <option value="overtime">Overtime</option>
+                        <option value="oncall">On-Call</option>
+                        <option value="leave">Leave/Time Off</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-textarea" id="modalNotes" placeholder="Additional notes or instructions..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-success" onclick="saveShift()">Save Shift</button>
+                    <button class="btn btn-danger" onclick="deleteShift()">Delete Shift</button>
+                    <button class="btn btn-secondary" onclick="closeShiftModal()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScheduleTab = 'weekly';
+        let selectedStaffId = 'EMP001';
+        let currentWeekStart = new Date('2025-09-15');
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Staff selection
+        function selectStaff(element, staffId) {
+            document.querySelectorAll('.staff-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+            selectedStaffId = staffId;
+            
+            showNotification('info', 'Staff member selected');
+        }
+
+        // Tab switching
+        function switchScheduleTab(tabName, element) {
+            document.querySelectorAll('#scheduleGrid > div').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            document.querySelectorAll('.schedule-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName + 'Content').style.display = 'block';
+            element.classList.add('active');
+            currentScheduleTab = tabName;
+            
+            if (tabName === 'monthly') {
+                setTimeout(() => {
+                    document.getElementById('monthlyContent').innerHTML = '<div style="text-align: center; color: #666; padding: 40px;">Monthly view would display a calendar grid here</div>';
+                }, 1000);
+            } else if (tabName === 'coverage') {
+                setTimeout(() => {
+                    document.getElementById('coverageContent').innerHTML = '<div style="text-align: center; color: #666; padding: 40px;">Coverage analysis with staffing ratios and gaps would be displayed here</div>';
+                }, 1000);
+            }
+        }
+
+        // Calendar navigation
+        function previousWeek() {
+            currentWeekStart.setDate(currentWeekStart.getDate() - 7);
+            updateWeekDisplay();
+            showNotification('info', 'Moved to previous week');
+        }
+
+        function nextWeek() {
+            currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            updateWeekDisplay();
+            showNotification('info', 'Moved to next week');
+        }
+
+        function currentWeek() {
+            currentWeekStart = new Date('2025-09-15');
+            updateWeekDisplay();
+            showNotification('info', 'Returned to current week');
+        }
+
+        function updateWeekDisplay() {
+            const endDate = new Date(currentWeekStart);
+            endDate.setDate(endDate.getDate() + 6);
+            
+            const dateRange = document.querySelector('.date-range');
+            dateRange.textContent = `${formatDate(currentWeekStart)} - ${formatDate(endDate)}`;
+        }
+
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+        }
+
+        // Filter functions
+        function filterStaff() {
+            const department = document.getElementById('departmentFilter').value;
+            const staffType = document.getElementById('staffTypeFilter').value;
+            const availability = document.getElementById('availabilityFilter').value;
+            
+            showNotification('info', `Filtering by ${department} department`);
+        }
+
+        // Shift management
+        function addShiftToGrid(day, time) {
+            showShiftModal(day, time, null);
+        }
+
+        function editShift(staffCode, day, time) {
+            showShiftModal(day, time, staffCode);
+        }
+
+        function showShiftModal(day, time, staffCode) {
+            const modal = document.getElementById('shiftModal');
+            modal.style.display = 'block';
+            
+            if (staffCode) {
+                document.getElementById('modalStaff').value = staffCode;
+            }
+            
+            document.getElementById('modalStartTime').value = time;
+        }
+
+        function closeShiftModal() {
+            document.getElementById('shiftModal').style.display = 'none';
+        }
+
+        function saveShift() {
+            const staff = document.getElementById('modalStaff').value;
+            const startTime = document.getElementById('modalStartTime').value;
+            const endTime = document.getElementById('modalEndTime').value;
+            const shiftType = document.getElementById('modalShiftType').value;
+            const notes = document.getElementById('modalNotes').value;
+            
+            showNotification('success', 'Shift saved successfully');
+            closeShiftModal();
+        }
+
+        function deleteShift() {
+            if (confirm('Are you sure you want to delete this shift?')) {
+                showNotification('warning', 'Shift deleted');
+                closeShiftModal();
+            }
+        }
+
+        // Header actions
+        function addShift() {
+            showShiftModal('MON', '08:00', null);
+        }
+
+        function manageRequests() {
+            showNotification('info', 'Opening request management system...');
+        }
+
+        function exportSchedule() {
+            showNotification('success', 'Schedule export initiated');
+        }
+
+        // Quick actions
+        function assignCoverage() {
+            showNotification('info', 'Opening coverage assignment...');
+        }
+
+        function manageTimeOff() {
+            showNotification('info', 'Opening time-off management...');
+        }
+
+        function swapShifts() {
+            showNotification('info', 'Opening shift swap system...');
+        }
+
+        function viewRequests() {
+            showNotification('info', 'Loading pending requests...');
+        }
+
+        function emergencyStaffing() {
+            showNotification('warning', 'Emergency staffing protocol activated');
+        }
+
+        function printSchedule() {
+            showNotification('info', 'Preparing schedule for printing...');
+        }
+
+        function shareSchedule() {
+            showNotification('info', 'Opening share options...');
+        }
+
+        // Notification system
+        function showNotification(type, message) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type}`;
+            notification.style.position = 'fixed';
+            notification.style.top = '80px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '300px';
+            notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            
+            const icons = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'warning': '⚠️',
+                'danger': '🚨'
+            };
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>${icons[type] || 'ℹ️'}</span>
+                    <span style="flex: 1;">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 16px;">
+                        ✕
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize system
+        document.addEventListener('DOMContentLoaded', function() {
+            showNotification('info', 'Schedule Management system initialized');
+        });
+
+        console.log('Schedule Management System Loaded');
+    </script>
+</body>
+</html>

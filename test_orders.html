@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory Test Orders - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1600px;
+        }
+
+        /* Three-column layout for test orders */
+        .orders-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Test Catalog */
+        .test-catalog {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .catalog-search {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .catalog-filters {
+            padding: 10px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .filter-group {
+            margin-bottom: 8px;
+        }
+
+        .filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 4px 6px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            font-size: 11px;
+            height: 24px;
+        }
+
+        .tests-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .test-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .test-item:hover {
+            background: #f8f9fa;
+        }
+
+        .test-item.selected {
+            background: #e8f4fd;
+            border-left: 3px solid #3d9aef;
+        }
+
+        .test-name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .test-details {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .test-price {
+            font-size: 12px;
+            font-weight: 600;
+            color: #28a745;
+            margin-top: 4px;
+        }
+
+        /* Center Panel - Order Management */
+        .orders-content {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .order-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .order-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .order-tab.active {
+            background: white;
+            border-bottom-color: #3d9aef;
+            color: #3d9aef;
+        }
+
+        .order-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .order-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Current Order Panel */
+        .current-order {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .order-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .order-patient {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .order-summary {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 10px;
+        }
+
+        .order-items {
+            margin-bottom: 10px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-remove {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            padding: 2px 6px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            padding-top: 8px;
+            border-top: 1px solid #dee2e6;
+            margin-top: 8px;
+        }
+
+        /* Orders List */
+        .orders-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .order-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .order-card:hover {
+            background: #e9ecef;
+        }
+
+        .order-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .order-id {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .order-status {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .status-ordered { background: #fff3cd; color: #856404; }
+        .status-collected { background: #cce5ff; color: #004085; }
+        .status-processing { background: #d4edda; color: #155724; }
+        .status-completed { background: #d1ecf1; color: #0c5460; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+
+        .order-patient-info {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .order-tests {
+            font-size: 11px;
+            color: #333;
+        }
+
+        .order-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        /* Right Panel - Order Details & Actions */
+        .order-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Patient Search */
+        .patient-search {
+            position: relative;
+        }
+
+        .patient-display {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        .patient-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .patient-details {
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .change-patient {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 2px;
+            padding: 4px 8px;
+            font-size: 10px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        /* Quick Actions */
+        .quick-action-btn {
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+
+        .quick-action-btn:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        .action-icon {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        /* Priority Selector */
+        .priority-selector {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .priority-btn {
+            flex: 1;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 10px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .priority-btn.active {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .priority-btn.stat {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .priority-btn.urgent {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #333;
+        }
+
+        /* Form Elements */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .form-input {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+            background: #fff;
+        }
+
+        .form-textarea {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-select {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+            background: #fff;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-info {
+            background: #cce5ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Test Results Display */
+        .test-result {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .result-test-name {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .result-status {
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .result-normal { background: #d4edda; color: #155724; }
+        .result-abnormal { background: #f8d7da; color: #721c24; }
+        .result-critical { background: #dc3545; color: white; }
+
+        .result-value {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .result-reference {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .orders-layout {
+                grid-template-columns: 250px 1fr 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .orders-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Search Results */
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 3px 3px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .search-result-item:hover {
+            background: #f8f9fa;
+        }
+
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">DR</div>
+                <span>(Dr. Johnson)</span>
+            </div>
+            <span style="margin-right: 15px;">🌐 Select Language ▾</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Patient Registration</span></div>
+                <div class="nav-item"><span>Patient Search</span></div>
+                <div class="nav-item"><span>Admission/Discharge</span></div>
+                <div class="nav-item"><span>Emergency Triage</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Medical Records</span></div>
+                <div class="nav-item"><span>Vital Signs</span></div>
+                <div class="nav-item"><span>Procedure Scheduling</span></div>
+                <div class="nav-item"><span>Discharge Planning</span></div>
+            </div>
+
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item active">
+                    <span>Test Orders</span>
+                </div>
+                <div class="nav-item">
+                    <span>Sample Tracking</span>
+                </div>
+                <div class="nav-item">
+                    <span>Results Entry</span>
+                </div>
+                <div class="nav-item">
+                    <span>Lab Reports</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Prescription Management</span></div>
+                <div class="nav-item"><span>Drug Inventory</span></div>
+                <div class="nav-item"><span>Dispensing</span></div>
+                <div class="nav-item"><span>Drug Interactions</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Invoice Generation</span></div>
+                <div class="nav-item"><span>Insurance Claims</span></div>
+                <div class="nav-item"><span>Payment Tracking</span></div>
+                <div class="nav-item"><span>Financial Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Employee Records</span></div>
+                <div class="nav-item"><span>Schedule Management</span></div>
+                <div class="nav-item"><span>Department Assignment</span></div>
+                <div class="nav-item"><span>Performance Tracking</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Risk Predictions</span></div>
+                <div class="nav-item"><span>Diagnostic Assistance</span></div>
+                <div class="nav-item"><span>Model Performance</span></div>
+                <div class="nav-item"><span>Classification Results</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>System Configuration</span></div>
+                <div class="nav-item"><span>User Management</span></div>
+                <div class="nav-item"><span>Audit Reports</span></div>
+                <div class="nav-item"><span>Security Settings</span></div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Laboratory</a> › Test Orders
+                    </div>
+                    <h1 class="page-title">Laboratory Test Orders</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="openOrderModal()">
+                        📝 New Order
+                    </button>
+                    <button class="btn btn-warning" onclick="openBulkOrderModal()">
+                        📋 Bulk Order
+                    </button>
+                    <button class="btn btn-secondary" onclick="printOrders()">
+                        🖨️ Print
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Three-column Test Orders Layout -->
+                <div class="orders-layout">
+                    <!-- Left Panel - Test Catalog -->
+                    <div class="test-catalog">
+                        <div class="region-header">
+                            <span class="icon">🔬</span>
+                            Test Catalog
+                        </div>
+                        <div class="catalog-search">
+                            <div style="position: relative;">
+                                <input type="text" class="search-input" placeholder="Search tests..." 
+                                       oninput="searchTests(this.value)" id="testSearchInput">
+                                <div class="search-results" id="testSearchResults"></div>
+                            </div>
+                        </div>
+                        <div class="catalog-filters">
+                            <div class="filter-group">
+                                <label class="filter-label">Category</label>
+                                <select class="filter-select" onchange="filterTestsByCategory(this.value)">
+                                    <option value="">All Categories</option>
+                                    <option value="HEMATOLOGY">Hematology</option>
+                                    <option value="CHEMISTRY">Chemistry</option>
+                                    <option value="MICROBIOLOGY">Microbiology</option>
+                                    <option value="IMMUNOLOGY">Immunology</option>
+                                    <option value="PATHOLOGY">Pathology</option>
+                                    <option value="RADIOLOGY">Radiology</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">Specimen</label>
+                                <select class="filter-select" onchange="filterTestsBySpecimen(this.value)">
+                                    <option value="">All Specimens</option>
+                                    <option value="BLOOD">Blood</option>
+                                    <option value="URINE">Urine</option>
+                                    <option value="STOOL">Stool</option>
+                                    <option value="TISSUE">Tissue</option>
+                                    <option value="SWAB">Swab</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="tests-container" id="testsContainer">
+                            <!-- Tests will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Center Panel - Order Management -->
+                    <div class="orders-content">
+                        <div class="order-tabs">
+                            <div class="order-tab active" onclick="switchOrderTab('current', this)">Current Order</div>
+                            <div class="order-tab" onclick="switchOrderTab('pending', this)">Pending Orders</div>
+                            <div class="order-tab" onclick="switchOrderTab('completed', this)">Completed</div>
+                            <div class="order-tab" onclick="switchOrderTab('results', this)">Results</div>
+                        </div>
+
+                        <div class="order-content" id="orderContent">
+                            <!-- Current Order Content -->
+                            <div id="currentOrderContent">
+                                <div class="current-order">
+                                    <div class="order-header">
+                                        <h3 class="order-title">Current Lab Order</h3>
+                                    </div>
+                                    <div id="selectedPatientDisplay" class="order-patient">
+                                        No patient selected - Please select a patient to begin ordering
+                                    </div>
+                                    <div class="order-summary" id="orderSummary" style="display: none;">
+                                        <div class="order-items" id="orderItems">
+                                            <!-- Selected tests will appear here -->
+                                        </div>
+                                        <div class="order-total">
+                                            <span>Total Cost:</span>
+                                            <span id="orderTotal">$0.00</span>
+                                        </div>
+                                        <div style="margin-top: 15px; display: flex; gap: 8px;">
+                                            <button class="btn btn-success" onclick="submitOrder()" id="submitOrderBtn" disabled>
+                                                Submit Order
+                                            </button>
+                                            <button class="btn btn-secondary" onclick="saveOrderDraft()">
+                                                Save Draft
+                                            </button>
+                                            <button class="btn btn-danger" onclick="clearOrder()">
+                                                Clear Order
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <strong>💡 Quick Tips:</strong>
+                                    <ul style="margin: 8px 0 0 20px;">
+                                        <li>Select a patient from the right panel first</li>
+                                        <li>Browse test catalog on the left and click to add tests</li>
+                                        <li>Set priority and add clinical notes before submitting</li>
+                                        <li>Use Ctrl+Click to select multiple tests quickly</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Pending Orders Content -->
+                            <div id="pendingOrdersContent" style="display: none;">
+                                <div class="orders-list" id="pendingOrdersList">
+                                    <!-- Pending orders will be loaded here -->
+                                </div>
+                            </div>
+
+                            <!-- Completed Orders Content -->
+                            <div id="completedOrdersContent" style="display: none;">
+                                <div class="orders-list" id="completedOrdersList">
+                                    <!-- Completed orders will be loaded here -->
+                                </div>
+                            </div>
+
+                            <!-- Results Content -->
+                            <div id="resultsContent" style="display: none;">
+                                <div id="testResultsList">
+                                    <!-- Test results will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Patient & Actions -->
+                    <div class="order-panel">
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">👤</span>
+                                Patient Selection
+                            </h4>
+                            <div class="patient-search">
+                                <input type="text" class="form-input" placeholder="Search patients..." 
+                                       oninput="searchPatients(this.value)" id="patientSearchInput">
+                                <div class="search-results" id="patientSearchResults"></div>
+                            </div>
+                            <div id="selectedPatientInfo" style="display: none;">
+                                <div class="patient-display" id="patientDisplay">
+                                    <!-- Selected patient info will appear here -->
+                                </div>
+                                <button class="change-patient" onclick="changePatient()">Change Patient</button>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">⚡</span>
+                                Quick Actions
+                            </h4>
+                            <button class="quick-action-btn" onclick="addCommonPanel()">
+                                <span class="action-icon">🩸</span>
+                                Basic Metabolic Panel
+                            </button>
+                            <button class="quick-action-btn" onclick="addCommonPanel('cbc')">
+                                <span class="action-icon">🔴</span>
+                                Complete Blood Count
+                            </button>
+                            <button class="quick-action-btn" onclick="addCommonPanel('lipid')">
+                                <span class="action-icon">💊</span>
+                                Lipid Panel
+                            </button>
+                            <button class="quick-action-btn" onclick="addCommonPanel('liver')">
+                                <span class="action-icon">🫀</span>
+                                Liver Function Tests
+                            </button>
+                            <button class="quick-action-btn" onclick="addCommonPanel('thyroid')">
+                                <span class="action-icon">🦋</span>
+                                Thyroid Panel
+                            </button>
+                            <button class="quick-action-btn" onclick="openCustomPanel()">
+                                <span class="action-icon">⚙️</span>
+                                Custom Panel
+                            </button>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">🚨</span>
+                                Order Priority
+                            </h4>
+                            <div class="priority-selector">
+                                <button class="priority-btn" onclick="setPriority('ROUTINE', this)">ROUTINE</button>
+                                <button class="priority-btn" onclick="setPriority('URGENT', this)">URGENT</button>
+                                <button class="priority-btn stat" onclick="setPriority('STAT', this)">STAT</button>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📝</span>
+                                Clinical Information
+                            </h4>
+                            <div class="form-group">
+                                <label class="form-label">Clinical Indication</label>
+                                <textarea class="form-textarea" id="clinicalIndication" 
+                                          placeholder="Reason for testing..." rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Special Instructions</label>
+                                <textarea class="form-textarea" id="specialInstructions" 
+                                          placeholder="Any special handling instructions..." rows="2"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📊</span>
+                                Recent Results
+                            </h4>
+                            <div id="recentResultsWidget">
+                                <div style="font-size: 11px; color: #666; text-align: center; padding: 10px;">
+                                    Select a patient to view recent results
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">⚠️</span>
+                                Alerts & Warnings
+                            </h4>
+                            <div id="alertsWidget">
+                                <div style="font-size: 11px; color: #666; text-align: center; padding: 10px;">
+                                    No active alerts
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Order Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>New Lab Order</h3>
+                <button class="modal-close" onclick="closeModal('orderModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="orderForm">
+                    <div class="alert alert-info">
+                        <strong>📋 Creating new lab order</strong> - Complete all required fields
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Patient *</label>
+                            <input type="text" class="form-input" name="patientSearch" 
+                                   placeholder="Search and select patient..." required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Order Date *</label>
+                            <input type="datetime-local" class="form-input" name="orderDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Priority *</label>
+                            <select class="form-select" name="priority" required>
+                                <option value="">-- Select Priority --</option>
+                                <option value="ROUTINE">Routine</option>
+                                <option value="URGENT">Urgent</option>
+                                <option value="STAT">STAT</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Ordering Physician</label>
+                            <input type="text" class="form-input" name="orderingPhysician" 
+                                   value="Dr. Johnson" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Clinical Indication *</label>
+                            <textarea class="form-textarea" name="clinicalIndication" rows="3" required
+                                      placeholder="Medical reason for ordering these tests..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Selected Tests</label>
+                            <div id="modalSelectedTests" style="border: 1px solid #ddd; border-radius: 3px; padding: 8px; min-height: 100px; background: #f9f9f9;">
+                                <em style="color: #666;">No tests selected</em>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('orderModal')">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-warning" onclick="saveOrderDraft()">
+                            Save Draft
+                        </button>
+                        <button type="submit" class="btn btn-success" id="submitModalOrderBtn">
+                            Submit Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const samplePatients = [
+            {
+                id: 1, patientNumber: 'P-20241215-001', mrn: 'MRN-20241215-0001',
+                firstName: 'Ahmed', lastName: 'Hassan', age: 46, gender: 'M',
+                dateOfBirth: '1978-05-15', phone: '+20-12-345-6789', 
+                bloodType: 'A+', status: 'ACTIVE'
+            },
+            {
+                id: 2, patientNumber: 'P-20241215-002', mrn: 'MRN-20241215-0002',
+                firstName: 'Fatima', lastName: 'Al-Zahra', age: 29, gender: 'F',
+                dateOfBirth: '1995-08-22', phone: '+20-10-987-6543', 
+                bloodType: 'O+', status: 'ACTIVE'
+            },
+            {
+                id: 3, patientNumber: 'P-20241214-045', mrn: 'MRN-20241214-0045',
+                firstName: 'Omar', lastName: 'Khaled', age: 62, gender: 'M',
+                dateOfBirth: '1962-12-03', phone: '+20-11-555-7788', 
+                bloodType: 'B-', status: 'ACTIVE'
+            }
+        ];
+
+        const sampleTests = [
+            {
+                id: 1, testCode: 'CBC-001', testName: 'Complete Blood Count', 
+                category: 'HEMATOLOGY', specimenType: 'BLOOD', cost: 25.00,
+                normalRange: 'See individual components', description: 'Full blood count with differential'
+            },
+            {
+                id: 2, testCode: 'BMP-001', testName: 'Basic Metabolic Panel', 
+                category: 'CHEMISTRY', specimenType: 'BLOOD', cost: 35.00,
+                normalRange: 'See individual components', description: '8-test chemistry panel'
+            },
+            {
+                id: 3, testCode: 'TSH-001', testName: 'Thyroid Stimulating Hormone', 
+                category: 'IMMUNOLOGY', specimenType: 'BLOOD', cost: 45.00,
+                normalRange: '0.4-4.0 mIU/L', description: 'TSH level assessment'
+            },
+            {
+                id: 4, testCode: 'HBA1C-001', testName: 'Hemoglobin A1C', 
+                category: 'CHEMISTRY', specimenType: 'BLOOD', cost: 30.00,
+                normalRange: '<5.7%', description: '3-month glucose average'
+            },
+            {
+                id: 5, testCode: 'LIPID-001', testName: 'Lipid Panel', 
+                category: 'CHEMISTRY', specimenType: 'BLOOD', cost: 40.00,
+                normalRange: 'See individual components', description: 'Cholesterol and triglycerides'
+            },
+            {
+                id: 6, testCode: 'UA-001', testName: 'Urinalysis', 
+                category: 'CHEMISTRY', specimenType: 'URINE', cost: 20.00,
+                normalRange: 'See individual components', description: 'Complete urine analysis'
+            }
+        ];
+
+        const sampleOrders = [
+            {
+                id: 1, orderId: 'ORD-2024-1215-001', patientId: 1, patientName: 'Ahmed Hassan',
+                orderDate: '2024-12-15 08:30', status: 'ORDERED', priority: 'ROUTINE',
+                tests: ['Complete Blood Count', 'Basic Metabolic Panel'], 
+                orderingPhysician: 'Dr. Johnson', totalCost: 60.00
+            },
+            {
+                id: 2, orderId: 'ORD-2024-1215-002', patientId: 2, patientName: 'Fatima Al-Zahra',
+                orderDate: '2024-12-15 09:15', status: 'COLLECTED', priority: 'URGENT',
+                tests: ['Hemoglobin A1C', 'Lipid Panel'], 
+                orderingPhysician: 'Dr. Smith', totalCost: 70.00
+            }
+        ];
+
+        // Global variables
+        let selectedPatient = null;
+        let currentOrder = [];
+        let currentOrderTab = 'current';
+        let selectedPriority = 'ROUTINE';
+        let filteredTests = [...sampleTests];
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTestCatalog();
+            loadPendingOrders();
+            loadCompletedOrders();
+            
+            // Set default order date/time
+            const now = new Date();
+            const orderDateInput = document.querySelector('[name="orderDate"]');
+            if (orderDateInput) {
+                orderDateInput.value = now.toISOString().slice(0, 16);
+            }
+
+            // Set default priority
+            setPriority('ROUTINE', document.querySelector('.priority-btn'));
+        });
+
+        // Load test catalog
+        function loadTestCatalog() {
+            const container = document.getElementById('testsContainer');
+            
+            container.innerHTML = filteredTests.map(test => `
+                <div class="test-item" onclick="selectTest(${test.id})" data-test-id="${test.id}">
+                    <div class="test-name">${test.testName}</div>
+                    <div class="test-details">
+                        Code: ${test.testCode}<br>
+                        Category: ${test.category}<br>
+                        Specimen: ${test.specimenType}<br>
+                        Range: ${test.normalRange}
+                    </div>
+                    <div class="test-price">$${test.cost.toFixed(2)}</div>
+                </div>
+            `).join('');
+        }
+
+        // Search tests
+        function searchTests(query) {
+            if (query.length < 2) {
+                filteredTests = [...sampleTests];
+                loadTestCatalog();
+                return;
+            }
+            
+            filteredTests = sampleTests.filter(test =>
+                test.testName.toLowerCase().includes(query.toLowerCase()) ||
+                test.testCode.toLowerCase().includes(query.toLowerCase()) ||
+                test.category.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            loadTestCatalog();
+        }
+
+        // Filter tests by category
+        function filterTestsByCategory(category) {
+            if (!category) {
+                filteredTests = [...sampleTests];
+            } else {
+                filteredTests = sampleTests.filter(test => test.category === category);
+            }
+            loadTestCatalog();
+        }
+
+        // Filter tests by specimen
+        function filterTestsBySpecimen(specimen) {
+            if (!specimen) {
+                filteredTests = [...sampleTests];
+            } else {
+                filteredTests = sampleTests.filter(test => test.specimenType === specimen);
+            }
+            loadTestCatalog();
+        }
+
+        // Select test
+        function selectTest(testId) {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first before adding tests.');
+                return;
+            }
+
+            const test = sampleTests.find(t => t.id === testId);
+            if (!test) return;
+
+            // Check if test already in order
+            if (currentOrder.find(item => item.testId === testId)) {
+                showAlert('info', 'This test is already in the current order.');
+                return;
+            }
+
+            // Add test to current order
+            currentOrder.push({
+                testId: testId,
+                testName: test.testName,
+                testCode: test.testCode,
+                cost: test.cost
+            });
+
+            updateOrderSummary();
+            showAlert('success', `${test.testName} added to order.`);
+        }
+
+        // Update order summary
+        function updateOrderSummary() {
+            const orderSummary = document.getElementById('orderSummary');
+            const orderItems = document.getElementById('orderItems');
+            const orderTotal = document.getElementById('orderTotal');
+            const submitBtn = document.getElementById('submitOrderBtn');
+
+            if (currentOrder.length === 0) {
+                orderSummary.style.display = 'none';
+                submitBtn.disabled = true;
+                return;
+            }
+
+            orderSummary.style.display = 'block';
+            
+            orderItems.innerHTML = currentOrder.map((item, index) => `
+                <div class="order-item">
+                    <div>
+                        <strong>${item.testName}</strong><br>
+                        <small>${item.testCode}</small>
+                    </div>
+                    <div style="text-align: right;">
+                        <div>$${item.cost.toFixed(2)}</div>
+                        <button class="item-remove" onclick="removeFromOrder(${index})">×</button>
+                    </div>
+                </div>
+            `).join('');
+
+            const total = currentOrder.reduce((sum, item) => sum + item.cost, 0);
+            orderTotal.textContent = `$${total.toFixed(2)}`;
+            
+            submitBtn.disabled = !selectedPatient || currentOrder.length === 0;
+        }
+
+        // Remove from order
+        function removeFromOrder(index) {
+            const removedTest = currentOrder[index];
+            currentOrder.splice(index, 1);
+            updateOrderSummary();
+            showAlert('info', `${removedTest.testName} removed from order.`);
+        }
+
+        // Clear order
+        function clearOrder() {
+            if (currentOrder.length === 0) return;
+            
+            if (confirm('Are you sure you want to clear the current order?')) {
+                currentOrder = [];
+                updateOrderSummary();
+                showAlert('info', 'Order cleared.');
+            }
+        }
+
+        // Search patients
+        function searchPatients(query) {
+            const results = document.getElementById('patientSearchResults');
+            
+            if (query.length < 2) {
+                results.style.display = 'none';
+                return;
+            }
+            
+            const filtered = samplePatients.filter(p =>
+                p.firstName.toLowerCase().includes(query.toLowerCase()) ||
+                p.lastName.toLowerCase().includes(query.toLowerCase()) ||
+                p.mrn.toLowerCase().includes(query.toLowerCase()) ||
+                p.patientNumber.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            if (filtered.length > 0) {
+                results.innerHTML = filtered.map(p => `
+                    <div class="search-result-item" onclick="selectPatient(${p.id}, '${p.firstName} ${p.lastName}')">
+                        <strong>${p.firstName} ${p.lastName}</strong><br>
+                        <small>${p.mrn} | Age: ${p.age} | ${p.gender === 'M' ? 'Male' : 'Female'}</small>
+                    </div>
+                `).join('');
+                results.style.display = 'block';
+            } else {
+                results.style.display = 'none';
+            }
+        }
+
+        // Select patient
+        function selectPatient(patientId, patientName) {
+            selectedPatient = samplePatients.find(p => p.id === patientId);
+            
+            // Hide search results
+            document.getElementById('patientSearchResults').style.display = 'none';
+            document.getElementById('patientSearchInput').value = patientName;
+            
+            // Update patient display
+            updatePatientDisplay();
+            
+            // Clear current order when changing patients
+            if (currentOrder.length > 0) {
+                if (confirm('Changing patient will clear the current order. Continue?')) {
+                    currentOrder = [];
+                    updateOrderSummary();
+                } else {
+                    return;
+                }
+            }
+            
+            showAlert('success', `Patient ${patientName} selected.`);
+        }
+
+        // Update patient display
+        function updatePatientDisplay() {
+            if (!selectedPatient) return;
+            
+            const patientInfo = document.getElementById('selectedPatientInfo');
+            const patientDisplay = document.getElementById('patientDisplay');
+            const selectedPatientDisplay = document.getElementById('selectedPatientDisplay');
+            
+            const patientHTML = `
+                <div class="patient-name">${selectedPatient.firstName} ${selectedPatient.lastName}</div>
+                <div class="patient-details">
+                    MRN: ${selectedPatient.mrn}<br>
+                    Age: ${selectedPatient.age}, ${selectedPatient.gender === 'M' ? 'Male' : 'Female'}<br>
+                    DOB: ${selectedPatient.dateOfBirth}<br>
+                    Blood Type: ${selectedPatient.bloodType}
+                </div>
+            `;
+            
+            patientDisplay.innerHTML = patientHTML;
+            patientInfo.style.display = 'block';
+            
+            selectedPatientDisplay.innerHTML = `Patient: ${selectedPatient.firstName} ${selectedPatient.lastName} (${selectedPatient.mrn})`;
+            
+            updateRecentResults();
+            updateAlertsWidget();
+            updateOrderSummary();
+        }
+
+        // Change patient
+        function changePatient() {
+            selectedPatient = null;
+            document.getElementById('selectedPatientInfo').style.display = 'none';
+            document.getElementById('patientSearchInput').value = '';
+            document.getElementById('selectedPatientDisplay').innerHTML = 'No patient selected - Please select a patient to begin ordering';
+            
+            // Clear current order
+            currentOrder = [];
+            updateOrderSummary();
+            updateRecentResults();
+            updateAlertsWidget();
+        }
+
+        // Switch order tabs
+        function switchOrderTab(tabName, element) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.order-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked tab
+            element.classList.add('active');
+            
+            currentOrderTab = tabName;
+            
+            // Hide all content divs
+            document.querySelectorAll('#orderContent > div').forEach(div => {
+                div.style.display = 'none';
+            });
+            
+            // Show relevant content
+            switch(tabName) {
+                case 'current':
+                    document.getElementById('currentOrderContent').style.display = 'block';
+                    break;
+                case 'pending':
+                    document.getElementById('pendingOrdersContent').style.display = 'block';
+                    loadPendingOrders();
+                    break;
+                case 'completed':
+                    document.getElementById('completedOrdersContent').style.display = 'block';
+                    loadCompletedOrders();
+                    break;
+                case 'results':
+                    document.getElementById('resultsContent').style.display = 'block';
+                    loadTestResults();
+                    break;
+            }
+        }
+
+        // Load pending orders
+        function loadPendingOrders() {
+            const container = document.getElementById('pendingOrdersList');
+            const pendingOrders = sampleOrders.filter(order => 
+                ['ORDERED', 'COLLECTED', 'PROCESSING'].includes(order.status)
+            );
+            
+            if (pendingOrders.length === 0) {
+                container.innerHTML = '<div class="loading">No pending orders found</div>';
+                return;
+            }
+            
+            container.innerHTML = pendingOrders.map(order => `
+                <div class="order-card" onclick="viewOrderDetails(${order.id})">
+                    <div class="order-card-header">
+                        <div class="order-id">${order.orderId}</div>
+                        <div class="order-status status-${order.status.toLowerCase()}">${order.status}</div>
+                    </div>
+                    <div class="order-patient-info">
+                        Patient: ${order.patientName}<br>
+                        Physician: ${order.orderingPhysician}
+                    </div>
+                    <div class="order-tests">
+                        Tests: ${order.tests.join(', ')}
+                    </div>
+                    <div class="order-meta">
+                        <span>Priority: ${order.priority}</span>
+                        <span>Total: $${order.totalCost.toFixed(2)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load completed orders
+        function loadCompletedOrders() {
+            const container = document.getElementById('completedOrdersList');
+            const completedOrders = sampleOrders.filter(order => 
+                ['COMPLETED', 'CANCELLED'].includes(order.status)
+            );
+            
+            if (completedOrders.length === 0) {
+                container.innerHTML = '<div class="loading">No completed orders found</div>';
+                return;
+            }
+            
+            container.innerHTML = completedOrders.map(order => `
+                <div class="order-card" onclick="viewOrderDetails(${order.id})">
+                    <div class="order-card-header">
+                        <div class="order-id">${order.orderId}</div>
+                        <div class="order-status status-${order.status.toLowerCase()}">${order.status}</div>
+                    </div>
+                    <div class="order-patient-info">
+                        Patient: ${order.patientName}<br>
+                        Physician: ${order.orderingPhysician}
+                    </div>
+                    <div class="order-tests">
+                        Tests: ${order.tests.join(', ')}
+                    </div>
+                    <div class="order-meta">
+                        <span>${formatDate(order.orderDate)}</span>
+                        <span>$${order.totalCost.toFixed(2)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load test results
+        function loadTestResults() {
+            const container = document.getElementById('testResultsList');
+            
+            // Sample results data
+            const sampleResults = [
+                {
+                    testName: 'Complete Blood Count', patientName: 'Ahmed Hassan',
+                    resultDate: '2024-12-14 16:30', status: 'FINAL',
+                    results: [
+                        { component: 'WBC', value: '8.5', unit: '10³/µL', range: '4.0-11.0', status: 'normal' },
+                        { component: 'RBC', value: '4.2', unit: '10⁶/µL', range: '4.2-5.8', status: 'normal' },
+                        { component: 'Hemoglobin', value: '12.8', unit: 'g/dL', range: '12.0-16.0', status: 'normal' },
+                        { component: 'Hematocrit', value: '38.5', unit: '%', range: '36.0-48.0', status: 'normal' }
+                    ]
+                },
+                {
+                    testName: 'Basic Metabolic Panel', patientName: 'Fatima Al-Zahra',
+                    resultDate: '2024-12-14 14:15', status: 'FINAL',
+                    results: [
+                        { component: 'Glucose', value: '95', unit: 'mg/dL', range: '70-100', status: 'normal' },
+                        { component: 'Creatinine', value: '1.8', unit: 'mg/dL', range: '0.6-1.2', status: 'abnormal' },
+                        { component: 'BUN', value: '25', unit: 'mg/dL', range: '7-20', status: 'abnormal' },
+                        { component: 'Sodium', value: '142', unit: 'mEq/L', range: '136-145', status: 'normal' }
+                    ]
+                }
+            ];
+            
+            container.innerHTML = sampleResults.map(result => `
+                <div class="test-result">
+                    <div class="result-header">
+                        <div>
+                            <div class="result-test-name">${result.testName}</div>
+                            <div style="font-size: 12px; color: #666;">Patient: ${result.patientName}</div>
+                            <div style="font-size: 11px; color: #666;">${formatDate(result.resultDate)}</div>
+                        </div>
+                        <div class="result-status status-${result.status.toLowerCase()}">${result.status}</div>
+                    </div>
+                    <div style="margin-top: 10px;">
+                        ${result.results.map(r => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid #f0f0f0;">
+                                <div style="font-size: 12px;">
+                                    <strong>${r.component}:</strong> ${r.value} ${r.unit}
+                                </div>
+                                <div style="text-align: right; font-size: 11px;">
+                                    <div class="result-status result-${r.status}">${r.status.toUpperCase()}</div>
+                                    <div style="color: #666;">Range: ${r.range}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Set priority
+        function setPriority(priority, element) {
+            selectedPriority = priority;
+            
+            // Remove active class from all priority buttons
+            document.querySelectorAll('.priority-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to selected button
+            element.classList.add('active');
+        }
+
+        // Add common panels
+        function addCommonPanel(panelType) {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first.');
+                return;
+            }
+            
+            let tests = [];
+            
+            switch(panelType) {
+                case 'cbc':
+                    tests = [1]; // CBC
+                    break;
+                case 'lipid':
+                    tests = [5]; // Lipid Panel
+                    break;
+                case 'liver':
+                    // Simulate liver function tests
+                    showAlert('info', 'Liver Function Tests panel added (simulated).');
+                    return;
+                case 'thyroid':
+                    tests = [3]; // TSH
+                    break;
+                default: // basic metabolic panel
+                    tests = [2]; // BMP
+                    break;
+            }
+            
+            tests.forEach(testId => {
+                if (!currentOrder.find(item => item.testId === testId)) {
+                    selectTest(testId);
+                }
+            });
+        }
+
+        // Submit order
+        function submitOrder() {
+            if (!selectedPatient || currentOrder.length === 0) {
+                showAlert('warning', 'Please select a patient and add tests before submitting.');
+                return;
+            }
+            
+            const clinicalIndication = document.getElementById('clinicalIndication').value;
+            if (!clinicalIndication.trim()) {
+                showAlert('warning', 'Please provide clinical indication for this order.');
+                document.getElementById('clinicalIndication').focus();
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitOrderBtn');
+            submitBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px; margin-right: 8px;"></div>Submitting...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // Simulate order submission
+                const orderId = 'ORD-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + 
+                               String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+                
+                // Add to pending orders
+                const newOrder = {
+                    id: Date.now(),
+                    orderId: orderId,
+                    patientId: selectedPatient.id,
+                    patientName: `${selectedPatient.firstName} ${selectedPatient.lastName}`,
+                    orderDate: new Date().toISOString(),
+                    status: 'ORDERED',
+                    priority: selectedPriority,
+                    tests: currentOrder.map(test => test.testName),
+                    orderingPhysician: 'Dr. Johnson',
+                    totalCost: currentOrder.reduce((sum, item) => sum + item.cost, 0)
+                };
+                
+                sampleOrders.unshift(newOrder);
+                
+                // Clear current order
+                currentOrder = [];
+                updateOrderSummary();
+                
+                // Clear form fields
+                document.getElementById('clinicalIndication').value = '';
+                document.getElementById('specialInstructions').value = '';
+                
+                submitBtn.innerHTML = 'Submit Order';
+                submitBtn.disabled = false;
+                
+                showAlert('success', `Order ${orderId} submitted successfully!`);
+                
+                // Switch to pending orders tab
+                switchOrderTab('pending', document.querySelector('.order-tab:nth-child(2)'));
+            }, 2000);
+        }
+
+        // Save order draft
+        function saveOrderDraft() {
+            if (currentOrder.length === 0) {
+                showAlert('warning', 'No tests in current order to save as draft.');
+                return;
+            }
+            
+            showAlert('success', 'Order saved as draft successfully.');
+        }
+
+        // Update recent results widget
+        function updateRecentResults() {
+            const widget = document.getElementById('recentResultsWidget');
+            
+            if (!selectedPatient) {
+                widget.innerHTML = '<div style="font-size: 11px; color: #666; text-align: center; padding: 10px;">Select a patient to view recent results</div>';
+                return;
+            }
+            
+            // Simulate recent results
+            widget.innerHTML = `
+                <div style="font-size: 11px; margin-bottom: 8px;">
+                    <strong>CBC (Dec 14)</strong><br>
+                    <span style="color: #28a745;">WBC: 8.5 ✓</span> | <span style="color: #28a745;">Hgb: 12.8 ✓</span>
+                </div>
+                <div style="font-size: 11px; margin-bottom: 8px;">
+                    <strong>BMP (Dec 12)</strong><br>
+                    <span style="color: #dc3545;">Creatinine: 1.8 ⚠</span> | <span style="color: #28a745;">Glucose: 95 ✓</span>
+                </div>
+                <div style="font-size: 11px;">
+                    <strong>HbA1c (Dec 10)</strong><br>
+                    <span style="color: #28a745;">6.2% ✓</span>
+                </div>
+            `;
+        }
+
+        // Update alerts widget
+        function updateAlertsWidget() {
+            const widget = document.getElementById('alertsWidget');
+            
+            if (!selectedPatient) {
+                widget.innerHTML = '<div style="font-size: 11px; color: #666; text-align: center; padding: 10px;">No active alerts</div>';
+                return;
+            }
+            
+            // Simulate alerts based on patient
+            if (selectedPatient.id === 3) { // Omar Khaled
+                widget.innerHTML = `
+                    <div style="font-size: 11px; margin-bottom: 6px; padding: 4px; background: #fff3cd; border-radius: 2px;">
+                        ⚠️ Elevated creatinine levels
+                    </div>
+                    <div style="font-size: 11px; padding: 4px; background: #f8d7da; border-radius: 2px;">
+                        🔴 Critical: Kidney function monitoring required
+                    </div>
+                `;
+            } else {
+                widget.innerHTML = '<div style="font-size: 11px; color: #666; text-align: center; padding: 10px;">No active alerts</div>';
+            }
+        }
+
+        // Modal functions
+        function openOrderModal() {
+            document.getElementById('orderModal').style.display = 'block';
+            
+            // Update modal with current order if any
+            updateModalSelectedTests();
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function updateModalSelectedTests() {
+            const container = document.getElementById('modalSelectedTests');
+            
+            if (currentOrder.length === 0) {
+                container.innerHTML = '<em style="color: #666;">No tests selected</em>';
+                return;
+            }
+            
+            container.innerHTML = currentOrder.map(test => `
+                <div style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #ddd;">
+                    <span>${test.testName}</span>
+                    <span>$${test.cost.toFixed(2)}</span>
+                </div>
+            `).join('') + `
+                <div style="display: flex; justify-content: space-between; padding: 8px 0; font-weight: bold; border-top: 2px solid #ddd; margin-top: 4px;">
+                    <span>Total:</span>
+                    <span>$${currentOrder.reduce((sum, item) => sum + item.cost, 0).toFixed(2)}</span>
+                </div>
+            `;
+        }
+
+        // Utility functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function viewOrderDetails(orderId) {
+            showAlert('info', `Viewing details for order ID: ${orderId}`);
+        }
+
+        function openBulkOrderModal() {
+            showAlert('info', 'Bulk order functionality will be available soon.');
+        }
+
+        function openCustomPanel() {
+            showAlert('info', 'Custom panel builder will be available soon.');
+        }
+
+        function printOrders() {
+            showAlert('info', 'Preparing orders for printing...');
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            document.querySelector('.main-container').insertBefore(alertDiv, document.querySelector('.main-container').firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Hide search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.patient-search')) {
+                document.getElementById('patientSearchResults').style.display = 'none';
+            }
+            if (!e.target.closest('.catalog-search')) {
+                document.getElementById('testSearchResults').style.display = 'none';
+            }
+        });
+
+        console.log('Laboratory Test Orders System Initialized');
+    </script>
+</body>
+</html>

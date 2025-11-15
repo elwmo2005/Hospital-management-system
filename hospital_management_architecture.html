@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System - Detailed Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c5282 0%, #3182ce 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .architecture-diagram {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin: 40px 0;
+            border: 3px solid #e2e8f0;
+            position: relative;
+            min-height: 800px;
+        }
+        
+        .layer {
+            position: relative;
+            margin: 30px 0;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .presentation-layer {
+            background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+            color: white;
+        }
+        
+        .business-layer {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+        }
+        
+        .data-layer {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            color: white;
+        }
+        
+        .integration-layer {
+            background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%);
+            color: white;
+        }
+        
+        .security-layer {
+            background: linear-gradient(135deg, #d69e2e 0%, #b7791f 100%);
+            color: white;
+        }
+        
+        .layer-title {
+            font-size: 2.2em;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .components-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .component-box {
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .component-box:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.25);
+        }
+        
+        .component-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .component-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+        
+        .component-details {
+            font-size: 0.95em;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        .component-list {
+            list-style: none;
+            margin: 10px 0;
+        }
+        
+        .component-list li {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .component-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .tech-stack {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .tech-section {
+            margin: 25px 0;
+        }
+        
+        .tech-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #2c5282;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .tech-item {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tech-item:hover {
+            border-color: #3182ce;
+            transform: translateY(-3px);
+        }
+        
+        .integration-diagram {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        
+        .integration-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .integration-box {
+            background: linear-gradient(135deg, #3182ce, #2c5282);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            min-width: 150px;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .flow-connector {
+            font-size: 2em;
+            color: #3182ce;
+            font-weight: bold;
+        }
+        
+        .data-flow-section {
+            background: linear-gradient(135deg, #fff 0%, #f7fafc 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .section-title {
+            font-size: 2.2em;
+            color: #2c5282;
+            margin-bottom: 25px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(135deg, #3182ce, #2c5282);
+            border-radius: 2px;
+        }
+        
+        .metrics-display {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .metric-item {
+            display: inline-block;
+            margin: 10px 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        
+        .security-features {
+            background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%);
+            border: 3px solid #d69e2e;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        
+        .security-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .security-item {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 5px solid #d69e2e;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .security-item-title {
+            font-weight: bold;
+            color: #b7791f;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        @media (max-width: 768px) {
+            .components-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .integration-flow {
+                flex-direction: column;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Hospital Management System Architecture</h1>
+            <p>Comprehensive Technical Architecture & Component Details</p>
+        </div>
+        
+        <div class="content">
+            <!-- Current Performance Metrics -->
+            <div class="metrics-display">
+                <h3 style="margin-bottom: 15px;">📊 System Capacity & Performance</h3>
+                <div class="metric-item">👥 Patients: 50K+ Active</div>
+                <div class="metric-item">👨‍⚕️ Staff: 2K+ Users</div>
+                <div class="metric-item">🏢 Multi-Hospital: ✓</div>
+                <div class="metric-item">⚡ Real-time: ✓</div>
+                <div class="metric-item">🔒 HIPAA Compliant: ✓</div>
+            </div>
+            
+            <!-- Architecture Diagram -->
+            <div class="architecture-diagram">
+                <h2 class="section-title">🏗️ N-Tier Architecture Overview</h2>
+                
+                <!-- Presentation Layer -->
+                <div class="layer presentation-layer">
+                    <div class="layer-title">🖥️ Presentation Layer</div>
+                    <div class="components-grid">
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">📱</span>
+                                Web Interface
+                            </div>
+                            <div class="component-details">
+                                Responsive healthcare portal with role-based dashboards
+                                <ul class="component-list">
+                                    <li>Patient Registration & Portal</li>
+                                    <li>Doctor Dashboard & EHR</li>
+                                    <li>Nurse Station Interface</li>
+                                    <li>Administrative Console</li>
+                                    <li>Pharmacy Management UI</li>
+                                    <li>Laboratory Results Portal</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">📊</span>
+                                Clinical Dashboards
+                            </div>
+                            <div class="component-details">
+                                Real-time monitoring and analytics interfaces
+                                <ul class="component-list">
+                                    <li>Patient Vital Signs Monitor</li>
+                                    <li>Bed Occupancy Dashboard</li>
+                                    <li>Emergency Department Status</li>
+                                    <li>Surgery Schedule Board</li>
+                                    <li>Inventory Alerts Panel</li>
+                                    <li>Financial Performance KPIs</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">📱</span>
+                                Mobile Applications
+                            </div>
+                            <div class="component-details">
+                                Native mobile apps for healthcare providers
+                                <ul class="component-list">
+                                    <li>Doctor Mobile App</li>
+                                    <li>Nurse Mobile Interface</li>
+                                    <li>Patient Self-Service App</li>
+                                    <li>Emergency Response App</li>
+                                    <li>Medication Management</li>
+                                    <li>Appointment Scheduling</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">🔔</span>
+                                Notification System
+                            </div>
+                            <div class="component-details">
+                                Multi-channel alert and communication system
+                                <ul class="component-list">
+                                    <li>Critical Alert Notifications</li>
+                                    <li>Appointment Reminders</li>
+                                    <li>Lab Result Alerts</li>
+                                    <li>Medication Reminders</li>
+                                    <li>Staff Schedule Updates</li>
+                                    <li>Emergency Broadcasts</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Business Logic Layer -->
+                <div class="layer business-layer">
+                    <div class="layer-title">⚙️ Business Logic Layer</div>
+                    <div class="components-grid">
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">🏥</span>
+                                Patient Management
+                            </div>
+                            <div class="component-details">
+                                Core patient lifecycle management services
+                                <ul class="component-list">
+                                    <li>Patient Registration Service</li>
+                                    <li>Admission/Discharge/Transfer</li>
+                                    <li>Insurance Verification</li>
+                                    <li>Emergency Triage Logic</li>
+                                    <li>Bed Assignment Algorithm</li>
+                                    <li>Patient History Aggregation</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">⚕️</span>
+                                Clinical Services
+                            </div>
+                            <div class="component-details">
+                                Medical workflow and decision support
+                                <ul class="component-list">
+                                    <li>Clinical Decision Support</li>
+                                    <li>Drug Interaction Checking</li>
+                                    <li>Treatment Protocol Engine</li>
+                                    <li>Diagnostic Workflow Manager</li>
+                                    <li>Surgery Scheduling Logic</li>
+                                    <li>Discharge Planning System</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">💊</span>
+                                Pharmacy Services
+                            </div>
+                            <div class="component-details">
+                                Medication management and safety checks
+                                <ul class="component-list">
+                                    <li>Prescription Processing</li>
+                                    <li>Drug Inventory Management</li>
+                                    <li>Allergy Alert System</li>
+                                    <li>Dosage Calculation Engine</li>
+                                    <li>Pharmacy Automation Interface</li>
+                                    <li>Controlled Substance Tracking</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">💰</span>
+                                Financial Services
+                            </div>
+                            <div class="component-details">
+                                Revenue cycle and billing management
+                                <ul class="component-list">
+                                    <li>Insurance Claims Processing</li>
+                                    <li>Automated Billing Engine</li>
+                                    <li>Payment Processing</li>
+                                    <li>Revenue Cycle Analytics</li>
+                                    <li>Cost Center Allocation</li>
+                                    <li>Financial Compliance Checks</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Data Layer -->
+                <div class="layer data-layer">
+                    <div class="layer-title">🗄️ Data Access Layer</div>
+                    <div class="components-grid">
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">👤</span>
+                                Patient Data Tables
+                            </div>
+                            <div class="component-details">
+                                Core patient information repository
+                                <ul class="component-list">
+                                    <li>PATIENTS - Master Demographics</li>
+                                    <li>PATIENT_ADMISSIONS - Stay Records</li>
+                                    <li>MEDICAL_RECORDS - Clinical History</li>
+                                    <li>PATIENT_ALLERGIES - Safety Data</li>
+                                    <li>EMERGENCY_CONTACTS - Family Info</li>
+                                    <li>INSURANCE_COVERAGE - Policy Data</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">🏥</span>
+                                Clinical Data Tables
+                            </div>
+                            <div class="component-details">
+                                Medical procedures and treatment data
+                                <ul class="component-list">
+                                    <li>PROCEDURES - Medical Procedures</li>
+                                    <li>DIAGNOSES - ICD-10 Codes</li>
+                                    <li>PRESCRIPTIONS - Medication Orders</li>
+                                    <li>LAB_RESULTS - Diagnostic Tests</li>
+                                    <li>VITAL_SIGNS - Patient Monitoring</li>
+                                    <li>SURGERY_SCHEDULES - OR Management</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">👨‍⚕️</span>
+                                Staff & Resource Tables
+                            </div>
+                            <div class="component-details">
+                                Human resources and facility management
+                                <ul class="component-list">
+                                    <li>STAFF_MEMBERS - Employee Master</li>
+                                    <li>DEPARTMENTS - Hospital Units</li>
+                                    <li>SCHEDULES - Duty Rosters</li>
+                                    <li>BEDS - Room & Bed Inventory</li>
+                                    <li>EQUIPMENT - Medical Devices</li>
+                                    <li>MEDICATIONS - Drug Inventory</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">📊</span>
+                                Analytics & Views
+                            </div>
+                            <div class="component-details">
+                                Performance monitoring and reporting
+                                <ul class="component-list">
+                                    <li>V_PATIENT_CENSUS - Occupancy</li>
+                                    <li>MV_FINANCIAL_SUMMARY - Revenue</li>
+                                    <li>V_CLINICAL_INDICATORS - Quality</li>
+                                    <li>V_STAFF_UTILIZATION - Workforce</li>
+                                    <li>V_INVENTORY_STATUS - Supplies</li>
+                                    <li>V_COMPLIANCE_REPORTS - Audit</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Integration Layer -->
+                <div class="layer integration-layer">
+                    <div class="layer-title">🔌 Integration Layer</div>
+                    <div class="components-grid">
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">🔬</span>
+                                Laboratory Integration
+                            </div>
+                            <div class="component-details">
+                                Diagnostic equipment and lab systems
+                                <ul class="component-list">
+                                    <li>LIS (Laboratory Information System)</li>
+                                    <li>Pathology Workflow Integration</li>
+                                    <li>Blood Bank Management</li>
+                                    <li>Microbiology Results</li>
+                                    <li>Chemistry Analyzer Interface</li>
+                                    <li>Point-of-Care Testing</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">📷</span>
+                                Imaging Integration
+                            </div>
+                            <div class="component-details">
+                                Medical imaging and PACS integration
+                                <ul class="component-list">
+                                    <li>DICOM Image Storage</li>
+                                    <li>RIS (Radiology Information System)</li>
+                                    <li>CT/MRI/X-Ray Integration</li>
+                                    <li>Image Viewing Workstations</li>
+                                    <li>Teleradiology Services</li>
+                                    <li>AI-Assisted Diagnostics</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">💊</span>
+                                Pharmacy Systems
+                            </div>
+                            <div class="component-details">
+                                Medication management and dispensing
+                                <ul class="component-list">
+                                    <li>Automated Dispensing Cabinets</li>
+                                    <li>Robot Pharmacy Integration</li>
+                                    <li>IV Compounding Systems</li>
+                                    <li>Barcode Medication Administration</li>
+                                    <li>Drug Database Services</li>
+                                    <li>Poison Control Integration</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">🌐</span>
+                                External APIs
+                            </div>
+                            <div class="component-details">
+                                Third-party system integrations
+                                <ul class="component-list">
+                                    <li>Insurance Eligibility Verification</li>
+                                    <li>Government Health Registries</li>
+                                    <li>Telemedicine Platforms</li>
+                                    <li>Medical Device APIs</li>
+                                    <li>Public Health Reporting</li>
+                                    <li>Emergency Services Integration</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Security Layer -->
+                <div class="layer security-layer">
+                    <div class="layer-title">🔒 Security & Compliance Layer</div>
+                    <div class="components-grid">
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">🏥</span>
+                                Multi-Hospital Security
+                            </div>
+                            <div class="component-details">
+                                Complete healthcare data isolation
+                                <ul class="component-list">
+                                    <li>HOSPITAL_ID in All Tables</li>
+                                    <li>Patient Data Segregation</li>
+                                    <li>Cross-Hospital Access Control</li>
+                                    <li>Inter-Hospital Referrals</li>
+                                    <li>Shared Resource Management</li>
+                                    <li>Data Privacy Compliance</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">👤</span>
+                                Identity Management
+                            </div>
+                            <div class="component-details">
+                                Healthcare provider authentication
+                                <ul class="component-list">
+                                    <li>Single Sign-On (SSO)</li>
+                                    <li>Role-Based Access Control</li>
+                                    <li>Multi-Factor Authentication</li>
+                                    <li>Privileged Access Management</li>
+                                    <li>Session Timeout Controls</li>
+                                    <li>Emergency Access Procedures</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">📋</span>
+                                HIPAA Compliance
+                            </div>
+                            <div class="component-details">
+                                Healthcare privacy and security standards
+                                <ul class="component-list">
+                                    <li>PHI Data Encryption</li>
+                                    <li>Access Logging & Monitoring</li>
+                                    <li>Breach Detection System</li>
+                                    <li>Data Loss Prevention</li>
+                                    <li>Patient Consent Management</li>
+                                    <li>Audit Trail Requirements</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="component-box">
+                            <div class="component-title">
+                                <span class="component-icon">🛡️</span>
+                                Data Protection
+                            </div>
+                            <div class="component-details">
+                                Comprehensive healthcare data security
+                                <ul class="component-list">
+                                    <li>End-to-End Encryption</li>
+                                    <li>Database Encryption at Rest</li>
+                                    <li>Secure Backup & Recovery</li>
+                                    <li>Network Security Monitoring</li>
+                                    <li>Vulnerability Management</li>
+                                    <li>Incident Response Planning</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+           
+            <!-- AI-Powered Data Flows -->
+            <div class="data-flow-section">
+                <h2 class="section-title">🤖 AI Classification & Prediction Workflows</h2>
+                
+                <div class="integration-diagram">
+                    <h3 style="color: #2c5282; margin-bottom: 20px;">Medical Classification AI Pipeline</h3>
+                    <div class="integration-flow">
+                        <div class="integration-box">Clinical Data</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">NLP Processing</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">AI Classification</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">ICD-10 Coding</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">EHR Integration</div>
+                    </div>
+                </div>
+                
+                <div class="integration-diagram">
+                    <h3 style="color: #2c5282; margin-bottom: 20px;">Predictive Analytics Pipeline</h3>
+                    <div class="integration-flow">
+                        <div class="integration-box">Patient Data</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">Feature Engineering</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">ML Models</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">Risk Prediction</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">Clinical Alerts</div>
+                    </div>
+                </div>
+                
+                <div class="components-grid" style="margin-top: 30px;">
+                    <div class="component-box" style="background: white; color: #2c5282; border: 2px solid #667eea;">
+                        <div class="component-title">
+                            <span class="component-icon">🏷️</span>
+                            AI Classification Models
+                        </div>
+                        <div class="component-details">
+                            <strong>Medical Image Classification:</strong> 95% accuracy on X-rays<br>
+                            <strong>Diagnosis Coding:</strong> Auto-ICD-10 from clinical notes<br>
+                            <strong>Drug Classification:</strong> Therapeutic category assignment<br>
+                            <strong>Risk Categorization:</strong> High/Medium/Low patient risk
+                        </div>
+                    </div>
+                    
+                    <div class="component-box" style="background: white; color: #2c5282; border: 2px solid #764ba2;">
+                        <div class="component-title">
+                            <span class="component-icon">🔮</span>
+                            Prediction Algorithms
+                        </div>
+                        <div class="component-details">
+                            <strong>Readmission Risk:</strong> 30-day prediction accuracy 87%<br>
+                            <strong>Length of Stay:</strong> ±1 day accuracy 82%<br>
+                            <strong>Treatment Outcome:</strong> Success probability 89%<br>
+                            <strong>Bed Demand:</strong> 24-hour forecast accuracy 94%
+                        </div>
+                    </div>
+                    
+                    <div class="component-box" style="background: white; color: #2c5282; border: 2px solid #38a169;">
+                        <div class="component-title">
+                            <span class="component-icon">⚡</span>
+                            Real-time AI Processing
+                        </div>
+                        <div class="component-details">
+                            <strong>Stream Processing:</strong> Oracle ML + Kafka integration<br>
+                            <strong>Response Time:</strong> Classification < 2 seconds<br>
+                            <strong>Batch Processing:</strong> Nightly model retraining<br>
+                            <strong>Model Updates:</strong> Continuous learning pipeline
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Flow Architecture -->
+            <div class="data-flow-section">
+                <h2 class="section-title">🔄 Patient Care Data Flow</h2>
+                
+                <div class="integration-diagram">
+                    <h3 style="color: #2c5282; margin-bottom: 20px;">Patient Journey Data Flow</h3>
+                    <div class="integration-flow">
+                        <div class="integration-box">Registration</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">Triage/Assessment</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">Treatment/Care</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">Billing/Discharge</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">Follow-up</div>
+                    </div>
+                </div>
+                
+                <div class="components-grid" style="margin-top: 30px;">
+                    <div class="component-box" style="background: white; color: #2c5282; border: 2px solid #3182ce;">
+                        <div class="component-title">
+                            <span class="component-icon">⚕️</span>
+                            Clinical Workflow
+                        </div>
+                        <div class="component-details">
+                            <strong>Admission:</strong> Patient registration → Insurance verification<br>
+                            <strong>Assessment:</strong> Triage → Initial diagnosis → Care plan<br>
+                            <strong>Treatment:</strong> Orders → Procedures → Monitoring<br>
+                            <strong>Documentation:</strong> Real-time EHR updates
+                        </div>
+                    </div>
+                    
+                    <div class="component-box" style="background: white; color: #2c5282; border: 2px solid #e53e3e;">
+                        <div class="component-title">
+                            <span class="component-icon">💊</span>
+                            Medication Flow
+                        </div>
+                        <div class="component-details">
+                            <strong>Prescription:</strong> Doctor orders → Pharmacy verification<br>
+                            <strong>Dispensing:</strong> Automated systems → Safety checks<br>
+                            <strong>Administration:</strong> Barcode scanning → Patient verification<br>
+                            <strong>Monitoring:</strong> Adverse reactions → Effectiveness tracking
+                        </div>
+                    </div>
+                    
+                    <div class="component-box" style="background: white; color: #2c5282; border: 2px solid #38a169;">
+                        <div class="component-title">
+                            <span class="component-icon">📊</span>
+                            Data Integration
+                        </div>
+                        <div class="component-details">
+                            <strong>Real-time Updates:</strong> All systems synchronized<br>
+                            <strong>Lab Results:</strong> Auto-populate EHR records<br>
+                            <strong>Imaging:</strong> DICOM integration with PACS<br>
+                            <strong>Analytics:</strong> Real-time dashboard updates
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="integration-diagram">
+                    <h3 style="color: #2c5282; margin-bottom: 20px;">Emergency Department Workflow</h3>
+                    <div class="integration-flow">
+                        <div class="integration-box">Arrival</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">Triage</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">Fast Track/Trauma</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">Treatment</div>
+                        <div class="flow-connector">→</div>
+                        <div class="integration-box">Disposition</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security Features -->
+            <div class="security-features">
+                <h2 class="section-title">🔒 Healthcare Security Architecture</h2>
+                
+                <div class="security-grid">
+                    <div class="security-item">
+                        <div class="security-item-title">HIPAA Compliance Framework</div>
+                        <div>Complete implementation of HIPAA requirements including administrative, physical, and technical safeguards. All patient health information (PHI) is protected with industry-leading encryption and access controls.</div>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-item-title">Multi-Hospital Data Isolation</div>
+                        <div>Each hospital's data is completely segregated using HOSPITAL_ID partitioning and virtual private database policies. Cross-hospital access requires explicit authorization and audit logging.</div>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-item-title">Role-Based Access Control (RBAC)</div>
+                        <div>Granular permissions based on healthcare roles: doctors, nurses, administrators, technicians. Access is limited to minimum necessary for job function with automatic session timeout.</div>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-item-title">Audit Trail & Compliance</div>
+                        <div>Comprehensive logging of all patient data access, modifications, and system interactions. Supports regulatory compliance audits and breach investigation requirements.</div>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-item-title">Data Encryption</div>
+                        <div>End-to-end encryption for all patient data at rest and in transit. Uses AES-256 encryption with secure key management and regular key rotation policies.</div>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-item-title">Emergency Access Procedures</div>
+                        <div>Break-glass access for emergency situations with full audit logging. Ensures patient care continuity while maintaining security oversight and compliance.</div>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-item-title">Network Security</div>
+                        <div>Segmented network architecture with firewall protection, intrusion detection, and VPN access for remote users. Medical devices are isolated in secure VLANs.</div>
+                    </div>
+                    
+                    <div class="security-item">
+                        <div class="security-item-title">Backup & Disaster Recovery</div>
+                        <div>Encrypted backups with geographic replication and tested disaster recovery procedures. RTO < 4 hours and RPO < 15 minutes for critical patient data.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Performance Metrics -->
+            <div class="metrics-display">
+                <h3 style="margin-bottom: 15px;">📈 Oracle OCI System Performance</h3>
+                <div class="metric-item">⚡ APEX Response: < 1.5 seconds</div>
+                <div class="metric-item">🔄 Oracle 19c Uptime: 99.95% SLA</div>
+                <div class="metric-item">👥 Concurrent APEX Users: 10,000+</div>
+                <div class="metric-item">📊 Daily DB Transactions: 500K+</div>
+                <div class="metric-item">🔒 OCI Security: Zero breaches</div>
+                <div class="metric-item">🤖 AI Model Accuracy: 95%+</div>
+            </div>
+            
+            <!-- Implementation Roadmap -->
+            <div class="data-flow-section">
+                <h2 class="section-title">🗓️ Implementation Roadmap</h2>
+                
+                <div class="components-grid">
+                    <div class="component-box" style="background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%); color: white;">
+                        <div class="component-title">
+                            <span class="component-icon">📅</span>
+                            Phase 1 (Months 1-3)
+                        </div>
+                        <div class="component-details">
+                            Foundation & Core Modules
+                            <ul class="component-list">
+                                <li>Infrastructure Setup & Security</li>
+                                <li>Patient Registration System</li>
+                                <li>Basic EHR Functionality</li>
+                                <li>User Management & Authentication</li>
+                                <li>Core Database Design</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="component-box" style="background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%); color: white;">
+                        <div class="component-title">
+                            <span class="component-icon">📅</span>
+                            Phase 2 (Months 4-6)
+                        </div>
+                        <div class="component-details">
+                            Clinical & Operational Systems
+                            <ul class="component-list">
+                                <li>Laboratory Integration</li>
+                                <li>Pharmacy Management</li>
+                                <li>Scheduling & Appointments</li>
+                                <li>Billing & Insurance</li>
+                                <li>Basic Reporting</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="component-box" style="background: linear-gradient(135deg, #38a169 0%, #2f855a 100%); color: white;">
+                        <div class="component-title">
+                            <span class="component-icon">📅</span>
+                            Phase 3 (Months 7-9)
+                        </div>
+                        <div class="component-details">
+                            Advanced Features & Integration
+                            <ul class="component-list">
+                                <li>DICOM/PACS Integration</li>
+                                <li>Mobile Applications</li>
+                                <li>Advanced Analytics</li>
+                                <li>Emergency Department Module</li>
+                                <li>Telemedicine Integration</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="component-box" style="background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%); color: white;">
+                        <div class="component-title">
+                            <span class="component-icon">📅</span>
+                            Phase 4 (Months 10-12)
+                        </div>
+                        <div class="component-details">
+                            Optimization & Go-Live
+                            <ul class="component-list">
+                                <li>Performance Optimization</li>
+                                <li>Staff Training & Documentation</li>
+                                <li>System Testing & Validation</li>
+                                <li>Data Migration</li>
+                                <li>Go-Live Support</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cost-Benefit Analysis -->
+            <div class="tech-stack">
+                <h2 class="section-title">💰 Investment & ROI Analysis</h2>
+                
+                <div class="tech-section">
+                    <div class="tech-title">
+                        <span class="component-icon">💵</span>
+                        Implementation Costs
+                    </div>
+                    <div class="tech-grid">
+                        <div class="tech-item">
+                            <strong>Software Development</strong><br>
+                            $800K - $1.2M
+                        </div>
+                        <div class="tech-item">
+                            <strong>Infrastructure & Cloud</strong><br>
+                            $200K - $300K
+                        </div>
+                        <div class="tech-item">
+                            <strong>Integration & Testing</strong><br>
+                            $150K - $250K
+                        </div>
+                        <div class="tech-item">
+                            <strong>Training & Change Management</strong><br>
+                            $100K - $150K
+                        </div>
+                        <div class="tech-item">
+                            <strong>Data Migration</strong><br>
+                            $80K - $120K
+                        </div>
+                        <div class="tech-item">
+                            <strong>Project Management</strong><br>
+                            $70K - $100K
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tech-section">
+                    <div class="tech-title">
+                        <span class="component-icon">📈</span>
+                        Expected Benefits (Annual)
+                    </div>
+                    <div class="tech-grid">
+                        <div class="tech-item">
+                            <strong>Operational Efficiency</strong><br>
+                            $300K - $500K savings
+                        </div>
+                        <div class="tech-item">
+                            <strong>Billing Accuracy</strong><br>
+                            $200K - $350K increase
+                        </div>
+                        <div class="tech-item">
+                            <strong>Inventory Optimization</strong><br>
+                            $150K - $250K savings
+                        </div>
+                        <div class="tech-item">
+                            <strong>Staff Productivity</strong><br>
+                            $250K - $400K value
+                        </div>
+                        <div class="tech-item">
+                            <strong>Compliance & Risk</strong><br>
+                            $100K - $200K savings
+                        </div>
+                        <div class="tech-item">
+                            <strong>Patient Satisfaction</strong><br>
+                            $50K - $100K value
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+                            

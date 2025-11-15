@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Records - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1600px;
+        }
+
+        /* Three-column layout for employee records */
+        .employee-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 380px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Employee Search & List */
+        .employee-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Center Panel - Employee Details */
+        .employee-content {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .employee-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .employee-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .employee-tab.active {
+            background: white;
+            border-bottom-color: #3d9aef;
+            color: #3d9aef;
+        }
+
+        .employee-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .employee-details {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Right Panel - Actions & Summary */
+        .actions-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Region Header */
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Employee Search */
+        .search-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .search-group {
+            margin-bottom: 10px;
+        }
+
+        .search-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .search-button {
+            width: 100%;
+            padding: 8px 12px;
+            background: #3d9aef;
+            border: 1px solid #3d9aef;
+            border-radius: 3px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        /* Employee List */
+        .employee-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .employee-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .employee-item:hover {
+            background: #f8f9fa;
+        }
+
+        .employee-item.selected {
+            background: #e8f4fd;
+            border-left: 3px solid #3d9aef;
+        }
+
+        .employee-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .employee-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .employee-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .employee-role {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 1px;
+        }
+
+        .employee-id {
+            font-size: 10px;
+            color: #999;
+        }
+
+        .employee-status {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .status-active { background: #d4edda; color: #155724; }
+        .status-inactive { background: #f8d7da; color: #721c24; }
+        .status-leave { background: #fff3cd; color: #856404; }
+
+        /* Form Elements */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .form-input {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .form-select {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .form-textarea {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Employee Details Card */
+        .employee-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .employee-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .employee-basic-info {
+            flex: 1;
+        }
+
+        .employee-full-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .employee-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 3px;
+        }
+
+        .employee-department {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .employee-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .badge-primary { background: #cce5ff; color: #004085; }
+        .badge-success { background: #d4edda; color: #155724; }
+        .badge-warning { background: #fff3cd; color: #856404; }
+
+        /* Detail Sections */
+        .detail-section {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .detail-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 12px 15px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .detail-content {
+            padding: 15px;
+        }
+
+        /* Data Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            padding: 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #495057;
+            font-size: 11px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .data-table td {
+            padding: 8px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: top;
+            font-size: 12px;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Action Buttons */
+        .action-button {
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+
+        .action-button:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        .action-button.primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .action-button.success {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .action-button.warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #333;
+        }
+
+        .action-button.danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .action-icon {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3d9aef;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-info {
+            background: #cce5ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .employee-layout {
+                grid-template-columns: 320px 1fr 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .employee-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">HM</div>
+                <span>(HR Manager)</span>
+            </div>
+            <span style="margin-right: 15px;">Select Language</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Patient Registration</span></div>
+                <div class="nav-item"><span>Patient Search</span></div>
+                <div class="nav-item"><span>Admission/Discharge</span></div>
+                <div class="nav-item"><span>Emergency Triage</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Medical Records</span></div>
+                <div class="nav-item"><span>Vital Signs</span></div>
+                <div class="nav-item"><span>Procedure Scheduling</span></div>
+                <div class="nav-item"><span>Discharge Planning</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Test Orders</span></div>
+                <div class="nav-item"><span>Sample Tracking</span></div>
+                <div class="nav-item"><span>Results Entry</span></div>
+                <div class="nav-item"><span>Lab Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Prescription Management</span></div>
+                <div class="nav-item"><span>Drug Inventory</span></div>
+                <div class="nav-item"><span>Dispensing</span></div>
+                <div class="nav-item"><span>Drug Interactions</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Invoice Generation</span></div>
+                <div class="nav-item"><span>Insurance Claims</span></div>
+                <div class="nav-item"><span>Payment Tracking</span></div>
+                <div class="nav-item"><span>Financial Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item active">
+                    <span>Employee Records</span>
+                </div>
+                <div class="nav-item">
+                    <span>Schedule Management</span>
+                </div>
+                <div class="nav-item">
+                    <span>Department Assignment</span>
+                </div>
+                <div class="nav-item">
+                    <span>Performance Tracking</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Risk Predictions</span></div>
+                <div class="nav-item"><span>Diagnostic Assistance</span></div>
+                <div class="nav-item"><span>Model Performance</span></div>
+                <div class="nav-item"><span>Classification Results</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>System Configuration</span></div>
+                <div class="nav-item"><span>User Management</span></div>
+                <div class="nav-item"><span>Audit Reports</span></div>
+                <div class="nav-item"><span>Security Settings</span></div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Staff Management</a> › Employee Records
+                    </div>
+                    <h1 class="page-title">Employee Records</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="addEmployee()">
+                        👤 Add Employee
+                    </button>
+                    <button class="btn btn-warning" onclick="exportData()">
+                        📊 Export Data
+                    </button>
+                    <button class="btn btn-secondary" onclick="importData()">
+                        📥 Import Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Three-column Employee Layout -->
+                <div class="employee-layout">
+                    <!-- Left Panel - Employee Search & List -->
+                    <div class="employee-panel">
+                        <div class="region-header">
+                            <span class="icon">🔍</span>
+                            Employee Search
+                        </div>
+                        
+                        <div class="search-section">
+                            <div class="search-group">
+                                <label class="search-label">Search Employees</label>
+                                <input type="text" class="search-input" placeholder="Name, ID, or Department..." 
+                                       id="employeeSearchInput" oninput="searchEmployees()">
+                            </div>
+                            
+                            <div class="search-group">
+                                <label class="search-label">Department</label>
+                                <select class="search-input" id="departmentFilter" onchange="filterEmployees()">
+                                    <option value="">All Departments</option>
+                                    <option value="EMERGENCY">Emergency</option>
+                                    <option value="SURGERY">Surgery</option>
+                                    <option value="CARDIOLOGY">Cardiology</option>
+                                    <option value="PEDIATRICS">Pediatrics</option>
+                                    <option value="RADIOLOGY">Radiology</option>
+                                    <option value="LABORATORY">Laboratory</option>
+                                    <option value="PHARMACY">Pharmacy</option>
+                                    <option value="NURSING">Nursing</option>
+                                    <option value="ADMINISTRATION">Administration</option>
+                                </select>
+                            </div>
+                            
+                            <div class="search-group">
+                                <label class="search-label">Status</label>
+                                <select class="search-input" id="statusFilter" onchange="filterEmployees()">
+                                    <option value="">All Statuses</option>
+                                    <option value="ACTIVE">Active</option>
+                                    <option value="INACTIVE">Inactive</option>
+                                    <option value="LEAVE">On Leave</option>
+                                </select>
+                            </div>
+                            
+                            <button class="search-button" onclick="searchEmployees()">
+                                🔍 Search Employees
+                            </button>
+                        </div>
+
+                        <div class="employee-list" id="employeeList">
+                            <div class="employee-item selected" onclick="selectEmployee(this, 'EMP001')">
+                                <div class="employee-avatar">AH</div>
+                                <div class="employee-info">
+                                    <div class="employee-name">Dr. Ahmed Hassan</div>
+                                    <div class="employee-role">Senior Cardiologist</div>
+                                    <div class="employee-id">EMP001 • Cardiology</div>
+                                </div>
+                                <span class="employee-status status-active">Active</span>
+                            </div>
+
+                            <div class="employee-item" onclick="selectEmployee(this, 'EMP002')">
+                                <div class="employee-avatar">SC</div>
+                                <div class="employee-info">
+                                    <div class="employee-name">Dr. Sarah Chen</div>
+                                    <div class="employee-role">Emergency Physician</div>
+                                    <div class="employee-id">EMP002 • Emergency</div>
+                                </div>
+                                <span class="employee-status status-active">Active</span>
+                            </div>
+
+                            <div class="employee-item" onclick="selectEmployee(this, 'EMP003')">
+                                <div class="employee-avatar">MA</div>
+                                <div class="employee-info">
+                                    <div class="employee-name">Dr. Mohamed Ali</div>
+                                    <div class="employee-role">Orthopedic Surgeon</div>
+                                    <div class="employee-id">EMP003 • Surgery</div>
+                                </div>
+                                <span class="employee-status status-active">Active</span>
+                            </div>
+
+                            <div class="employee-item" onclick="selectEmployee(this, 'EMP004')">
+                                <div class="employee-avatar">FZ</div>
+                                <div class="employee-info">
+                                    <div class="employee-name">Dr. Fatima Al-Zahra</div>
+                                    <div class="employee-role">Pediatrician</div>
+                                    <div class="employee-id">EMP004 • Pediatrics</div>
+                                </div>
+                                <span class="employee-status status-active">Active</span>
+                            </div>
+
+                            <div class="employee-item" onclick="selectEmployee(this, 'EMP005')">
+                                <div class="employee-avatar">LJ</div>
+                                <div class="employee-info">
+                                    <div class="employee-name">Lisa Johnson</div>
+                                    <div class="employee-role">Head Nurse</div>
+                                    <div class="employee-id">EMP005 • Nursing</div>
+                                </div>
+                                <span class="employee-status status-active">Active</span>
+                            </div>
+
+                            <div class="employee-item" onclick="selectEmployee(this, 'EMP006')">
+                                <div class="employee-avatar">RK</div>
+                                <div class="employee-info">
+                                    <div class="employee-name">Dr. Ravi Kumar</div>
+                                    <div class="employee-role">Radiologist</div>
+                                    <div class="employee-id">EMP006 • Radiology</div>
+                                </div>
+                                <span class="employee-status status-leave">On Leave</span>
+                            </div>
+
+                            <div class="employee-item" onclick="selectEmployee(this, 'EMP007')">
+                                <div class="employee-avatar">MB</div>
+                                <div class="employee-info">
+                                    <div class="employee-name">Maria Bautista</div>
+                                    <div class="employee-role">Lab Technician</div>
+                                    <div class="employee-id">EMP007 • Laboratory</div>
+                                </div>
+                                <span class="employee-status status-active">Active</span>
+                            </div>
+
+                            <div class="employee-item" onclick="selectEmployee(this, 'EMP008')">
+                                <div class="employee-avatar">JS</div>
+                                <div class="employee-info">
+                                    <div class="employee-name">John Smith</div>
+                                    <div class="employee-role">Pharmacist</div>
+                                    <div class="employee-id">EMP008 • Pharmacy</div>
+                                </div>
+                                <span class="employee-status status-active">Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Center Panel - Employee Details -->
+                    <div class="employee-content">
+                        <div class="employee-tabs">
+                            <div class="employee-tab active" onclick="switchEmployeeTab('profile', this)">Profile</div>
+                            <div class="employee-tab" onclick="switchEmployeeTab('employment', this)">Employment</div>
+                            <div class="employee-tab" onclick="switchEmployeeTab('schedule', this)">Schedule</div>
+                            <div class="employee-tab" onclick="switchEmployeeTab('benefits', this)">Benefits</div>
+                            <div class="employee-tab" onclick="switchEmployeeTab('documents', this)">Documents</div>
+                        </div>
+
+                        <div class="employee-details" id="employeeDetails">
+                            <div id="profileContent">
+                                <div class="employee-card">
+                                    <div class="employee-photo">AH</div>
+                                    <div class="employee-basic-info">
+                                        <div class="employee-full-name">Dr. Ahmed Hassan</div>
+                                        <div class="employee-title">Senior Cardiologist</div>
+                                        <div class="employee-department">Cardiology Department</div>
+                                        <div class="employee-badges">
+                                            <span class="badge badge-primary">Board Certified</span>
+                                            <span class="badge badge-success">Full Time</span>
+                                            <span class="badge badge-warning">On Call</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-section">
+                                    <div class="detail-header">
+                                        Personal Information
+                                        <button class="btn btn-primary" onclick="editProfile()">✏️ Edit</button>
+                                    </div>
+                                    <div class="detail-content">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label class="form-label">Employee ID</label>
+                                                <input type="text" class="form-input" value="EMP001" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Social Security Number</label>
+                                                <input type="text" class="form-input" value="***-**-1234" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Date of Birth</label>
+                                                <input type="date" class="form-input" value="1975-03-15" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Gender</label>
+                                                <select class="form-select" disabled>
+                                                    <option selected>Male</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label class="form-label">Email Address</label>
+                                                <input type="email" class="form-input" value="ahmed.hassan@hospital.com" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Phone Number</label>
+                                                <input type="tel" class="form-input" value="+20-12-345-6789" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Emergency Contact</label>
+                                                <input type="tel" class="form-input" value="+20-12-987-6543" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Marital Status</label>
+                                                <select class="form-select" disabled>
+                                                    <option selected>Married</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">Home Address</label>
+                                            <textarea class="form-textarea" readonly>123 Medical District Avenue
+Cairo, Egypt 11511</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-section">
+                                    <div class="detail-header">
+                                        Medical Qualifications
+                                    </div>
+                                    <div class="detail-content">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Degree/Certification</th>
+                                                    <th>Institution</th>
+                                                    <th>Year</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>MD - Doctor of Medicine</td>
+                                                    <td>Cairo University Faculty of Medicine</td>
+                                                    <td>1998</td>
+                                                    <td><span class="badge badge-success">Verified</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Cardiology Residency</td>
+                                                    <td>Cairo University Hospitals</td>
+                                                    <td>2002</td>
+                                                    <td><span class="badge badge-success">Verified</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Board Certification - Cardiology</td>
+                                                    <td>Egyptian Medical Syndicate</td>
+                                                    <td>2004</td>
+                                                    <td><span class="badge badge-success">Active</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Fellowship - Interventional Cardiology</td>
+                                                    <td>American College of Cardiology</td>
+                                                    <td>2006</td>
+                                                    <td><span class="badge badge-success">Active</span></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="employmentContent" style="display: none;">
+                                <div class="detail-section">
+                                    <div class="detail-header">
+                                        Employment Details
+                                        <button class="btn btn-primary" onclick="editEmployment()">✏️ Edit</button>
+                                    </div>
+                                    <div class="detail-content">
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label class="form-label">Job Title</label>
+                                                <input type="text" class="form-input" value="Senior Cardiologist" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Department</label>
+                                                <select class="form-select" disabled>
+                                                    <option selected>Cardiology</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Employment Type</label>
+                                                <select class="form-select" disabled>
+                                                    <option selected>Full Time</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Employee Status</label>
+                                                <select class="form-select" disabled>
+                                                    <option selected>Active</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label class="form-label">Hire Date</label>
+                                                <input type="date" class="form-input" value="2008-07-15" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Years of Service</label>
+                                                <input type="text" class="form-input" value="17.2 years" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Supervisor</label>
+                                                <input type="text" class="form-input" value="Dr. Sarah Mitchell - Chief of Cardiology" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Location</label>
+                                                <input type="text" class="form-input" value="Main Hospital - 3rd Floor" readonly>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label class="form-label">Base Salary (Annual)</label>
+                                                <input type="text" class="form-input" value="$125,000" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Pay Grade</label>
+                                                <input type="text" class="form-input" value="Level 8 - Senior Physician" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Next Review Date</label>
+                                                <input type="date" class="form-input" value="2026-01-15" readonly>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Performance Rating</label>
+                                                <input type="text" class="form-input" value="Exceeds Expectations" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-section">
+                                    <div class="detail-header">
+                                        Employment History
+                                    </div>
+                                    <div class="detail-content">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Position</th>
+                                                    <th>Department</th>
+                                                    <th>Start Date</th>
+                                                    <th>End Date</th>
+                                                    <th>Reason</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Senior Cardiologist</td>
+                                                    <td>Cardiology</td>
+                                                    <td>2015-01-01</td>
+                                                    <td>Current</td>
+                                                    <td>Promotion</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Staff Cardiologist</td>
+                                                    <td>Cardiology</td>
+                                                    <td>2008-07-15</td>
+                                                    <td>2014-12-31</td>
+                                                    <td>Promotion</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="scheduleContent" style="display: none;">
+                                <div class="detail-section">
+                                    <div class="detail-header">
+                                        Current Schedule
+                                        <button class="btn btn-primary" onclick="editSchedule()">📅 Edit Schedule</button>
+                                    </div>
+                                    <div class="detail-content">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Day</th>
+                                                    <th>Shift</th>
+                                                    <th>Start Time</th>
+                                                    <th>End Time</th>
+                                                    <th>Location</th>
+                                                    <th>On-Call</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Monday</td>
+                                                    <td>Regular</td>
+                                                    <td>8:00 AM</td>
+                                                    <td>5:00 PM</td>
+                                                    <td>Cardiology Wing</td>
+                                                    <td>No</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Tuesday</td>
+                                                    <td>Regular</td>
+                                                    <td>8:00 AM</td>
+                                                    <td>5:00 PM</td>
+                                                    <td>Cardiology Wing</td>
+                                                    <td>Yes</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Wednesday</td>
+                                                    <td>Regular</td>
+                                                    <td>8:00 AM</td>
+                                                    <td>5:00 PM</td>
+                                                    <td>Cardiology Wing</td>
+                                                    <td>No</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Thursday</td>
+                                                    <td>Surgery</td>
+                                                    <td>7:00 AM</td>
+                                                    <td>3:00 PM</td>
+                                                    <td>OR Suite 3</td>
+                                                    <td>No</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Friday</td>
+                                                    <td>Regular</td>
+                                                    <td>8:00 AM</td>
+                                                    <td>5:00 PM</td>
+                                                    <td>Cardiology Wing</td>
+                                                    <td>No</td>
+                                                </tr>
+                                                <tr style="background: #f8f9fa;">
+                                                    <td>Saturday</td>
+                                                    <td colspan="5" style="text-align: center; color: #666; font-style: italic;">Day Off</td>
+                                                </tr>
+                                                <tr style="background: #f8f9fa;">
+                                                    <td>Sunday</td>
+                                                    <td colspan="5" style="text-align: center; color: #666; font-style: italic;">Day Off</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <div style="font-size: 16px;">ℹ️</div>
+                                    <div>
+                                        <strong>Schedule Notes:</strong><br>
+                                        • On-call rotation every 2nd Tuesday<br>
+                                        • Available for emergency cardiac procedures<br>
+                                        • Participates in weekend coverage rotation
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="benefitsContent" style="display: none;">
+                                <div class="detail-section">
+                                    <div class="detail-header">
+                                        Benefits & Compensation
+                                    </div>
+                                    <div class="detail-content">
+                                        <div class="stats-grid">
+                                            <div class="stat-card">
+                                                <span class="stat-value">25</span>
+                                                <span class="stat-label">Vacation Days</span>
+                                            </div>
+                                            <div class="stat-card">
+                                                <span class="stat-value">12</span>
+                                                <span class="stat-label">Sick Days</span>
+                                            </div>
+                                            <div class="stat-card">
+                                                <span class="stat-value">5</span>
+                                                <span class="stat-label">Personal Days</span>
+                                            </div>
+                                            <div class="stat-card">
+                                                <span class="stat-value">$125K</span>
+                                                <span class="stat-label">Annual Salary</span>
+                                            </div>
+                                        </div>
+
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Benefit Type</th>
+                                                    <th>Plan</th>
+                                                    <th>Coverage</th>
+                                                    <th>Employee Cost</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Health Insurance</td>
+                                                    <td>Premium PPO</td>
+                                                    <td>Family</td>
+                                                    <td>$185/month</td>
+                                                    <td><span class="badge badge-success">Active</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Dental Insurance</td>
+                                                    <td>Standard Plan</td>
+                                                    <td>Family</td>
+                                                    <td>$45/month</td>
+                                                    <td><span class="badge badge-success">Active</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Vision Insurance</td>
+                                                    <td>Basic Plan</td>
+                                                    <td>Individual</td>
+                                                    <td>$12/month</td>
+                                                    <td><span class="badge badge-success">Active</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Life Insurance</td>
+                                                    <td>2x Annual Salary</td>
+                                                    <td>$250,000</td>
+                                                    <td>Employer Paid</td>
+                                                    <td><span class="badge badge-success">Active</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>401(k) Retirement</td>
+                                                    <td>6% Match</td>
+                                                    <td>8% Contribution</td>
+                                                    <td>$10,000/year</td>
+                                                    <td><span class="badge badge-success">Active</span></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="documentsContent" style="display: none;">
+                                <div class="detail-section">
+                                    <div class="detail-header">
+                                        Employee Documents
+                                        <button class="btn btn-success" onclick="uploadDocument()">📎 Upload Document</button>
+                                    </div>
+                                    <div class="detail-content">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Document Type</th>
+                                                    <th>File Name</th>
+                                                    <th>Upload Date</th>
+                                                    <th>Size</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Medical License</td>
+                                                    <td>Ahmed_Hassan_Medical_License.pdf</td>
+                                                    <td>2024-01-15</td>
+                                                    <td>2.3 MB</td>
+                                                    <td>
+                                                        <button class="btn btn-primary" onclick="viewDocument()">👁️ View</button>
+                                                        <button class="btn btn-secondary" onclick="downloadDocument()">⬇️ Download</button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Resume/CV</td>
+                                                    <td>Ahmed_Hassan_CV_2024.pdf</td>
+                                                    <td>2024-01-10</td>
+                                                    <td>1.8 MB</td>
+                                                    <td>
+                                                        <button class="btn btn-primary" onclick="viewDocument()">👁️ View</button>
+                                                        <button class="btn btn-secondary" onclick="downloadDocument()">⬇️ Download</button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Background Check</td>
+                                                    <td>Background_Verification_2008.pdf</td>
+                                                    <td>2008-07-01</td>
+                                                    <td>0.9 MB</td>
+                                                    <td>
+                                                        <button class="btn btn-primary" onclick="viewDocument()">👁️ View</button>
+                                                        <button class="btn btn-secondary" onclick="downloadDocument()">⬇️ Download</button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Performance Review</td>
+                                                    <td>Performance_Review_2024.pdf</td>
+                                                    <td>2024-08-15</td>
+                                                    <td>1.2 MB</td>
+                                                    <td>
+                                                        <button class="btn btn-primary" onclick="viewDocument()">👁️ View</button>
+                                                        <button class="btn btn-secondary" onclick="downloadDocument()">⬇️ Download</button>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Training Certificates</td>
+                                                    <td>CPR_BLS_Certification_2024.pdf</td>
+                                                    <td>2024-06-20</td>
+                                                    <td>0.7 MB</td>
+                                                    <td>
+                                                        <button class="btn btn-primary" onclick="viewDocument()">👁️ View</button>
+                                                        <button class="btn btn-secondary" onclick="downloadDocument()">⬇️ Download</button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-warning">
+                                    <div style="font-size: 16px;">⚠️</div>
+                                    <div>
+                                        <strong>Document Expiration Alert:</strong><br>
+                                        Medical license expires in 90 days. Please ensure renewal documentation is submitted before expiration.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Actions & Summary -->
+                    <div class="actions-panel">
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">⚡</span>
+                                Quick Actions
+                            </h4>
+                            <button class="action-button primary" onclick="editEmployee()">
+                                <span class="action-icon">✏️</span>
+                                Edit Employee
+                            </button>
+                            <button class="action-button success" onclick="activateEmployee()">
+                                <span class="action-icon">✅</span>
+                                Activate Employee
+                            </button>
+                            <button class="action-button warning" onclick="leaveManagement()">
+                                <span class="action-icon">🏖️</span>
+                                Leave Management
+                            </button>
+                            <button class="action-button" onclick="scheduleShift()">
+                                <span class="action-icon">📅</span>
+                                Schedule Shift
+                            </button>
+                            <button class="action-button" onclick="performanceReview()">
+                                <span class="action-icon">📊</span>
+                                Performance Review
+                            </button>
+                            <button class="action-button danger" onclick="terminateEmployee()">
+                                <span class="action-icon">❌</span>
+                                Terminate Employee
+                            </button>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📊</span>
+                                Employee Summary
+                            </h4>
+                            <div style="font-size: 11px; line-height: 1.8;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>Employee ID:</span>
+                                    <span style="font-weight: 600;">EMP001</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>Years of Service:</span>
+                                    <span style="font-weight: 600;">17.2 years</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span>Current Status:</span>
+                                    <span style="font-weight: 600; color: #28a745;">Active</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span>Next Review:</span>
+                                    <span style="font-weight: 600;">Jan 15, 2026</span>
+                                </div>
+                                <hr style="margin: 8px 0; border: none; border-top: 1px solid #dee2e6;">
+                                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 13px;">
+                                    <span>Performance:</span>
+                                    <span style="color: #28a745;">Exceeds Expectations</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">🏥</span>
+                                Department Stats
+                            </h4>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <span class="stat-value">45</span>
+                                    <span class="stat-label">Total Staff</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">42</span>
+                                    <span class="stat-label">Active</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">2</span>
+                                    <span class="stat-label">On Leave</span>
+                                </div>
+                                <div class="stat-card">
+                                    <span class="stat-value">1</span>
+                                    <span class="stat-label">Inactive</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">🔔</span>
+                                Recent Activity
+                            </h4>
+                            <div style="font-size: 11px;">
+                                <div style="margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
+                                    <div style="color: #666; margin-bottom: 2px;">2 hours ago</div>
+                                    <div>Schedule updated for next week</div>
+                                </div>
+                                <div style="margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
+                                    <div style="color: #666; margin-bottom: 2px;">1 day ago</div>
+                                    <div>Training certificate uploaded</div>
+                                </div>
+                                <div style="margin-bottom: 8px; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">
+                                    <div style="color: #666; margin-bottom: 2px;">3 days ago</div>
+                                    <div>Performance review completed</div>
+                                </div>
+                                <div style="margin-bottom: 8px;">
+                                    <div style="color: #666; margin-bottom: 2px;">1 week ago</div>
+                                    <div>Emergency contact updated</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📋</span>
+                                Compliance Checklist
+                            </h4>
+                            <div style="font-size: 11px;">
+                                <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" checked disabled>
+                                    <span>Medical License Current</span>
+                                </div>
+                                <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" checked disabled>
+                                    <span>Background Check Completed</span>
+                                </div>
+                                <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" checked disabled>
+                                    <span>CPR/BLS Certified</span>
+                                </div>
+                                <div style="margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" checked disabled>
+                                    <span>Annual Training Complete</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" disabled>
+                                    <span style="color: #856404;">License Renewal Due</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEmployeeTab = 'profile';
+        let selectedEmployeeId = 'EMP001';
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Employee selection
+        function selectEmployee(element, employeeId) {
+            // Remove selection from all items
+            document.querySelectorAll('.employee-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Add selection to clicked item
+            element.classList.add('selected');
+            selectedEmployeeId = employeeId;
+            
+            // Load employee data (in real app, this would fetch from database)
+            loadEmployeeData(employeeId);
+            
+            showNotification('info', 'Employee record loaded successfully.');
+        }
+
+        // Tab switching
+        function switchEmployeeTab(tabName, element) {
+            // Hide all content
+            document.querySelectorAll('#employeeDetails > div').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.employee-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected content and activate tab
+            document.getElementById(tabName + 'Content').style.display = 'block';
+            element.classList.add('active');
+            currentEmployeeTab = tabName;
+        }
+
+        // Search and filter functions
+        function searchEmployees() {
+            const searchTerm = document.getElementById('employeeSearchInput').value.toLowerCase();
+            const department = document.getElementById('departmentFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            
+            showNotification('info', 'Searching employees...');
+            console.log('Search params:', { searchTerm, department, status });
+        }
+
+        function filterEmployees() {
+            searchEmployees();
+        }
+
+        // Load employee data
+        function loadEmployeeData(employeeId) {
+            // In a real application, this would fetch data from the server
+            console.log('Loading data for employee:', employeeId);
+        }
+
+        // Header actions
+        function addEmployee() {
+            showNotification('info', 'Opening new employee form...');
+        }
+
+        function exportData() {
+            showNotification('success', 'Employee data export initiated.');
+        }
+
+        function importData() {
+            showNotification('info', 'Opening data import dialog...');
+        }
+
+        // Employee actions
+        function editEmployee() {
+            showNotification('info', 'Opening employee editor...');
+        }
+
+        function editProfile() {
+            showNotification('info', 'Profile editing enabled.');
+        }
+
+        function editEmployment() {
+            showNotification('info', 'Employment details editing enabled.');
+        }
+
+        function editSchedule() {
+            showNotification('info', 'Schedule editor opened.');
+        }
+
+        function activateEmployee() {
+            showNotification('success', 'Employee activated successfully.');
+        }
+
+        function leaveManagement() {
+            showNotification('info', 'Opening leave management system...');
+        }
+
+        function scheduleShift() {
+            showNotification('info', 'Opening shift scheduler...');
+        }
+
+        function performanceReview() {
+            showNotification('info', 'Opening performance review system...');
+        }
+
+        function terminateEmployee() {
+            if (confirm('Are you sure you want to terminate this employee? This action requires proper documentation and approvals.')) {
+                showNotification('warning', 'Employee termination process initiated.');
+            }
+        }
+
+        function uploadDocument() {
+            showNotification('info', 'Document upload dialog opened.');
+        }
+
+        function viewDocument() {
+            showNotification('info', 'Opening document viewer...');
+        }
+
+        function downloadDocument() {
+            showNotification('success', 'Document download started.');
+        }
+
+        // Notification system
+        function showNotification(type, message) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type}`;
+            notification.style.position = 'fixed';
+            notification.style.top = '80px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '300px';
+            notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            
+            const icons = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'warning': '⚠️',
+                'danger': '🚨'
+            };
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>${icons[type] || 'ℹ️'}</span>
+                    <span style="flex: 1;">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 16px;">
+                        ✕
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize system
+        document.addEventListener('DOMContentLoaded', function() {
+            showNotification('info', 'Employee Records system initialized successfully.');
+        });
+
+        console.log('Employee Records System Loaded');
+    </script>
+</body>
+</html>

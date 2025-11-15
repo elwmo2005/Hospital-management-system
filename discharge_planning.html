@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discharge Planning - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1600px;
+        }
+
+        /* APEX Region Style */
+        .apex-region {
+            background: #ffffff;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        .region-body {
+            padding: 20px;
+        }
+
+        /* Discharge Planning Layout */
+        .discharge-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 300px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Patient List */
+        .patients-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .filter-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .filter-tab.active {
+            background: white;
+            border-bottom-color: #3d9aef;
+            font-weight: 600;
+        }
+
+        .patient-search {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .patients-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .patient-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .patient-item:hover {
+            background: #f8f9fa;
+        }
+
+        .patient-item.selected {
+            background: #e8f4fd;
+            border-left: 3px solid #3d9aef;
+        }
+
+        .patient-name {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .patient-details {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .discharge-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-ready { background: #28a745; }
+        .status-pending { background: #ffc107; }
+        .status-blocked { background: #dc3545; }
+        .status-planned { background: #6c757d; }
+
+        .los-indicator {
+            margin-top: 4px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        .los-normal { background: #d4edda; color: #155724; }
+        .los-extended { background: #fff3cd; color: #856404; }
+        .los-prolonged { background: #f8d7da; color: #721c24; }
+
+        /* Center Panel - Discharge Planning Workflow */
+        .discharge-content {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .patient-banner {
+            background: linear-gradient(135deg, #3d9aef 0%, #2e7bc6 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .patient-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Discharge Workflow Tabs */
+        .workflow-tabs {
+            padding: 15px 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 2px;
+        }
+
+        .workflow-tab {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .workflow-tab.active {
+            background: white;
+            border-bottom-color: white;
+            font-weight: 600;
+            color: #3d9aef;
+        }
+
+        .workflow-tab.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .workflow-tab.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .tab-status {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            font-size: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .status-complete { background: #28a745; }
+        .status-incomplete { background: #dc3545; }
+        .status-inprogress { background: #ffc107; color: #000; }
+
+        /* Workflow Content */
+        .workflow-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .workflow-section {
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3d9aef;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .checklist {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 12px;
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-checkbox {
+            margin-right: 10px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .checklist-text {
+            flex: 1;
+        }
+
+        .checklist-status {
+            margin-left: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .status-done { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-required { background: #f8d7da; color: #721c24; }
+
+        /* Forms */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .form-input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 32px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3d9aef;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 32px;
+            background: white;
+        }
+
+        .form-textarea {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Right Panel - Actions & Summary */
+        .discharge-sidebar {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quick-actions {
+            padding: 15px;
+        }
+
+        .quick-action-btn {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .quick-action-btn:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        .quick-action-btn .icon {
+            margin-right: 8px;
+            width: 16px;
+            display: inline-block;
+        }
+
+        .discharge-summary {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .summary-section {
+            margin-bottom: 15px;
+        }
+
+        .summary-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .summary-content {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #2e7bc6;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background: #cce5ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Medication List */
+        .medication-list {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .medication-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .medication-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .medication-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .medication-dose {
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .medication-action {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .action-continue { background: #d4edda; color: #155724; }
+        .action-stop { background: #f8d7da; color: #721c24; }
+        .action-change { background: #fff3cd; color: #856404; }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .discharge-layout {
+                grid-template-columns: 300px 1fr 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .discharge-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">DC</div>
+                <span>(Discharge Coordinator)</span>
+            </div>
+            <span style="margin-right: 15px;">🌐 Select Language ▾</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Patient Registration</span></div>
+                <div class="nav-item"><span>Patient Search</span></div>
+                <div class="nav-item"><span>Admission/Discharge</span></div>
+                <div class="nav-item"><span>Emergency Triage</span></div>
+            </div>
+
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item">
+                    <span>Medical Records</span>
+                </div>
+                <div class="nav-item">
+                    <span>Vital Signs</span>
+                </div>
+                <div class="nav-item">
+                    <span>Procedure Scheduling</span>
+                </div>
+                <div class="nav-item active">
+                    <span>Discharge Planning</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Clinical Module</a> › Discharge Planning
+                    </div>
+                    <h1 class="page-title">Discharge Planning</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-danger" onclick="expediteDischarge()">
+                        🚨 Expedite Discharge
+                    </button>
+                    <button class="btn btn-success" onclick="approveDischarge()">
+                        ✅ Approve Discharge
+                    </button>
+                    <button class="btn btn-warning" onclick="generateSummary()">
+                        📄 Generate Summary
+                    </button>
+                    <button class="btn btn-secondary" onclick="printInstructions()">
+                        🖨️ Print Instructions
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Three-column Discharge Planning Layout -->
+                <div class="discharge-layout">
+                    <!-- Left Panel - Patient List with Discharge Status -->
+                    <div class="patients-panel">
+                        <div class="region-header">
+                            <span class="icon">📋</span>
+                            Discharge Planning Queue
+                        </div>
+                        
+                        <div class="filter-tabs">
+                            <div class="filter-tab active" onclick="switchFilterTab('all', this)">All (12)</div>
+                            <div class="filter-tab" onclick="switchFilterTab('ready', this)">Ready (3)</div>
+                            <div class="filter-tab" onclick="switchFilterTab('pending', this)">Pending (7)</div>
+                            <div class="filter-tab" onclick="switchFilterTab('blocked', this)">Blocked (2)</div>
+                        </div>
+
+                        <div class="patient-search">
+                            <input type="text" class="search-input" placeholder="Search patients..." 
+                                   oninput="searchDischargePatients(this.value)">
+                        </div>
+
+                        <div class="patients-container" id="dischargePatients">
+                            <!-- Patients will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Center Panel - Discharge Planning Workflow -->
+                    <div class="discharge-content">
+                        <div id="patientBanner" class="patient-banner" style="display: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <h2 id="patientDisplayName" style="margin: 0; font-size: 18px;">Select a Patient</h2>
+                                    <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;" id="patientBasicInfo">
+                                        Choose a patient to begin discharge planning
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 11px; opacity: 0.8;">Estimated Discharge</div>
+                                    <div style="font-size: 13px; font-weight: 600;" id="estimatedDischarge">--</div>
+                                </div>
+                            </div>
+                            <div class="patient-info-grid" id="patientInfoGrid">
+                                <!-- Patient info will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Workflow Tabs -->
+                        <div class="workflow-tabs">
+                            <div class="workflow-tab active" onclick="switchWorkflowTab('clearance', this)">
+                                Medical Clearance
+                                <div class="tab-status status-inprogress">!</div>
+                            </div>
+                            <div class="workflow-tab pending" onclick="switchWorkflowTab('medications', this)">
+                                Medication Reconciliation
+                                <div class="tab-status status-incomplete">✗</div>
+                            </div>
+                            <div class="workflow-tab pending" onclick="switchWorkflowTab('followup', this)">
+                                Follow-up Planning
+                                <div class="tab-status status-incomplete">✗</div>
+                            </div>
+                            <div class="workflow-tab pending" onclick="switchWorkflowTab('education', this)">
+                                Patient Education
+                                <div class="tab-status status-incomplete">✗</div>
+                            </div>
+                            <div class="workflow-tab pending" onclick="switchWorkflowTab('instructions', this)">
+                                Discharge Instructions
+                                <div class="tab-status status-incomplete">✗</div>
+                            </div>
+                            <div class="workflow-tab pending" onclick="switchWorkflowTab('approval', this)">
+                                Final Approval
+                                <div class="tab-status status-incomplete">✗</div>
+                            </div>
+                        </div>
+
+                        <!-- Workflow Content -->
+                        <div class="workflow-content" id="workflowContent">
+                            <div class="loading">
+                                <div>Select a patient to begin discharge planning workflow</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Quick Actions & Summary -->
+                    <div class="discharge-sidebar">
+                        <div class="region-header">
+                            <span class="icon">⚡</span>
+                            Quick Actions
+                        </div>
+                        
+                        <div class="quick-actions">
+                            <button class="quick-action-btn" onclick="scheduleDischarge()">
+                                <span class="icon">📅</span>
+                                Schedule Discharge
+                            </button>
+                            <button class="quick-action-btn" onclick="orderTransport()">
+                                <span class="icon">🚗</span>
+                                Arrange Transport
+                            </button>
+                            <button class="quick-action-btn" onclick="contactFamily()">
+                                <span class="icon">📞</span>
+                                Contact Family
+                            </button>
+                            <button class="quick-action-btn" onclick="scheduleFollowup()">
+                                <span class="icon">🗓️</span>
+                                Schedule Follow-up
+                            </button>
+                            <button class="quick-action-btn" onclick="homeHealthReferral()">
+                                <span class="icon">🏠</span>
+                                Home Health Referral
+                            </button>
+                            <button class="quick-action-btn" onclick="equipmentOrders()">
+                                <span class="icon">🔧</span>
+                                Equipment Orders
+                            </button>
+                        </div>
+
+                        <div class="discharge-summary">
+                            <div class="summary-section">
+                                <div class="summary-title">Discharge Progress</div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="dischargeProgress" style="width: 16.6%;">17%</div>
+                                </div>
+                                <div class="summary-content" style="margin-top: 8px;">
+                                    1 of 6 steps completed
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Current Status</div>
+                                <div class="summary-content" id="currentStatus">
+                                    Awaiting medical clearance from attending physician
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Attending Physician</div>
+                                <div class="summary-content" id="attendingPhysician">
+                                    Dr. Ahmed Nasser (Cardiology)
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Insurance Status</div>
+                                <div class="summary-content" id="insuranceStatus">
+                                    ✅ Verified and approved
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Estimated Discharge</div>
+                                <div class="summary-content" id="estimatedDischargeTime">
+                                    Tomorrow, 10:00 AM
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Length of Stay</div>
+                                <div class="summary-content" id="lengthOfStay">
+                                    5 days (within normal range)
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Outstanding Tasks</div>
+                                <div class="summary-content" id="outstandingTasks">
+                                    • Medical clearance pending<br>
+                                    • Medication reconciliation required<br>
+                                    • Follow-up appointments needed<br>
+                                    • Patient education incomplete
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Alerts & Warnings</div>
+                                <div class="summary-content" id="dischargeAlerts">
+                                    ⚠️ Patient requires home oxygen therapy<br>
+                                    📋 Medication allergies documented
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discharge Approval Modal -->
+    <div id="approvalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Final Discharge Approval</h3>
+                <button class="modal-close" onclick="closeModal('approvalModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <strong>⚠️ Please review all discharge requirements before final approval</strong>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Discharge Date & Time *</label>
+                    <input type="datetime-local" class="form-input" id="dischargeDateTime" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Discharge Disposition *</label>
+                    <select class="form-select" id="dischargeDisposition" required>
+                        <option value="">-- Select Disposition --</option>
+                        <option value="HOME">Home</option>
+                        <option value="HOME_WITH_SERVICES">Home with Home Health Services</option>
+                        <option value="SKILLED_NURSING">Skilled Nursing Facility</option>
+                        <option value="REHAB">Rehabilitation Facility</option>
+                        <option value="ASSISTED_LIVING">Assisted Living Facility</option>
+                        <option value="HOSPICE">Hospice Care</option>
+                        <option value="TRANSFER">Transfer to Another Hospital</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Final Diagnosis</label>
+                    <textarea class="form-textarea" id="finalDiagnosis" rows="3"
+                              placeholder="Enter final diagnosis and any additional conditions..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Discharge Summary</label>
+                    <textarea class="form-textarea" id="dischargeSummary" rows="4"
+                              placeholder="Brief summary of hospitalization and treatment..."></textarea>
+                </div>
+
+                <!-- Final Checklist -->
+                <div class="summary-section">
+                    <div class="summary-title">Final Discharge Checklist</div>
+                    <div class="checklist">
+                        <div class="checklist-item">
+                            <input type="checkbox" class="checklist-checkbox" id="medicalClearance">
+                            <div class="checklist-text">Medical clearance obtained from attending physician</div>
+                            <div class="checklist-status status-done">Complete</div>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" class="checklist-checkbox" id="medicationsReconciled">
+                            <div class="checklist-text">Medications reconciled and prescriptions prepared</div>
+                            <div class="checklist-status status-done">Complete</div>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" class="checklist-checkbox" id="followupScheduled">
+                            <div class="checklist-text">Follow-up appointments scheduled</div>
+                            <div class="checklist-status status-done">Complete</div>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" class="checklist-checkbox" id="patientEducated">
+                            <div class="checklist-text">Patient/family education completed</div>
+                            <div class="checklist-status status-done">Complete</div>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" class="checklist-checkbox" id="instructionsProvided">
+                            <div class="checklist-text">Written discharge instructions provided</div>
+                            <div class="checklist-status status-done">Complete</div>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" class="checklist-checkbox" id="transportArranged">
+                            <div class="checklist-text">Transportation arranged (if needed)</div>
+                            <div class="checklist-status status-pending">Pending</div>
+                        </div>
+                        <div class="checklist-item">
+                            <input type="checkbox" class="checklist-checkbox" id="billingCleared">
+                            <div class="checklist-text">Billing and insurance matters resolved</div>
+                            <div class="checklist-status status-done">Complete</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('approvalModal')">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="saveAsDraft()">
+                        Save as Draft
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="finalizeDischarge()">
+                        ✅ Approve & Discharge
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const dischargePatients = [
+            {
+                id: 1, firstName: 'Ahmed', lastName: 'Hassan', mrn: 'MRN-001',
+                room: 'GEN-201', bed: 'A', admissionDate: '2024-12-10', 
+                attendingDoctor: 'Dr. Ahmed Nasser', department: 'Cardiology',
+                status: 'ready', los: 5, condition: 'Stable', diagnosis: 'Acute MI',
+                estimatedDischarge: '2024-12-16 10:00'
+            },
+            {
+                id: 2, firstName: 'Fatima', lastName: 'Al-Zahra', mrn: 'MRN-002',
+                room: 'MAT-105', bed: 'B', admissionDate: '2024-12-12',
+                attendingDoctor: 'Dr. Amira Saleh', department: 'Obstetrics',
+                status: 'pending', los: 3, condition: 'Good', diagnosis: 'Normal Delivery',
+                estimatedDischarge: '2024-12-15 14:00'
+            },
+            {
+                id: 3, firstName: 'Omar', lastName: 'Khaled', mrn: 'MRN-045',
+                room: 'ICU-03', bed: 'A', admissionDate: '2024-12-08',
+                attendingDoctor: 'Dr. Sarah Johnson', department: 'ICU',
+                status: 'blocked', los: 7, condition: 'Critical', diagnosis: 'Pneumonia',
+                estimatedDischarge: '2024-12-18 09:00'
+            },
+            {
+                id: 4, firstName: 'Layla', lastName: 'Mohammed', mrn: 'MRN-023',
+                room: 'GEN-105', bed: 'A', admissionDate: '2024-12-11',
+                attendingDoctor: 'Dr. Mohamed Ali', department: 'General Surgery',
+                status: 'pending', los: 4, condition: 'Improving', diagnosis: 'Appendectomy',
+                estimatedDischarge: '2024-12-16 12:00'
+            }
+        ];
+
+        const workflowTemplates = {
+            clearance: {
+                title: 'Medical Clearance',
+                sections: [
+                    {
+                        title: 'Physician Assessment',
+                        icon: '👨‍⚕️',
+                        checklist: [
+                            { text: 'Attending physician final assessment completed', status: 'done' },
+                            { text: 'Vital signs stable for 24 hours', status: 'done' },
+                            { text: 'Laboratory values within acceptable range', status: 'pending' },
+                            { text: 'Imaging studies reviewed and documented', status: 'done' },
+                            { text: 'Consultant recommendations addressed', status: 'pending' }
+                        ]
+                    },
+                    {
+                        title: 'Clinical Stability',
+                        icon: '💓',
+                        checklist: [
+                            { text: 'Patient ambulating independently', status: 'done' },
+                            { text: 'Pain controlled with oral medications', status: 'done' },
+                            { text: 'Tolerating regular diet', status: 'done' },
+                            { text: 'No signs of infection or complications', status: 'pending' }
+                        ]
+                    }
+                ]
+            },
+            medications: {
+                title: 'Medication Reconciliation',
+                sections: [
+                    {
+                        title: 'Current Medications Review',
+                        icon: '💊',
+                        content: `
+                            <div class="medication-list">
+                                <div class="medication-item">
+                                    <div>
+                                        <div class="medication-name">Metoprolol 50mg</div>
+                                        <div class="medication-dose">Twice daily, continue</div>
+                                    </div>
+                                    <div class="medication-action action-continue">Continue</div>
+                                </div>
+                                <div class="medication-item">
+                                    <div>
+                                        <div class="medication-name">Aspirin 81mg</div>
+                                        <div class="medication-dose">Daily, continue</div>
+                                    </div>
+                                    <div class="medication-action action-continue">Continue</div>
+                                </div>
+                                <div class="medication-item">
+                                    <div>
+                                        <div class="medication-name">Lisinopril 10mg</div>
+                                        <div class="medication-dose">Daily, new prescription</div>
+                                    </div>
+                                    <div class="medication-action action-change">New</div>
+                                </div>
+                                <div class="medication-item">
+                                    <div>
+                                        <div class="medication-name">Morphine IV</div>
+                                        <div class="medication-dose">Inpatient only</div>
+                                    </div>
+                                    <div class="medication-action action-stop">Stop</div>
+                                </div>
+                            </div>
+                        `
+                    },
+                    {
+                        title: 'Prescription Processing',
+                        icon: '📝',
+                        checklist: [
+                            { text: 'Discharge prescriptions written', status: 'pending' },
+                            { text: 'Drug interactions checked', status: 'done' },
+                            { text: 'Allergy alerts reviewed', status: 'done' },
+                            { text: 'Patient/family counseled on medications', status: 'pending' },
+                            { text: 'Pharmacy contacted for special preparations', status: 'pending' }
+                        ]
+                    }
+                ]
+            },
+            followup: {
+                title: 'Follow-up Planning',
+                sections: [
+                    {
+                        title: 'Appointment Scheduling',
+                        icon: '📅',
+                        checklist: [
+                            { text: 'Primary care physician follow-up scheduled', status: 'pending' },
+                            { text: 'Cardiology follow-up in 1 week', status: 'pending' },
+                            { text: 'Laboratory follow-up in 3 days', status: 'pending' },
+                            { text: 'Patient given appointment cards', status: 'pending' }
+                        ]
+                    },
+                    {
+                        title: 'Referrals & Services',
+                        icon: '🏥',
+                        checklist: [
+                            { text: 'Home health services arranged', status: 'pending' },
+                            { text: 'Physical therapy referral submitted', status: 'pending' },
+                            { text: 'Nutritionist consultation scheduled', status: 'pending' },
+                            { text: 'Medical equipment ordered', status: 'pending' }
+                        ]
+                    }
+                ]
+            },
+            education: {
+                title: 'Patient Education',
+                sections: [
+                    {
+                        title: 'Disease-Specific Education',
+                        icon: '📚',
+                        checklist: [
+                            { text: 'Cardiac diet education completed', status: 'pending' },
+                            { text: 'Activity restrictions explained', status: 'pending' },
+                            { text: 'Warning signs reviewed', status: 'pending' },
+                            { text: 'Medication adherence counseling', status: 'pending' }
+                        ]
+                    },
+                    {
+                        title: 'General Care Instructions',
+                        icon: '🏠',
+                        checklist: [
+                            { text: 'Wound care instructions provided', status: 'pending' },
+                            { text: 'When to call doctor explained', status: 'pending' },
+                            { text: 'Emergency contact information given', status: 'pending' },
+                            { text: 'Family education completed', status: 'pending' }
+                        ]
+                    }
+                ]
+            },
+            instructions: {
+                title: 'Discharge Instructions',
+                sections: [
+                    {
+                        title: 'Documentation Preparation',
+                        icon: '📄',
+                        checklist: [
+                            { text: 'Discharge summary completed', status: 'pending' },
+                            { text: 'Written instructions prepared', status: 'pending' },
+                            { text: 'Prescription list finalized', status: 'pending' },
+                            { text: 'Follow-up appointment list prepared', status: 'pending' }
+                        ]
+                    },
+                    {
+                        title: 'Patient Understanding',
+                        icon: '✅',
+                        checklist: [
+                            { text: 'Patient demonstrates understanding', status: 'pending' },
+                            { text: 'Questions answered satisfactorily', status: 'pending' },
+                            { text: 'Emergency procedures reviewed', status: 'pending' },
+                            { text: 'Contact information verified', status: 'pending' }
+                        ]
+                    }
+                ]
+            },
+            approval: {
+                title: 'Final Approval',
+                sections: [
+                    {
+                        title: 'Final Verification',
+                        icon: '✅',
+                        checklist: [
+                            { text: 'All discharge criteria met', status: 'pending' },
+                            { text: 'Transportation arranged', status: 'pending' },
+                            { text: 'Billing matters resolved', status: 'done' },
+                            { text: 'Patient belongings collected', status: 'pending' }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        let selectedPatient = null;
+        let currentWorkflowTab = 'clearance';
+        let currentFilter = 'all';
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDischargePatients();
+            
+            // Set default discharge date/time to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('dischargeDateTime').value = tomorrow.toISOString().slice(0, 16);
+        });
+
+        // Load discharge patients
+        function loadDischargePatients() {
+            const container = document.getElementById('dischargePatients');
+            
+            let filteredPatients = dischargePatients;
+            if (currentFilter !== 'all') {
+                filteredPatients = dischargePatients.filter(p => p.status === currentFilter);
+            }
+            
+            container.innerHTML = filteredPatients.map(patient => `
+                <div class="patient-item" onclick="selectDischargePatient(${patient.id})" data-patient-id="${patient.id}">
+                    <div class="patient-name">${patient.firstName} ${patient.lastName}</div>
+                    <div class="patient-details">
+                        MRN: ${patient.mrn} | Room: ${patient.room}-${patient.bed}<br>
+                        Attending: ${patient.attendingDoctor}<br>
+                        Diagnosis: ${patient.diagnosis}
+                    </div>
+                    <div class="discharge-status">
+                        <div class="status-indicator status-${patient.status}"></div>
+                        <span>${getStatusText(patient.status)}</span>
+                    </div>
+                    <div class="los-indicator ${getLOSClass(patient.los)}">
+                        LOS: ${patient.los} days
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Switch filter tabs
+        function switchFilterTab(filter, element) {
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+            
+            currentFilter = filter;
+            loadDischargePatients();
+        }
+
+        // Search discharge patients
+        function searchDischargePatients(query) {
+            const container = document.getElementById('dischargePatients');
+            const filtered = dischargePatients.filter(p =>
+                p.firstName.toLowerCase().includes(query.toLowerCase()) ||
+                p.lastName.toLowerCase().includes(query.toLowerCase()) ||
+                p.mrn.toLowerCase().includes(query.toLowerCase()) ||
+                p.attendingDoctor.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            container.innerHTML = filtered.map(patient => `
+                <div class="patient-item" onclick="selectDischargePatient(${patient.id})" data-patient-id="${patient.id}">
+                    <div class="patient-name">${patient.firstName} ${patient.lastName}</div>
+                    <div class="patient-details">
+                        MRN: ${patient.mrn} | Room: ${patient.room}-${patient.bed}<br>
+                        Attending: ${patient.attendingDoctor}<br>
+                        Diagnosis: ${patient.diagnosis}
+                    </div>
+                    <div class="discharge-status">
+                        <div class="status-indicator status-${patient.status}"></div>
+                        <span>${getStatusText(patient.status)}</span>
+                    </div>
+                    <div class="los-indicator ${getLOSClass(patient.los)}">
+                        LOS: ${patient.los} days
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Select discharge patient
+        function selectDischargePatient(patientId) {
+            selectedPatient = dischargePatients.find(p => p.id === patientId);
+            
+            // Update UI selection
+            document.querySelectorAll('.patient-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.querySelector(`[data-patient-id="${patientId}"]`).classList.add('selected');
+            
+            // Update patient banner
+            updatePatientBanner();
+            
+            // Load workflow content
+            loadWorkflowContent();
+            
+            // Update sidebar summary
+            updateDischargeProgressSummary();
+        }
+
+        // Update patient banner
+        function updatePatientBanner() {
+            if (!selectedPatient) return;
+            
+            const banner = document.getElementById('patientBanner');
+            const displayName = document.getElementById('patientDisplayName');
+            const basicInfo = document.getElementById('patientBasicInfo');
+            const estimatedDischarge = document.getElementById('estimatedDischarge');
+            const infoGrid = document.getElementById('patientInfoGrid');
+            
+            displayName.textContent = `${selectedPatient.firstName} ${selectedPatient.lastName}`;
+            basicInfo.textContent = `${selectedPatient.diagnosis} | Room: ${selectedPatient.room}-${selectedPatient.bed} | LOS: ${selectedPatient.los} days`;
+            estimatedDischarge.textContent = formatDateTime(selectedPatient.estimatedDischarge);
+            
+            infoGrid.innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">MRN</div>
+                    <div class="info-value">${selectedPatient.mrn}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Attending</div>
+                    <div class="info-value">${selectedPatient.attendingDoctor}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Department</div>
+                    <div class="info-value">${selectedPatient.department}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Condition</div>
+                    <div class="info-value">${selectedPatient.condition}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Admission Date</div>
+                    <div class="info-value">${formatDate(selectedPatient.admissionDate)}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value">${getStatusText(selectedPatient.status)}</div>
+                </div>
+            `;
+            
+            banner.style.display = 'block';
+        }
+
+        // Switch workflow tabs
+        function switchWorkflowTab(tab, element) {
+            document.querySelectorAll('.workflow-tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            
+            currentWorkflowTab = tab;
+            loadWorkflowContent();
+        }
+
+        // Load workflow content
+        function loadWorkflowContent() {
+            if (!selectedPatient) return;
+            
+            const template = workflowTemplates[currentWorkflowTab];
+            const container = document.getElementById('workflowContent');
+            
+            let contentHTML = '';
+            
+            template.sections.forEach(section => {
+                contentHTML += `
+                    <div class="workflow-section">
+                        <div class="section-title">
+                            <div class="section-icon">${section.icon}</div>
+                            ${section.title}
+                        </div>
+                        
+                        ${section.content || ''}
+                        
+                        ${section.checklist ? `
+                            <div class="checklist">
+                                ${section.checklist.map(item => `
+                                    <div class="checklist-item">
+                                        <input type="checkbox" class="checklist-checkbox" ${item.status === 'done' ? 'checked' : ''}>
+                                        <div class="checklist-text">${item.text}</div>
+                                        <div class="checklist-status status-${item.status}">${getStatusLabel(item.status)}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            // Add action buttons for each tab
+            contentHTML += `
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
+                    <button class="btn btn-secondary" onclick="saveProgress()">Save Progress</button>
+                    <button class="btn btn-primary" onclick="completeSection()">Complete Section</button>
+                </div>
+            `;
+            
+            container.innerHTML = contentHTML;
+        }
+
+        // Update discharge progress summary
+        function updateDischargeProgressSummary() {
+            if (!selectedPatient) return;
+            
+            // Calculate progress based on completed tabs
+            const completedTabs = document.querySelectorAll('.workflow-tab.completed').length;
+            const totalTabs = document.querySelectorAll('.workflow-tab').length;
+            const progress = Math.round((completedTabs / totalTabs) * 100);
+            
+            document.getElementById('dischargeProgress').style.width = `${progress}%`;
+            document.getElementById('dischargeProgress').textContent = `${progress}%`;
+            
+            // Update summary information
+            document.getElementById('currentStatus').textContent = getCurrentStatusText();
+            document.getElementById('attendingPhysician').textContent = selectedPatient.attendingDoctor;
+            document.getElementById('estimatedDischargeTime').textContent = formatDateTime(selectedPatient.estimatedDischarge);
+            document.getElementById('lengthOfStay').textContent = `${selectedPatient.los} days (${getLOSDescription(selectedPatient.los)})`;
+        }
+
+        // Complete workflow section
+        function completeSection() {
+            const currentTab = document.querySelector('.workflow-tab.active');
+            currentTab.classList.add('completed');
+            currentTab.classList.remove('pending');
+            
+            const statusIndicator = currentTab.querySelector('.tab-status');
+            statusIndicator.className = 'tab-status status-complete';
+            statusIndicator.textContent = '✓';
+            
+            // Move to next tab
+            const nextTab = currentTab.nextElementSibling;
+            if (nextTab && nextTab.classList.contains('workflow-tab')) {
+                switchWorkflowTab(nextTab.onclick.toString().match(/'(\w+)'/)[1], nextTab);
+            }
+            
+            updateDischargeProgressSummary();
+            showAlert('success', `${workflowTemplates[currentWorkflowTab].title} completed successfully.`);
+        }
+
+        // Final discharge approval
+        function approveDischarge() {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first.');
+                return;
+            }
+            
+            document.getElementById('approvalModal').style.display = 'block';
+        }
+
+        function finalizeDischarge() {
+            const dischargeDateTime = document.getElementById('dischargeDateTime').value;
+            const disposition = document.getElementById('dischargeDisposition').value;
+            
+            if (!dischargeDateTime || !disposition) {
+                showAlert('warning', 'Please fill in all required fields.');
+                return;
+            }
+            
+            // Check all required checkboxes
+            const requiredChecks = ['medicalClearance', 'medicationsReconciled', 'followupScheduled', 
+                                  'patientEducated', 'instructionsProvided', 'billingCleared'];
+            const allChecked = requiredChecks.every(id => document.getElementById(id).checked);
+            
+            if (!allChecked) {
+                showAlert('warning', 'Please complete all required discharge checklist items.');
+                return;
+            }
+            
+            // Simulate discharge process
+            const approveBtn = event.target;
+            approveBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px; margin-right: 8px;"></div>Processing...';
+            approveBtn.disabled = true;
+            
+            setTimeout(() => {
+                // Update patient status
+                selectedPatient.status = 'discharged';
+                
+                // Remove from discharge list
+                loadDischargePatients();
+                
+                approveBtn.innerHTML = '✅ Approve & Discharge';
+                approveBtn.disabled = false;
+                closeModal('approvalModal');
+                
+                showAlert('success', `${selectedPatient.firstName} ${selectedPatient.lastName} has been successfully discharged.`);
+                
+                // Clear selection
+                selectedPatient = null;
+                document.getElementById('patientBanner').style.display = 'none';
+                document.getElementById('workflowContent').innerHTML = '<div class="loading"><div>Patient successfully discharged</div></div>';
+            }, 3000);
+        }
+
+        // Utility functions
+        function getStatusText(status) {
+            const statusMap = {
+                'ready': 'Ready for Discharge',
+                'pending': 'Planning in Progress',
+                'blocked': 'Blocked/Medical Hold',
+                'planned': 'Discharge Planned'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getLOSClass(days) {
+            if (days <= 3) return 'los-normal';
+            if (days <= 7) return 'los-extended';
+            return 'los-prolonged';
+        }
+
+        function getLOSDescription(days) {
+            if (days <= 3) return 'within normal range';
+            if (days <= 7) return 'extended stay';
+            return 'prolonged hospitalization';
+        }
+
+        function getStatusLabel(status) {
+            const statusMap = {
+                'done': 'Complete',
+                'pending': 'Pending',
+                'required': 'Required'
+            };
+            return statusMap[status] || status;
+        }
+
+        function getCurrentStatusText() {
+            if (!selectedPatient) return '';
+            
+            const statusMap = {
+                'ready': 'All discharge criteria met - ready for final approval',
+                'pending': 'Awaiting completion of discharge planning workflow',
+                'blocked': 'Medical hold - discharge criteria not met',
+                'planned': 'Discharge scheduled and coordinated'
+            };
+            return statusMap[selectedPatient.status] || 'Status unknown';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString();
+        }
+
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            document.querySelector('.main-container').insertBefore(alertDiv, document.querySelector('.main-container').firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Quick action functions
+        function expediteDischarge() {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first.');
+                return;
+            }
+            showAlert('warning', 'Expedited discharge process initiated. Please complete all required steps.');
+        }
+
+        function scheduleDischarge() {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first.');
+                return;
+            }
+            alert('Opening discharge scheduling interface...');
+        }
+
+        function orderTransport() {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first.');
+                return;
+            }
+            alert('Contacting transport services...');
+        }
+
+        function contactFamily() {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first.');
+                return;
+            }
+            alert('Opening family contact information...');
+        }
+
+        function scheduleFollowup() {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first.');
+                return;
+            }
+            alert('Opening follow-up appointment scheduling...');
+        }
+
+        function homeHealthReferral() {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first.');
+                return;
+            }
+            alert('Creating home health services referral...');
+        }
+
+        function equipmentOrders() {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first.');
+                return;
+            }
+            alert('Opening medical equipment ordering system...');
+        }
+
+        function generateSummary() {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first.');
+                return;
+            }
+            alert('Generating discharge summary report...');
+        }
+
+        function printInstructions() {
+            if (!selectedPatient) {
+                showAlert('warning', 'Please select a patient first.');
+                return;
+            }
+            alert('Preparing discharge instructions for printing...');
+        }
+
+        function saveProgress() {
+            showAlert('success', 'Discharge planning progress saved.');
+        }
+
+        function saveAsDraft() {
+            showAlert('info', 'Discharge approval saved as draft.');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        console.log('Discharge Planning System Initialized');
+    </script>
+</body>
+</html>

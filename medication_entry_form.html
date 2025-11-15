@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medication Entry Form - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Content Area */
+        .content-area {
+            background: #f4f4f4;
+            min-height: calc(100vh - 50px);
+            padding: 20px;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Modal Content */
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        /* Modal Header */
+        .modal-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #e9ecef;
+        }
+
+        /* Modal Body */
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Patient Info Bar */
+        .patient-info-bar {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .patient-info {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+        }
+
+        .patient-info span {
+            color: #0c5460;
+            font-weight: 500;
+        }
+
+        /* Form Sections */
+        .form-section {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 12px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: #dc3545;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+            height: 36px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3d9aef;
+            box-shadow: 0 0 0 2px rgba(61, 154, 239, 0.25);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+            height: 36px;
+            background: white;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 13px;
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Medication Search */
+        .medication-search {
+            position: relative;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ced4da;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+
+        .search-result-item:hover {
+            background: #f8f9fa;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .medication-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+        }
+
+        .medication-details {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* Drug Interaction Alerts */
+        .interaction-alert {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .interaction-alert.critical {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .interaction-alert.major {
+            background: #ffeaa7;
+            border: 1px solid #ffd93d;
+            color: #8e6a00;
+        }
+
+        .interaction-alert.moderate {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .interaction-alert.safe {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        /* Dosing Calculator */
+        .dosing-calculator {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .calc-item {
+            text-align: center;
+        }
+
+        .calc-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .calc-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 36px;
+            min-width: 100px;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #2980d3;
+            border-color: #2980d3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            border-color: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            border-color: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            border-color: #e0a800;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            border-color: #c82333;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #3d9aef;
+            border-color: #3d9aef;
+        }
+
+        .btn-outline:hover {
+            background: #3d9aef;
+            color: white;
+        }
+
+        /* Action Buttons */
+        .modal-actions {
+            background: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* Tabs */
+        .form-tabs {
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 20px;
+        }
+
+        .form-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            color: #666;
+        }
+
+        .form-tab.active {
+            color: #3d9aef;
+            border-bottom-color: #3d9aef;
+        }
+
+        .form-tab:hover:not(.active) {
+            color: #333;
+            background: #f8f9fa;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Progress Indicator */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 30px;
+            right: 30px;
+            height: 2px;
+            background: #dee2e6;
+            z-index: 1;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            background: #f4f4f4;
+            padding: 0 10px;
+        }
+
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #dee2e6;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .step-circle.active {
+            background: #3d9aef;
+            color: white;
+        }
+
+        .step-circle.completed {
+            background: #28a745;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+        }
+
+        /* Allergies & Contraindications */
+        .alert-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+        }
+
+        .alert-box.danger {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        .alert-content {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 10px;
+            }
+
+            .form-grid,
+            .form-grid-2,
+            .form-grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .patient-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .modal-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        /* Validation States */
+        .form-input.invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+        }
+
+        .form-input.valid {
+            border-color: #28a745;
+            box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">DR</div>
+                <span>(Dr. Sarah Chen | Physician)</span>
+            </div>
+            <span style="margin-right: 15px;">🌐 Select Language ▾</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <div class="modal-title">
+                    <span style="font-size: 20px;">💊</span>
+                    Add New Medication
+                </div>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Patient Info Bar -->
+                <div class="patient-info-bar">
+                    <div class="patient-info">
+                        <span><strong>Patient:</strong> Sarah Johnson</span>
+                        <span><strong>MRN:</strong> PAT-2024-001523</span>
+                        <span><strong>Age:</strong> 67 years</span>
+                        <span><strong>Weight:</strong> 72 kg</span>
+                        <span><strong>eGFR:</strong> 58 mL/min</span>
+                    </div>
+                    <div style="font-size: 12px; color: #0c5460;">
+                        <strong>Allergies:</strong> Penicillin, Sulfa drugs
+                    </div>
+                </div>
+
+                <!-- Progress Steps -->
+                <div class="progress-steps">
+                    <div class="progress-step">
+                        <div class="step-circle completed">1</div>
+                        <div class="step-label">Select Medication</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-circle active">2</div>
+                        <div class="step-label">Dosing & Instructions</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Interaction Check</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-circle">4</div>
+                        <div class="step-label">Review & Submit</div>
+                    </div>
+                </div>
+
+                <!-- Form Tabs -->
+                <div class="form-tabs">
+                    <div class="form-tab active" onclick="switchTab('medication', this)">Medication Details</div>
+                    <div class="form-tab" onclick="switchTab('dosing', this)">Dosing & Schedule</div>
+                    <div class="form-tab" onclick="switchTab('interactions', this)">Safety Check</div>
+                    <div class="form-tab" onclick="switchTab('instructions', this)">Patient Instructions</div>
+                </div>
+
+                <!-- Medication Details Tab -->
+                <div id="medicationTab" class="tab-content active">
+                    <div class="form-section">
+                        <div class="section-header">
+                            <span class="section-icon">🔍</span>
+                            Medication Search & Selection
+                        </div>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label class="form-label required">Medication Name</label>
+                                <div class="medication-search">
+                                    <input type="text" class="form-input" id="medicationSearch" 
+                                           placeholder="Search by name, brand, or generic..." 
+                                           oninput="searchMedications(this.value)"
+                                           onfocus="showSearchResults()"
+                                           onblur="hideSearchResults()">
+                                    <div class="search-results" id="searchResults">
+                                        <div class="search-result-item" onclick="selectMedication('Atorvastatin', '20mg Tablet')">
+                                            <div class="medication-name">Atorvastatin</div>
+                                            <div class="medication-details">20mg Tablet • Generic for Lipitor • NDC: 12345-678-90</div>
+                                        </div>
+                                        <div class="search-result-item" onclick="selectMedication('Metformin', '500mg Tablet')">
+                                            <div class="medication-name">Metformin</div>
+                                            <div class="medication-details">500mg Tablet • Generic for Glucophage • NDC: 98765-432-10</div>
+                                        </div>
+                                        <div class="search-result-item" onclick="selectMedication('Lisinopril', '10mg Tablet')">
+                                            <div class="medication-name">Lisinopril</div>
+                                            <div class="medication-details">10mg Tablet • Generic for Prinivil • NDC: 55555-777-88</div>
+                                        </div>
+                                        <div class="search-result-item" onclick="selectMedication('Amlodipine', '5mg Tablet')">
+                                            <div class="medication-name">Amlodipine</div>
+                                            <div class="medication-details">5mg Tablet • Generic for Norvasc • NDC: 11111-222-33</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label class="form-label required">Strength</label>
+                                    <select class="form-select" id="medicationStrength">
+                                        <option value="">Select strength...</option>
+                                        <option value="5mg">5mg</option>
+                                        <option value="10mg">10mg</option>
+                                        <option value="20mg">20mg</option>
+                                        <option value="40mg">40mg</option>
+                                        <option value="80mg">80mg</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required">Dosage Form</label>
+                                    <select class="form-select" id="dosageForm">
+                                        <option value="">Select form...</option>
+                                        <option value="tablet">Tablet</option>
+                                        <option value="capsule">Capsule</option>
+                                        <option value="liquid">Liquid</option>
+                                        <option value="injection">Injection</option>
+                                        <option value="topical">Topical</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">NDC Number</label>
+                                    <input type="text" class="form-input" id="ndcNumber" readonly 
+                                           placeholder="Auto-populated" style="background: #f8f9fa;">
+                                </div>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Generic Name</label>
+                                    <input type="text" class="form-input" id="genericName" readonly 
+                                           placeholder="Auto-populated" style="background: #f8f9fa;">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Drug Class</label>
+                                    <input type="text" class="form-input" id="drugClass" readonly 
+                                           placeholder="Auto-populated" style="background: #f8f9fa;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Allergy & Contraindication Check -->
+                    <div class="alert-box danger" id="allergyAlert" style="display: none;">
+                        <div class="alert-title">⚠️ ALLERGY ALERT</div>
+                        <div class="alert-content">
+                            Patient has documented allergy to Penicillin. Cross-reactivity possible with selected medication.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dosing & Schedule Tab -->
+                <div id="dosingTab" class="tab-content">
+                    <div class="form-section">
+                        <div class="section-header">
+                            <span class="section-icon">⚖️</span>
+                            Dosing Information
+                        </div>
+                        <div class="section-content">
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label class="form-label required">Dose</label>
+                                    <input type="text" class="form-input" id="dose" placeholder="e.g., 10mg" 
+                                           oninput="calculateDosing()">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required">Frequency</label>
+                                    <select class="form-select" id="frequency" onchange="calculateDosing()">
+                                        <option value="">Select frequency...</option>
+                                        <option value="once_daily">Once daily</option>
+                                        <option value="twice_daily">Twice daily</option>
+                                        <option value="three_times_daily">Three times daily</option>
+                                        <option value="four_times_daily">Four times daily</option>
+                                        <option value="every_other_day">Every other day</option>
+                                        <option value="as_needed">As needed</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label required">Route</label>
+                                    <select class="form-select" id="route">
+                                        <option value="">Select route...</option>
+                                        <option value="oral">Oral</option>
+                                        <option value="sublingual">Sublingual</option>
+                                        <option value="topical">Topical</option>
+                                        <option value="injection">Injection</option>
+                                        <option value="inhalation">Inhalation</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Start Date</label>
+                                    <input type="date" class="form-input" id="startDate" value="2025-09-15">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Duration</label>
+                                    <select class="form-select" id="duration">
+                                        <option value="">Select duration...</option>
+                                        <option value="7_days">7 days</option>
+                                        <option value="14_days">14 days</option>
+                                        <option value="30_days">30 days</option>
+                                        <option value="90_days">90 days</option>
+                                        <option value="ongoing">Ongoing</option>
+                                        <option value="until_discontinued">Until discontinued</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Administration Instructions</label>
+                                <textarea class="form-textarea" id="adminInstructions" 
+                                          placeholder="e.g., Take with food, at bedtime, etc."></textarea>
+                            </div>
+
+                            <!-- Dosing Calculator -->
+                            <div class="dosing-calculator">
+                                <div style="font-weight: 600; margin-bottom: 10px; color: #333;">
+                                    📊 Dosing Calculator
+                                </div>
+                                <div class="calc-grid">
+                                    <div class="calc-item">
+                                        <div class="calc-value" id="dailyDose">-</div>
+                                        <div class="calc-label">Daily Dose</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-value" id="weeklyDose">-</div>
+                                        <div class="calc-label">Weekly Dose</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-value" id="monthlyDose">-</div>
+                                        <div class="calc-label">Monthly Dose</div>
+                                    </div>
+                                    <div class="calc-item">
+                                        <div class="calc-value" id="pillsPerDay">-</div>
+                                        <div class="calc-label">Pills/Day</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Safety Check Tab -->
+                <div id="interactionsTab" class="tab-content">
+                    <div class="form-section">
+                        <div class="section-header">
+                            <span class="section-icon">🛡️</span>
+                            Drug Interaction Analysis
+                        </div>
+                        <div class="section-content">
+                            <div class="loading" id="interactionLoading">
+                                <div class="spinner"></div>
+                                Checking drug interactions with current medications...
+                            </div>
+
+                            <div id="interactionResults" style="display: none;">
+                                <div class="interaction-alert critical">
+                                    <div style="font-size: 16px;">⚠️</div>
+                                    <div>
+                                        <strong>CRITICAL INTERACTION</strong><br>
+                                        New medication may interact with Warfarin. Increased risk of bleeding. Monitor INR closely.
+                                    </div>
+                                </div>
+
+                                <div class="interaction-alert major">
+                                    <div style="font-size: 16px;">🔸</div>
+                                    <div>
+                                        <strong>MAJOR INTERACTION</strong><br>
+                                        Potential interaction with Lisinopril. May affect kidney function. Monitor eGFR.
+                                    </div>
+                                </div>
+
+                                <div class="interaction-alert safe">
+                                    <div style="font-size: 16px;">✅</div>
+                                    <div>
+                                        <strong>SAFE COMBINATION</strong><br>
+                                        No significant interactions detected with Vitamin D3 and Metformin.
+                                    </div>
+                                </div>
+
+                                <div style="background: white; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin-top: 15px;">
+                                    <div style="font-weight: 600; margin-bottom: 10px;">Contraindication Check</div>
+                                    <div style="font-size: 12px; line-height: 1.5;">
+                                        <div style="margin-bottom: 8px;">
+                                            ✅ <strong>Kidney Function:</strong> Safe for eGFR ≥ 45 mL/min (Current: 58)
+                                        </div>
+                                        <div style="margin-bottom: 8px;">
+                                            ⚠️ <strong>Age Considerations:</strong> Dose adjustment recommended for patients >65 years
+                                        </div>
+                                        <div>
+                                            ✅ <strong>Allergies:</strong> No cross-reactivity with documented allergies
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patient Instructions Tab -->
+                <div id="instructionsTab" class="tab-content">
+                    <div class="form-section">
+                        <div class="section-header">
+                            <span class="section-icon">📝</span>
+                            Patient Education & Instructions
+                        </div>
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label class="form-label">Directions for Use</label>
+                                <textarea class="form-textarea" id="patientDirections" 
+                                          placeholder="e.g., Take 1 tablet by mouth once daily at bedtime with a full glass of water"></textarea>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Indication</label>
+                                    <input type="text" class="form-input" id="indication" 
+                                           placeholder="e.g., High cholesterol">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Quantity to Dispense</label>
+                                    <input type="number" class="form-input" id="quantity" 
+                                           placeholder="30" min="1">
+                                </div>
+                            </div>
+
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Refills</label>
+                                    <select class="form-select" id="refills">
+                                        <option value="0">No refills</option>
+                                        <option value="1">1 refill</option>
+                                        <option value="2">2 refills</option>
+                                        <option value="3">3 refills</option>
+                                        <option value="5">5 refills</option>
+                                        <option value="11">PRN (11 refills)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Priority</label>
+                                    <select class="form-select" id="priority">
+                                        <option value="routine">Routine</option>
+                                        <option value="urgent">Urgent</option>
+                                        <option value="stat">STAT</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Special Instructions</label>
+                                <textarea class="form-textarea" id="specialInstructions" 
+                                          placeholder="Additional instructions, precautions, or monitoring requirements..."></textarea>
+                            </div>
+
+                            <div class="alert-box">
+                                <div class="alert-title">💡 Counseling Points</div>
+                                <div class="alert-content">
+                                    • Take at the same time each day for best results<br>
+                                    • May cause dizziness - rise slowly from sitting or lying position<br>
+                                    • Avoid grapefruit juice while taking this medication<br>
+                                    • Report muscle pain or weakness to healthcare provider
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Actions -->
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="saveDraft()">
+                    💾 Save Draft
+                </button>
+                <button class="btn btn-outline" onclick="previewPrescription()">
+                    👁️ Preview
+                </button>
+                <button class="btn btn-warning" onclick="checkInteractions()">
+                    🔍 Recheck Interactions
+                </button>
+                <button class="btn btn-success" onclick="submitPrescription()">
+                    ✅ Submit Prescription
+                </button>
+                <button class="btn btn-secondary" onclick="closeModal()">
+                    ❌ Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 2;
+        let selectedMedication = null;
+        let interactionCheckComplete = false;
+
+        // Tab switching
+        function switchTab(tabName, element) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.form-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            element.classList.add('active');
+        }
+
+        // Medication search functionality
+        function searchMedications(query) {
+            const searchResults = document.getElementById('searchResults');
+            if (query.length > 2) {
+                searchResults.style.display = 'block';
+                // In real implementation, this would filter results based on query
+            } else {
+                searchResults.style.display = 'none';
+            }
+        }
+
+        function showSearchResults() {
+            const searchResults = document.getElementById('searchResults');
+            const query = document.getElementById('medicationSearch').value;
+            if (query.length > 2) {
+                searchResults.style.display = 'block';
+            }
+        }
+
+        function hideSearchResults() {
+            setTimeout(() => {
+                document.getElementById('searchResults').style.display = 'none';
+            }, 200);
+        }
+
+        function selectMedication(name, strength) {
+            selectedMedication = { name, strength };
+            document.getElementById('medicationSearch').value = name;
+            document.getElementById('searchResults').style.display = 'none';
+            
+            // Auto-populate related fields
+            populateMedicationDetails(name);
+            
+            // Update progress
+            updateProgressStep(1, 'completed');
+            updateProgressStep(2, 'active');
+            
+            showNotification('success', `${name} selected successfully.`);
+        }
+
+        function populateMedicationDetails(medicationName) {
+            const medicationData = {
+                'Atorvastatin': {
+                    generic: 'Atorvastatin Calcium',
+                    drugClass: 'HMG-CoA Reductase Inhibitor',
+                    ndc: '12345-678-90',
+                    strengths: ['10mg', '20mg', '40mg', '80mg']
+                },
+                'Metformin': {
+                    generic: 'Metformin Hydrochloride',
+                    drugClass: 'Biguanide',
+                    ndc: '98765-432-10',
+                    strengths: ['500mg', '850mg', '1000mg']
+                },
+                'Lisinopril': {
+                    generic: 'Lisinopril',
+                    drugClass: 'ACE Inhibitor',
+                    ndc: '55555-777-88',
+                    strengths: ['2.5mg', '5mg', '10mg', '20mg']
+                }
+            };
+
+            const data = medicationData[medicationName];
+            if (data) {
+                document.getElementById('genericName').value = data.generic;
+                document.getElementById('drugClass').value = data.drugClass;
+                document.getElementById('ndcNumber').value = data.ndc;
+                
+                // Update strength options
+                const strengthSelect = document.getElementById('medicationStrength');
+                strengthSelect.innerHTML = '<option value="">Select strength...</option>';
+                data.strengths.forEach(strength => {
+                    strengthSelect.innerHTML += `<option value="${strength}">${strength}</option>`;
+                });
+            }
+        }
+
+        // Dosing calculator
+        function calculateDosing() {
+            const dose = document.getElementById('dose').value;
+            const frequency = document.getElementById('frequency').value;
+            
+            if (!dose || !frequency) return;
+            
+            const doseValue = parseFloat(dose.replace(/[^\d.]/g, ''));
+            if (isNaN(doseValue)) return;
+            
+            const frequencyMultipliers = {
+                'once_daily': 1,
+                'twice_daily': 2,
+                'three_times_daily': 3,
+                'four_times_daily': 4,
+                'every_other_day': 0.5,
+                'as_needed': 1
+            };
+            
+            const dailyMultiplier = frequencyMultipliers[frequency] || 1;
+            const dailyDose = doseValue * dailyMultiplier;
+            const weeklyDose = dailyDose * 7;
+            const monthlyDose = dailyDose * 30;
+            
+            document.getElementById('dailyDose').textContent = dailyDose + 'mg';
+            document.getElementById('weeklyDose').textContent = weeklyDose + 'mg';
+            document.getElementById('monthlyDose').textContent = monthlyDose + 'mg';
+            document.getElementById('pillsPerDay').textContent = dailyMultiplier;
+        }
+
+        // Progress step management
+        function updateProgressStep(stepNumber, status) {
+            const steps = document.querySelectorAll('.step-circle');
+            const step = steps[stepNumber - 1];
+            
+            step.className = 'step-circle ' + status;
+            
+            if (status === 'completed') {
+                step.innerHTML = '✓';
+            } else {
+                step.innerHTML = stepNumber;
+            }
+        }
+
+        // Interaction checking
+        function checkInteractions() {
+            document.getElementById('interactionLoading').style.display = 'block';
+            document.getElementById('interactionResults').style.display = 'none';
+            
+            // Simulate interaction check
+            setTimeout(() => {
+                document.getElementById('interactionLoading').style.display = 'none';
+                document.getElementById('interactionResults').style.display = 'block';
+                interactionCheckComplete = true;
+                
+                updateProgressStep(3, 'completed');
+                updateProgressStep(4, 'active');
+                
+                showNotification('warning', 'Critical interactions detected. Review safety alerts.');
+            }, 3000);
+        }
+
+        // Form actions
+        function saveDraft() {
+            showNotification('info', 'Prescription saved as draft.');
+        }
+
+        function previewPrescription() {
+            if (!selectedMedication) {
+                showNotification('warning', 'Please select a medication first.');
+                return;
+            }
+            showNotification('info', 'Opening prescription preview...');
+        }
+
+        function submitPrescription() {
+            if (!selectedMedication) {
+                showNotification('error', 'Please select a medication first.');
+                return;
+            }
+            
+            if (!interactionCheckComplete) {
+                showNotification('warning', 'Please complete interaction check before submitting.');
+                return;
+            }
+            
+            // Validate required fields
+            const requiredFields = ['dose', 'frequency', 'route', 'patientDirections'];
+            let hasErrors = false;
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    field.classList.add('invalid');
+                    hasErrors = true;
+                } else {
+                    field.classList.remove('invalid');
+                    field.classList.add('valid');
+                }
+            });
+            
+            if (hasErrors) {
+                showNotification('error', 'Please complete all required fields.');
+                return;
+            }
+            
+            showNotification('success', 'Prescription submitted successfully!');
+            setTimeout(() => {
+                closeModal();
+            }, 2000);
+        }
+
+        function closeModal() {
+            document.querySelector('.modal-overlay').style.display = 'none';
+        }
+
+        // Notification system
+        function showNotification(type, message) {
+            const notification = document.createElement('div');
+            notification.className = `interaction-alert ${type}`;
+            notification.style.position = 'fixed';
+            notification.style.top = '80px';
+            notification.style.right = '20px';
+            notification.style.zIndex = '9999';
+            notification.style.minWidth = '300px';
+            notification.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            
+            const icons = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'warning': '⚠️',
+                'error': '🚨'
+            };
+            
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>${icons[type] || 'ℹ️'}</span>
+                    <span style="flex: 1;">${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 16px;">
+                        ✕
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simulate interaction check on load
+            setTimeout(() => {
+                checkInteractions();
+            }, 1000);
+            
+            showNotification('info', 'Medication entry form initialized. Complete all tabs before submitting.');
+        });
+
+        // Close modal when clicking outside
+        document.querySelector('.modal-overlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        console.log('Medication Entry Form Loaded');
+    </script>
+</body>
+</html>

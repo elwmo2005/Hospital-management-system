@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dispensing Management - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1600px;
+        }
+
+        /* Three-column layout for dispensing */
+        .dispensing-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 380px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Dispensing Queue */
+        .dispensing-queue {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .queue-filters {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .filter-group {
+            margin-bottom: 12px;
+        }
+
+        .filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-row .filter-input,
+        .filter-row .filter-select {
+            flex: 1;
+        }
+
+        .search-button {
+            width: 100%;
+            padding: 8px 12px;
+            background: #3d9aef;
+            border: 1px solid #3d9aef;
+            border-radius: 3px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* Queue Stats */
+        .queue-stats {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .stat-box {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 6px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .stat-box.ready {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+
+        .stat-box.waiting {
+            border-color: #ffc107;
+            background: #fffdf0;
+        }
+
+        .dispensing-items-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .dispensing-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .dispensing-item:hover {
+            background: #f8f9fa;
+        }
+
+        .dispensing-item.selected {
+            background: #e8f4fd;
+            border-left: 3px solid #3d9aef;
+        }
+
+        .dispensing-item.ready {
+            border-left: 3px solid #28a745;
+        }
+
+        .dispensing-item.stat {
+            border-left: 3px solid #dc3545;
+        }
+
+        .dispensing-item.counseling {
+            border-left: 3px solid #ffc107;
+        }
+
+        .dispensing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .dispensing-id {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .dispensing-priority {
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .priority-routine { background: #e2e8f0; color: #4a5568; }
+        .priority-urgent { background: #fff3cd; color: #856404; }
+        .priority-stat { background: #f8d7da; color: #721c24; }
+
+        .dispensing-patient {
+            font-size: 12px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .dispensing-medication {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .dispensing-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .dispensing-status {
+            padding: 1px 4px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .status-ready { background: #d4edda; color: #155724; }
+        .status-filling { background: #cce5ff; color: #004085; }
+        .status-checking { background: #fff3cd; color: #856404; }
+        .status-counseling { background: #e2e8f0; color: #4a5568; }
+        .status-complete { background: #d1ecf1; color: #0c5460; }
+
+        .time-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .time-normal { background: #28a745; }
+        .time-warning { background: #ffc107; }
+        .time-critical { background: #dc3545; }
+
+        /* Center Panel - Dispensing Workflow */
+        .dispensing-content {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dispensing-tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .dispensing-tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .dispensing-tab.active {
+            background: white;
+            border-bottom-color: #3d9aef;
+            color: #3d9aef;
+        }
+
+        .dispensing-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .dispensing-workflow {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Workflow Steps */
+        .workflow-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .workflow-steps::before {
+            content: '';
+            position: absolute;
+            top: 30px;
+            left: 50px;
+            right: 50px;
+            height: 2px;
+            background: #dee2e6;
+            z-index: 1;
+        }
+
+        .workflow-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            background: #f8f9fa;
+            padding: 0 10px;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-bottom: 8px;
+            border: 2px solid #dee2e6;
+            background: white;
+            color: #666;
+        }
+
+        .step.active .step-icon {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .step.completed .step-icon {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+        }
+
+        /* Prescription Details */
+        .prescription-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .prescription-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .prescription-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .prescription-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .prescription-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .detail-value {
+            color: #666;
+        }
+
+        /* Medication Cards */
+        .medication-cards {
+            margin-bottom: 20px;
+        }
+
+        .medication-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .medication-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .medication-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .medication-strength {
+            font-size: 14px;
+            color: #666;
+            margin-left: 8px;
+        }
+
+        .medication-status {
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .med-status-ready { background: #d4edda; color: #155724; }
+        .med-status-filling { background: #cce5ff; color: #004085; }
+        .med-status-complete { background: #d1ecf1; color: #0c5460; }
+
+        .medication-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 12px;
+        }
+
+        .med-detail {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .med-detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .med-detail-value {
+            color: #666;
+        }
+
+        /* Barcode Verification */
+        .barcode-section {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .barcode-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .barcode-icon {
+            margin-right: 8px;
+            font-size: 16px;
+            color: #3d9aef;
+        }
+
+        .barcode-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .barcode-status {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 3px;
+            text-align: center;
+        }
+
+        .barcode-verified {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .barcode-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        /* Right Panel - Patient & Quality Assurance */
+        .dispensing-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Patient Information */
+        .patient-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .patient-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .patient-details {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Quality Checks */
+        .quality-checklist {
+            margin-bottom: 15px;
+        }
+
+        .quality-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+        }
+
+        .quality-item:last-child {
+            border-bottom: none;
+        }
+
+        .quality-checkbox {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+        }
+
+        .quality-text {
+            flex: 1;
+            color: #333;
+        }
+
+        .quality-status {
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .check-pass { background: #d4edda; color: #155724; }
+        .check-pending { background: #fff3cd; color: #856404; }
+
+        /* Insurance Information */
+        .insurance-card {
+            background: #e8f4fd;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .insurance-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .insurance-details {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.3;
+        }
+
+        .copay-amount {
+            font-size: 16px;
+            font-weight: bold;
+            color: #28a745;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* Action Buttons */
+        .action-button {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+
+        .action-button:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        .action-button.primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .action-button.success {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .action-button.warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #333;
+        }
+
+        .action-button.danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .action-icon {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        /* Counseling Notes */
+        .counseling-section {
+            background: #fff9c4;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .counseling-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .counseling-points {
+            font-size: 11px;
+            color: #856404;
+            line-height: 1.4;
+        }
+
+        .counseling-points ul {
+            margin: 0;
+            padding-left: 16px;
+        }
+
+        .counseling-points li {
+            margin-bottom: 4px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-info {
+            background: #cce5ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Region Header */
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Digital Signature Pad */
+        .signature-pad {
+            border: 2px solid #dee2e6;
+            border-radius: 4px;
+            background: white;
+            cursor: crosshair;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dispensing-layout {
+                grid-template-columns: 320px 1fr 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .dispensing-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .prescription-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">PD</div>
+                <span>(Pharmacy Dispenser)</span>
+            </div>
+            <span style="margin-right: 15px;">🌐 Select Language ▾</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Patient Registration</span></div>
+                <div class="nav-item"><span>Patient Search</span></div>
+                <div class="nav-item"><span>Admission/Discharge</span></div>
+                <div class="nav-item"><span>Emergency Triage</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Medical Records</span></div>
+                <div class="nav-item"><span>Vital Signs</span></div>
+                <div class="nav-item"><span>Procedure Scheduling</span></div>
+                <div class="nav-item"><span>Discharge Planning</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Test Orders</span></div>
+                <div class="nav-item"><span>Sample Tracking</span></div>
+                <div class="nav-item"><span>Results Entry</span></div>
+                <div class="nav-item"><span>Lab Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item">
+                    <span>Prescription Management</span>
+                </div>
+                <div class="nav-item">
+                    <span>Drug Inventory</span>
+                </div>
+                <div class="nav-item active">
+                    <span>Dispensing</span>
+                </div>
+                <div class="nav-item">
+                    <span>Drug Interactions</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Invoice Generation</span></div>
+                <div class="nav-item"><span>Insurance Claims</span></div>
+                <div class="nav-item"><span>Payment Tracking</span></div>
+                <div class="nav-item"><span>Financial Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Employee Records</span></div>
+                <div class="nav-item"><span>Schedule Management</span></div>
+                <div class="nav-item"><span>Department Assignment</span></div>
+                <div class="nav-item"><span>Performance Tracking</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Risk Predictions</span></div>
+                <div class="nav-item"><span>Diagnostic Assistance</span></div>
+                <div class="nav-item"><span>Model Performance</span></div>
+                <div class="nav-item"><span>Classification Results</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>System Configuration</span></div>
+                <div class="nav-item"><span>User Management</span></div>
+                <div class="nav-item"><span>Audit Reports</span></div>
+                <div class="nav-item"><span>Security Settings</span></div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Pharmacy</a> › Dispensing
+                    </div>
+                    <h1 class="page-title">Medication Dispensing</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="batchFill()">
+                        📦 Batch Fill
+                    </button>
+                    <button class="btn btn-warning" onclick="printPickList()">
+                        📋 Pick List
+                    </button>
+                    <button class="btn btn-secondary" onclick="dispensingReport()">
+                        📊 Reports
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Three-column Dispensing Layout -->
+                <div class="dispensing-layout">
+                    <!-- Left Panel - Dispensing Queue -->
+                    <div class="dispensing-queue">
+                        <div class="region-header">
+                            <span class="icon">💊</span>
+                            Dispensing Queue
+                        </div>
+                        
+                        <div class="queue-stats">
+                            <div class="stat-box ready">
+                                <div class="stat-number">8</div>
+                                <div class="stat-label">Ready</div>
+                            </div>
+                            <div class="stat-box waiting">
+                                <div class="stat-number">4</div>
+                                <div class="stat-label">Filling</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-number">12</div>
+                                <div class="stat-label">Total</div>
+                            </div>
+                        </div>
+
+                        <div class="queue-filters">
+                            <div class="filter-group">
+                                <label class="filter-label">Patient Search</label>
+                                <input type="text" class="filter-input" placeholder="Name, MRN, or Phone..." 
+                                       id="patientSearchInput" oninput="searchDispensing()">
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Status & Priority</label>
+                                <div class="filter-row">
+                                    <select class="filter-select" id="statusFilter" onchange="filterDispensing()">
+                                        <option value="">All Status</option>
+                                        <option value="READY">Ready to Fill</option>
+                                        <option value="FILLING">Filling</option>
+                                        <option value="CHECKING">Quality Check</option>
+                                        <option value="COUNSELING">Counseling</option>
+                                        <option value="COMPLETE">Complete</option>
+                                    </select>
+                                    <select class="filter-select" id="priorityFilter" onchange="filterDispensing()">
+                                        <option value="">All Priority</option>
+                                        <option value="STAT">STAT</option>
+                                        <option value="URGENT">Urgent</option>
+                                        <option value="ROUTINE">Routine</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <button class="search-button" onclick="searchDispensing()">
+                                🔍 Search Queue
+                            </button>
+                        </div>
+
+                        <div class="dispensing-items-container" id="dispensingContainer">
+                            <!-- Dispensing queue items will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Center Panel - Dispensing Workflow -->
+                    <div class="dispensing-content">
+                        <div class="dispensing-tabs">
+                            <div class="dispensing-tab active" onclick="switchTab('dispensing', this)">Dispensing</div>
+                            <div class="dispensing-tab" onclick="switchTab('counseling', this)">Counseling</div>
+                            <div class="dispensing-tab" onclick="switchTab('pickup', this)">Pickup/Delivery</div>
+                        </div>
+
+                        <div class="dispensing-workflow" id="dispensingWorkflow">
+                            <div id="defaultContent">
+                                <div class="alert alert-info">
+                                    <strong>💊 Medication Dispensing Workflow</strong><br>
+                                    Select a prescription from the queue to begin the dispensing process. Follow the workflow steps for accurate medication preparation and patient safety.
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-top: 20px;">
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6;">
+                                        <h4 style="margin-bottom: 10px; color: #333;">Today's Dispensing</h4>
+                                        <div style="font-size: 12px; line-height: 1.6;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Prescriptions Filled:</span>
+                                                <span style="font-weight: 600;">67</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Average Fill Time:</span>
+                                                <span style="font-weight: 600; color: #28a745;">6 minutes</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Quality Checks:</span>
+                                                <span style="font-weight: 600; color: #3d9aef;">98.5%</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span>Patient Counseling:</span>
+                                                <span style="font-weight: 600;">45</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6;">
+                                        <h4 style="margin-bottom: 10px; color: #333;">Quality Metrics</h4>
+                                        <div style="font-size: 12px; line-height: 1.6;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Accuracy Rate:</span>
+                                                <span style="font-weight: 600; color: #28a745;">99.8%</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Dispensing Errors:</span>
+                                                <span style="font-weight: 600; color: #dc3545;">0</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Returns/Exchanges:</span>
+                                                <span style="font-weight: 600;">2</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span>Patient Satisfaction:</span>
+                                                <span style="font-weight: 600; color: #28a745;">4.9/5</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; border: 1px solid #dee2e6;">
+                                        <h4 style="margin-bottom: 10px; color: #333;">Workflow Status</h4>
+                                        <div style="font-size: 12px; line-height: 1.6;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Ready to Fill:</span>
+                                                <span style="font-weight: 600; color: #28a745;">8</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Currently Filling:</span>
+                                                <span style="font-weight: 600; color: #3d9aef;">4</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                                                <span>Awaiting Pickup:</span>
+                                                <span style="font-weight: 600; color: #ffc107;">15</span>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span>STAT Orders:</span>
+                                                <span style="font-weight: 600; color: #dc3545;">2</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="selectedDispensingContent" style="display: none;">
+                                <!-- Selected dispensing details will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Patient Info & Quality Assurance -->
+                    <div class="dispensing-panel">
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">👤</span>
+                                Patient Information
+                            </h4>
+                            <div class="patient-card" id="patientCard">
+                                <div style="text-align: center; color: #666; font-size: 11px; padding: 10px;">
+                                    Select a prescription to view patient details
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">🏥</span>
+                                Insurance & Billing
+                            </h4>
+                            <div class="insurance-card" id="insuranceCard">
+                                <div style="text-align: center; color: #666; font-size: 11px; padding: 10px;">
+                                    Select a prescription to view insurance details
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">✅</span>
+                                Quality Assurance
+                            </h4>
+                            <div class="quality-checklist" id="qualityChecklist">
+                                <div class="quality-item">
+                                    <input type="checkbox" class="quality-checkbox" id="check1">
+                                    <span class="quality-text">Right Patient</span>
+                                    <span class="quality-status check-pending">PENDING</span>
+                                </div>
+                                <div class="quality-item">
+                                    <input type="checkbox" class="quality-checkbox" id="check2">
+                                    <span class="quality-text">Right Medication</span>
+                                    <span class="quality-status check-pending">PENDING</span>
+                                </div>
+                                <div class="quality-item">
+                                    <input type="checkbox" class="quality-checkbox" id="check3">
+                                    <span class="quality-text">Right Dose</span>
+                                    <span class="quality-status check-pending">PENDING</span>
+                                </div>
+                                <div class="quality-item">
+                                    <input type="checkbox" class="quality-checkbox" id="check4">
+                                    <span class="quality-text">Right Route</span>
+                                    <span class="quality-status check-pending">PENDING</span>
+                                </div>
+                                <div class="quality-item">
+                                    <input type="checkbox" class="quality-checkbox" id="check5">
+                                    <span class="quality-text">Right Time</span>
+                                    <span class="quality-status check-pending">PENDING</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">⚡</span>
+                                Quick Actions
+                            </h4>
+                            <button class="action-button primary" onclick="startFilling()">
+                                <span class="action-icon">🧪</span>
+                                Start Filling
+                            </button>
+                            <button class="action-button success" onclick="verifyMedication()">
+                                <span class="action-icon">✓</span>
+                                Verify Medication
+                            </button>
+                            <button class="action-button warning" onclick="printLabel()">
+                                <span class="action-icon">🏷️</span>
+                                Print Label
+                            </button>
+                            <button class="action-button" onclick="patientCounseling()">
+                                <span class="action-icon">💬</span>
+                                Patient Counseling
+                            </button>
+                            <button class="action-button" onclick="completeDispensing()">
+                                <span class="action-icon">📦</span>
+                                Complete Dispensing
+                            </button>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">💬</span>
+                                Counseling Points
+                            </h4>
+                            <div class="counseling-section" id="counselingPoints">
+                                <div style="text-align: center; color: #666; font-size: 11px; padding: 10px;">
+                                    Select a medication to view counseling points
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📋</span>
+                                Dispensing Notes
+                            </h4>
+                            <textarea class="form-textarea" id="dispensingNotes" 
+                                      placeholder="Add dispensing notes or patient instructions..." rows="3"></textarea>
+                            <button class="btn btn-secondary" onclick="saveDispensingNotes()" style="margin-top: 8px; width: 100%;">
+                                Save Notes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Signature Modal -->
+    <div id="signatureModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📝 Patient Signature</h3>
+                <button class="modal-close" onclick="closeModal('signatureModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <strong>Patient Acknowledgment</strong><br>
+                    Patient signature required for medication receipt and counseling confirmation
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label class="form-label">Patient Name</label>
+                    <input type="text" class="form-input" id="signaturePatientName" readonly>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label class="form-label">Signature</label>
+                    <canvas class="signature-pad" id="signaturePad" width="500" height="150"></canvas>
+                    <button class="btn btn-secondary" onclick="clearSignature()" style="margin-top: 5px;">
+                        Clear Signature
+                    </button>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <div style="font-size: 12px; color: #666; line-height: 1.4;">
+                        <input type="checkbox" id="counselingConfirm" style="margin-right: 8px;">
+                        <label for="counselingConfirm">I confirm that I have received medication counseling and understand the instructions for use.</label>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('signatureModal')">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="completeSignature()">
+                        ✓ Complete Dispensing
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const dispensingData = [
+            {
+                id: 'DISP-2024-1215-001',
+                rxId: 'RX-2024-1215-001',
+                patientName: 'Ahmed Hassan',
+                patientId: 'MRN-20241215-0001',
+                age: 46,
+                phone: '+20-12-345-6789',
+                rxDate: '2024-12-15 14:30',
+                priority: 'STAT',
+                status: 'READY',
+                medications: [
+                    {
+                        name: 'Metoprolol',
+                        strength: '50mg',
+                        form: 'Tablet',
+                        quantity: 30,
+                        directions: 'Take 1 tablet twice daily with food',
+                        ndc: '12345-678-90',
+                        status: 'READY'
+                    }
+                ],
+                insurance: {
+                    provider: 'Egyptian Health Insurance',
+                    id: 'EHI-2024-4567',
+                    copay: 'EGP 15'
+                },
+                allergies: ['Penicillin', 'Sulfa'],
+                timeIndicator: 'critical'
+            },
+            {
+                id: 'DISP-2024-1215-002',
+                rxId: 'RX-2024-1215-002',
+                patientName: 'Fatima Al-Zahra',
+                patientId: 'MRN-20241215-0002',
+                age: 29,
+                phone: '+20-10-987-6543',
+                rxDate: '2024-12-15 13:45',
+                priority: 'URGENT',
+                status: 'FILLING',
+                medications: [
+                    {
+                        name: 'Amoxicillin',
+                        strength: '500mg',
+                        form: 'Capsule',
+                        quantity: 21,
+                        directions: 'Take 1 capsule three times daily for 7 days',
+                        ndc: '98765-432-10',
+                        status: 'FILLING'
+                    }
+                ],
+                insurance: {
+                    provider: 'Private Insurance Co.',
+                    id: 'PIC-2024-8901',
+                    copay: 'EGP 25'
+                },
+                allergies: ['None Known'],
+                timeIndicator: 'warning'
+            },
+            {
+                id: 'DISP-2024-1215-003',
+                rxId: 'RX-2024-1215-003',
+                patientName: 'Omar Khaled',
+                patientId: 'MRN-20241214-0045',
+                age: 62,
+                phone: '+20-11-555-7788',
+                rxDate: '2024-12-15 12:30',
+                priority: 'ROUTINE',
+                status: 'COUNSELING',
+                medications: [
+                    {
+                        name: 'Atorvastatin',
+                        strength: '20mg',
+                        form: 'Tablet',
+                        quantity: 90,
+                        directions: 'Take 1 tablet daily at bedtime',
+                        ndc: '55555-777-88',
+                        status: 'COMPLETE'
+                    }
+                ],
+                insurance: {
+                    provider: 'Government Insurance',
+                    id: 'GOV-2024-1122',
+                    copay: 'EGP 10'
+                },
+                allergies: ['Aspirin'],
+                timeIndicator: 'normal'
+            }
+        ];
+
+        let selectedDispensing = null;
+        let filteredDispensing = [...dispensingData];
+        let currentTab = 'dispensing';
+        let signaturePad = null;
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDispensingQueue();
+            initializeQualityChecks();
+        });
+
+        // Load dispensing queue
+        function loadDispensingQueue() {
+            const container = document.getElementById('dispensingContainer');
+            
+            container.innerHTML = filteredDispensing.map(item => `
+                <div class="dispensing-item ${getStatusClass(item)} ${selectedDispensing?.id === item.id ? 'selected' : ''}" 
+                     onclick="selectDispensing('${item.id}')" data-dispensing-id="${item.id}">
+                    <div class="time-indicator ${item.timeIndicator}"></div>
+                    <div class="dispensing-header">
+                        <div class="dispensing-id">${item.rxId}</div>
+                        <div class="dispensing-priority priority-${item.priority.toLowerCase()}">${item.priority}</div>
+                    </div>
+                    <div class="dispensing-patient">${item.patientName}</div>
+                    <div class="dispensing-medication">${item.medications[0].name} ${item.medications[0].strength}</div>
+                    <div class="dispensing-meta">
+                        <span>${formatTime(item.rxDate)}</span>
+                        <span class="dispensing-status status-${item.status.toLowerCase()}">${item.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get status class for styling
+        function getStatusClass(item) {
+            switch(item.status) {
+                case 'READY': return 'ready';
+                case 'STAT': return 'stat';
+                case 'COUNSELING': return 'counseling';
+                default: return '';
+            }
+        }
+
+        // Select dispensing item
+        function selectDispensing(dispensingId) {
+            selectedDispensing = dispensingData.find(d => d.id === dispensingId);
+            
+            // Update UI selection
+            document.querySelectorAll('.dispensing-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.querySelector(`[data-dispensing-id="${dispensingId}"]`).classList.add('selected');
+            
+            // Update dispensing details
+            updateDispensingDetails();
+            updatePatientInfo();
+            updateInsuranceInfo();
+            updateCounselingPoints();
+            resetQualityChecks();
+        }
+
+        // Update dispensing details
+        function updateDispensingDetails() {
+            if (!selectedDispensing) return;
+            
+            const defaultContent = document.getElementById('defaultContent');
+            const selectedContent = document.getElementById('selectedDispensingContent');
+            
+            defaultContent.style.display = 'none';
+            selectedContent.style.display = 'block';
+            
+            if (currentTab === 'dispensing') {
+                selectedContent.innerHTML = `
+                    <div class="workflow-steps">
+                        <div class="workflow-step step ${getStepStatus(selectedDispensing.status, 'READY')}" data-step="ready">
+                            <div class="step-icon">📋</div>
+                            <div class="step-label">Ready</div>
+                        </div>
+                        <div class="workflow-step step ${getStepStatus(selectedDispensing.status, 'FILLING')}" data-step="filling">
+                            <div class="step-icon">💊</div>
+                            <div class="step-label">Filling</div>
+                        </div>
+                        <div class="workflow-step step ${getStepStatus(selectedDispensing.status, 'CHECKING')}" data-step="checking">
+                            <div class="step-icon">✅</div>
+                            <div class="step-label">QC Check</div>
+                        </div>
+                        <div class="workflow-step step ${getStepStatus(selectedDispensing.status, 'COUNSELING')}" data-step="counseling">
+                            <div class="step-icon">💬</div>
+                            <div class="step-label">Counseling</div>
+                        </div>
+                        <div class="workflow-step step ${getStepStatus(selectedDispensing.status, 'COMPLETE')}" data-step="complete">
+                            <div class="step-icon">📦</div>
+                            <div class="step-label">Complete</div>
+                        </div>
+                    </div>
+
+                    <div class="prescription-card">
+                        <div class="prescription-header">
+                            <div class="prescription-title">Prescription ${selectedDispensing.rxId}</div>
+                            <div class="prescription-actions">
+                                <button class="btn btn-primary" onclick="printLabel()">🏷️ Label</button>
+                                <button class="btn btn-secondary" onclick="viewHistory()">📜 History</button>
+                            </div>
+                        </div>
+                        <div class="prescription-details">
+                            <div class="detail-item">
+                                <span class="detail-label">Patient:</span>
+                                <span class="detail-value">${selectedDispensing.patientName}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">MRN:</span>
+                                <span class="detail-value">${selectedDispensing.patientId}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Age:</span>
+                                <span class="detail-value">${selectedDispensing.age} years</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Priority:</span>
+                                <span class="detail-value">${selectedDispensing.priority}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Prescription Date:</span>
+                                <span class="detail-value">${formatDateTime(selectedDispensing.rxDate)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Status:</span>
+                                <span class="detail-value">${selectedDispensing.status}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="medication-cards">
+                        <h3 style="margin-bottom: 15px; color: #333;">Medications to Dispense</h3>
+                        ${selectedDispensing.medications.map(medication => `
+                            <div class="medication-card">
+                                <div class="medication-header">
+                                    <div>
+                                        <span class="medication-name">${medication.name}</span>
+                                        <span class="medication-strength">${medication.strength}</span>
+                                    </div>
+                                    <div class="medication-status med-status-${medication.status.toLowerCase()}">${medication.status}</div>
+                                </div>
+                                <div class="medication-grid">
+                                    <div class="med-detail">
+                                        <span class="med-detail-label">Form:</span>
+                                        <span class="med-detail-value">${medication.form}</span>
+                                    </div>
+                                    <div class="med-detail">
+                                        <span class="med-detail-label">Quantity:</span>
+                                        <span class="med-detail-value">${medication.quantity}</span>
+                                    </div>
+                                    <div class="med-detail">
+                                        <span class="med-detail-label">NDC:</span>
+                                        <span class="med-detail-value">${medication.ndc}</span>
+                                    </div>
+                                </div>
+                                <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 3px; padding: 10px; margin-top: 10px;">
+                                    <strong>Directions for Use:</strong><br>
+                                    ${medication.directions}
+                                </div>
+                                
+                                <div class="barcode-section">
+                                    <div class="barcode-header">
+                                        <span class="barcode-icon">📱</span>
+                                        Barcode Verification
+                                    </div>
+                                    <input type="text" class="barcode-input" placeholder="Scan or enter NDC barcode" 
+                                           onchange="verifyBarcode(this.value, '${medication.ndc}')">
+                                    <div class="barcode-status barcode-pending" id="barcode-status-${medication.ndc}">
+                                        Scan to verify medication
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (currentTab === 'counseling') {
+                selectedContent.innerHTML = `
+                    <div class="prescription-card">
+                        <div class="prescription-header">
+                            <div class="prescription-title">Patient Counseling - ${selectedDispensing.patientName}</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4 style="margin-bottom: 15px; color: #333;">Medication Education</h4>
+                            ${selectedDispensing.medications.map(medication => `
+                                <div class="medication-card">
+                                    <div style="font-weight: 600; margin-bottom: 10px;">${medication.name} ${medication.strength}</div>
+                                    <div style="font-size: 12px; line-height: 1.5;">
+                                        <div style="margin-bottom: 8px;">
+                                            <strong>Purpose:</strong> ${getMedicationPurpose(medication.name)}
+                                        </div>
+                                        <div style="margin-bottom: 8px;">
+                                            <strong>How to Take:</strong> ${medication.directions}
+                                        </div>
+                                        <div style="margin-bottom: 8px;">
+                                            <strong>Side Effects:</strong> ${getSideEffects(medication.name)}
+                                        </div>
+                                        <div>
+                                            <strong>Precautions:</strong> ${getPrecautions(medication.name)}
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div>
+                            <h4 style="margin-bottom: 15px; color: #333;">Patient Understanding</h4>
+                            <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px;">
+                                <div style="margin-bottom: 12px;">
+                                    <input type="checkbox" id="understand1" style="margin-right: 8px;">
+                                    <label for="understand1" style="font-size: 12px;">Patient understands medication purpose</label>
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <input type="checkbox" id="understand2" style="margin-right: 8px;">
+                                    <label for="understand2" style="font-size: 12px;">Patient understands dosing schedule</label>
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <input type="checkbox" id="understand3" style="margin-right: 8px;">
+                                    <label for="understand3" style="font-size: 12px;">Patient understands side effects</label>
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <input type="checkbox" id="understand4" style="margin-right: 8px;">
+                                    <label for="understand4" style="font-size: 12px;">Patient has no additional questions</label>
+                                </div>
+                                <div>
+                                    <input type="checkbox" id="understand5" style="margin-right: 8px;">
+                                    <label for="understand5" style="font-size: 12px;">Medication guide provided</label>
+                                </div>
+                            </div>
+
+                            <h4 style="margin: 20px 0 15px 0; color: #333;">Counseling Notes</h4>
+                            <textarea class="form-textarea" placeholder="Document counseling conversation and patient questions..." rows="5"></textarea>
+                            
+                            <button class="btn btn-success" onclick="completeCounseling()" style="width: 100%; margin-top: 15px;">
+                                ✓ Complete Counseling
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (currentTab === 'pickup') {
+                selectedContent.innerHTML = `
+                    <div class="prescription-card">
+                        <div class="prescription-header">
+                            <div class="prescription-title">Pickup & Delivery - ${selectedDispensing.patientName}</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4 style="margin-bottom: 15px; color: #333;">Pickup Information</h4>
+                            <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin-bottom: 15px;">
+                                <div class="form-group">
+                                    <label class="form-label">Pickup Method</label>
+                                    <select class="form-select">
+                                        <option>Patient Pickup</option>
+                                        <option>Authorized Representative</option>
+                                        <option>Delivery Service</option>
+                                        <option>Mail Delivery</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Pickup Person ID</label>
+                                    <input type="text" class="form-input" placeholder="ID number for verification">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Pickup Date & Time</label>
+                                    <input type="datetime-local" class="form-input" value="${new Date().toISOString().slice(0, 16)}">
+                                </div>
+                            </div>
+
+                            <h4 style="margin-bottom: 15px; color: #333;">Payment Information</h4>
+                            <div style="background: #e8f4fd; border: 1px solid #bee5eb; border-radius: 4px; padding: 15px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span>Insurance Coverage:</span>
+                                    <span style="font-weight: 600;">$${calculateCoverage(selectedDispensing)}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                    <span>Patient Copay:</span>
+                                    <span style="font-weight: 600; color: #dc3545;">${selectedDispensing.insurance.copay}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; border-top: 1px solid #bee5eb; padding-top: 8px; margin-top: 8px;">
+                                    <span style="font-weight: 600;">Total Due:</span>
+                                    <span style="font-weight: 600; font-size: 16px; color: #dc3545;">${selectedDispensing.insurance.copay}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="margin-bottom: 15px; color: #333;">Final Verification</h4>
+                            <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px; padding: 15px; margin-bottom: 15px;">
+                                <div style="font-weight: 600; margin-bottom: 8px;">Before completing pickup:</div>
+                                <div style="font-size: 12px; line-height: 1.5;">
+                                    <div style="margin-bottom: 4px;">✓ Verify patient/representative identity</div>
+                                    <div style="margin-bottom: 4px;">✓ Confirm medication understanding</div>
+                                    <div style="margin-bottom: 4px;">✓ Collect payment if applicable</div>
+                                    <div>✓ Obtain patient signature</div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary" onclick="openSignatureModal()" style="width: 100%; margin-bottom: 10px;">
+                                📝 Collect Patient Signature
+                            </button>
+                            
+                            <button class="btn btn-success" onclick="completePickup()" style="width: 100%;">
+                                🎉 Complete Pickup
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Get step status for workflow
+        function getStepStatus(currentStatus, stepStatus) {
+            const statusOrder = ['READY', 'FILLING', 'CHECKING', 'COUNSELING', 'COMPLETE'];
+            const currentIndex = statusOrder.indexOf(currentStatus);
+            const stepIndex = statusOrder.indexOf(stepStatus);
+            
+            if (stepIndex < currentIndex) return 'completed';
+            if (stepIndex === currentIndex) return 'active';
+            return '';
+        }
+
+        // Update patient info
+        function updatePatientInfo() {
+            const patientCard = document.getElementById('patientCard');
+            
+            if (!selectedDispensing) {
+                patientCard.innerHTML = '<div style="text-align: center; color: #666; font-size: 11px; padding: 10px;">Select a prescription to view patient details</div>';
+                return;
+            }
+            
+            patientCard.innerHTML = `
+                <div class="patient-name">${selectedDispensing.patientName}</div>
+                <div class="patient-details">
+                    <strong>MRN:</strong> ${selectedDispensing.patientId}<br>
+                    <strong>Age:</strong> ${selectedDispensing.age} years<br>
+                    <strong>Phone:</strong> ${selectedDispensing.phone}<br>
+                    <strong>Allergies:</strong> ${selectedDispensing.allergies.join(', ')}
+                </div>
+            `;
+        }
+
+        // Update insurance info
+        function updateInsuranceInfo() {
+            const insuranceCard = document.getElementById('insuranceCard');
+            
+            if (!selectedDispensing) {
+                insuranceCard.innerHTML = '<div style="text-align: center; color: #666; font-size: 11px; padding: 10px;">Select a prescription to view insurance details</div>';
+                return;
+            }
+            
+            const insurance = selectedDispensing.insurance;
+            insuranceCard.innerHTML = `
+                <div class="insurance-header">${insurance.provider}</div>
+                <div class="insurance-details">
+                    <strong>Policy ID:</strong> ${insurance.id}<br>
+                    <strong>Status:</strong> Active<br>
+                    <strong>Coverage:</strong> 80%
+                </div>
+                <div class="copay-amount">${insurance.copay}</div>
+            `;
+        }
+
+        // Update counseling points
+        function updateCounselingPoints() {
+            const counselingPoints = document.getElementById('counselingPoints');
+            
+            if (!selectedDispensing) {
+                counselingPoints.innerHTML = '<div style="text-align: center; color: #666; font-size: 11px; padding: 10px;">Select a medication to view counseling points</div>';
+                return;
+            }
+            
+            const medication = selectedDispensing.medications[0];
+            const points = getCounselingPoints(medication.name);
+            
+            counselingPoints.innerHTML = `
+                <div class="counseling-header">Key Counseling Points</div>
+                <div class="counseling-points">
+                    <ul>
+                        ${points.map(point => `<li>${point}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Get counseling points for medication
+        function getCounselingPoints(medicationName) {
+            const counselingMap = {
+                'Metoprolol': [
+                    'Take with food to reduce stomach upset',
+                    'Monitor blood pressure regularly',
+                    'Do not stop suddenly - may cause rebound hypertension',
+                    'May cause dizziness - rise slowly from sitting/lying'
+                ],
+                'Amoxicillin': [
+                    'Take entire course even if feeling better',
+                    'Take with food if stomach upset occurs',
+                    'Report any allergic reactions immediately',
+                    'Avoid alcohol during treatment'
+                ],
+                'Atorvastatin': [
+                    'Take at bedtime for best effectiveness',
+                    'Avoid grapefruit juice during treatment',
+                    'Report muscle pain or weakness',
+                    'Regular liver function monitoring required'
+                ]
+            };
+            
+            return counselingMap[medicationName] || ['Follow medication directions as prescribed', 'Contact pharmacy with any questions'];
+        }
+
+        // Get medication purpose
+        function getMedicationPurpose(medicationName) {
+            const purposeMap = {
+                'Metoprolol': 'Controls high blood pressure and prevents heart problems',
+                'Amoxicillin': 'Antibiotic to treat bacterial infections',
+                'Atorvastatin': 'Lowers cholesterol to prevent heart disease'
+            };
+            return purposeMap[medicationName] || 'Prescribed for your medical condition';
+        }
+
+        // Get side effects
+        function getSideEffects(medicationName) {
+            const sideEffectsMap = {
+                'Metoprolol': 'Fatigue, dizziness, cold hands/feet',
+                'Amoxicillin': 'Nausea, diarrhea, stomach upset',
+                'Atorvastatin': 'Muscle aches, stomach upset, headache'
+            };
+            return sideEffectsMap[medicationName] || 'Consult medication guide for details';
+        }
+
+        // Get precautions
+        function getPrecautions(medicationName) {
+            const precautionsMap = {
+                'Metoprolol': 'Monitor blood pressure, avoid sudden stopping',
+                'Amoxicillin': 'Complete full course, watch for allergic reactions',
+                'Atorvastatin': 'Avoid grapefruit, report muscle pain'
+            };
+            return precautionsMap[medicationName] || 'Follow all medication instructions';
+        }
+
+        // Initialize quality checks
+        function initializeQualityChecks() {
+            const checkboxes = document.querySelectorAll('.quality-checkbox');
+            checkboxes.forEach((checkbox, index) => {
+                checkbox.addEventListener('change', function() {
+                    const statusElement = this.parentNode.querySelector('.quality-status');
+                    if (this.checked) {
+                        statusElement.textContent = 'PASS';
+                        statusElement.className = 'quality-status check-pass';
+                    } else {
+                        statusElement.textContent = 'PENDING';
+                        statusElement.className = 'quality-status check-pending';
+                    }
+                });
+            });
+        }
+
+        // Reset quality checks
+        function resetQualityChecks() {
+            const checkboxes = document.querySelectorAll('.quality-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+                const statusElement = checkbox.parentNode.querySelector('.quality-status');
+                statusElement.textContent = 'PENDING';
+                statusElement.className = 'quality-status check-pending';
+            });
+        }
+
+        // Switch tabs
+        function switchTab(tabName, element) {
+            document.querySelectorAll('.dispensing-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            element.classList.add('active');
+            currentTab = tabName;
+            
+            if (selectedDispensing) {
+                updateDispensingDetails();
+            }
+        }
+
+        // Search and filter functions
+        function searchDispensing() {
+            filterDispensing();
+        }
+
+        function filterDispensing() {
+            const searchTerm = document.getElementById('patientSearchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            
+            filteredDispensing = dispensingData.filter(item => {
+                const matchesSearch = !searchTerm || 
+                    item.patientName.toLowerCase().includes(searchTerm) ||
+                    item.patientId.toLowerCase().includes(searchTerm) ||
+                    item.phone.includes(searchTerm);
+                
+                const matchesStatus = !statusFilter || item.status === statusFilter;
+                const matchesPriority = !priorityFilter || item.priority === priorityFilter;
+                
+                return matchesSearch && matchesStatus && matchesPriority;
+            });
+            
+            loadDispensingQueue();
+        }
+
+        // Action functions
+        function startFilling() {
+            if (!selectedDispensing) {
+                showAlert('warning', 'Please select a prescription to start filling.');
+                return;
+            }
+            
+            selectedDispensing.status = 'FILLING';
+            selectedDispensing.medications[0].status = 'FILLING';
+            loadDispensingQueue();
+            updateDispensingDetails();
+            showAlert('success', `Started filling prescription ${selectedDispensing.rxId}.`);
+        }
+
+        function verifyMedication() {
+            if (!selectedDispensing) {
+                showAlert('warning', 'Please select a prescription to verify.');
+                return;
+            }
+            
+            // Check if all quality checks are completed
+            const checkboxes = document.querySelectorAll('.quality-checkbox:checked');
+            if (checkboxes.length < 5) {
+                showAlert('warning', 'Please complete all quality checks before verification.');
+                return;
+            }
+            
+            selectedDispensing.status = 'CHECKING';
+            showAlert('success', 'Medication verified successfully.');
+        }
+
+        function printLabel() {
+            if (!selectedDispensing) {
+                showAlert('warning', 'Please select a prescription to print label.');
+                return;
+            }
+            
+            showAlert('success', `Label printed for ${selectedDispensing.medications[0].name}.`);
+        }
+
+        function patientCounseling() {
+            if (!selectedDispensing) {
+                showAlert('warning', 'Please select a prescription for counseling.');
+                return;
+            }
+            
+            switchTab('counseling', document.querySelector('.dispensing-tab:nth-child(2)'));
+        }
+
+        function completeDispensing() {
+            if (!selectedDispensing) {
+                showAlert('warning', 'Please select a prescription to complete.');
+                return;
+            }
+            
+            selectedDispensing.status = 'COMPLETE';
+            selectedDispensing.medications[0].status = 'COMPLETE';
+            loadDispensingQueue();
+            updateDispensingDetails();
+            showAlert('success', `Prescription ${selectedDispensing.rxId} completed successfully.`);
+        }
+
+        function completeCounseling() {
+            selectedDispensing.status = 'COUNSELING';
+            switchTab('pickup', document.querySelector('.dispensing-tab:nth-child(3)'));
+            showAlert('success', 'Patient counseling completed.');
+        }
+
+        function verifyBarcode(scannedCode, expectedNDC) {
+            const statusElement = document.getElementById(`barcode-status-${expectedNDC}`);
+            
+            if (scannedCode === expectedNDC) {
+                statusElement.textContent = '✓ Verified - Correct medication';
+                statusElement.className = 'barcode-status barcode-verified';
+            } else {
+                statusElement.textContent = '❌ Error - NDC mismatch';
+                statusElement.className = 'barcode-status barcode-pending';
+                showAlert('danger', 'Barcode verification failed - NDC mismatch detected!');
+            }
+        }
+
+        function calculateCoverage(dispensing) {
+            // Simulate insurance coverage calculation
+            const totalCost = dispensing.medications.reduce((sum, med) => sum + (med.quantity * 2.5), 0);
+            const coverage = totalCost * 0.8; // 80% coverage
+            return coverage.toFixed(2);
+        }
+
+        // Signature modal functions
+        function openSignatureModal() {
+            document.getElementById('signaturePatientName').value = selectedDispensing.patientName;
+            document.getElementById('signatureModal').style.display = 'block';
+            
+            // Initialize signature pad
+            const canvas = document.getElementById('signaturePad');
+            signaturePad = new SignaturePad(canvas);
+        }
+
+        function clearSignature() {
+            if (signaturePad) {
+                signaturePad.clear();
+            }
+        }
+
+        function completeSignature() {
+            const counselingConfirm = document.getElementById('counselingConfirm').checked;
+            
+            if (!counselingConfirm) {
+                showAlert('warning', 'Patient must confirm receipt of counseling.');
+                return;
+            }
+            
+            if (signaturePad && signaturePad.isEmpty()) {
+                showAlert('warning', 'Patient signature is required.');
+                return;
+            }
+            
+            closeModal('signatureModal');
+            completePickup();
+        }
+
+        function completePickup() {
+            selectedDispensing.status = 'COMPLETE';
+            loadDispensingQueue();
+            showAlert('success', `Pickup completed for ${selectedDispensing.patientName}.`);
+        }
+
+        function saveDispensingNotes() {
+            const notes = document.getElementById('dispensingNotes').value;
+            if (notes.trim()) {
+                showAlert('success', 'Dispensing notes saved successfully.');
+            }
+        }
+
+        // Header action functions
+        function batchFill() {
+            showAlert('info', 'Batch filling interface would open here.');
+        }
+
+        function printPickList() {
+            showAlert('info', 'Printing pick list for current queue...');
+        }
+
+        function dispensingReport() {
+            showAlert('info', 'Dispensing reports interface would open here.');
+        }
+
+        // Modal functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Utility functions
+        function formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function formatTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+            return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            document.querySelector('.main-container').insertBefore(alertDiv, document.querySelector('.main-container').firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Simple signature pad implementation
+        class SignaturePad {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.drawing = false;
+                this.isEmpty = true;
+                
+                this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
+                this.canvas.addEventListener('mousemove', this.draw.bind(this));
+                this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
+                this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
+            }
+            
+            startDrawing(e) {
+                this.drawing = true;
+                this.draw(e);
+            }
+            
+            draw(e) {
+                if (!this.drawing) return;
+                
+                this.ctx.lineWidth = 2;
+                this.ctx.lineCap = 'round';
+                this.ctx.strokeStyle = '#000';
+                
+                const rect = this.canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                this.ctx.lineTo(x, y);
+                this.ctx.stroke();
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                
+                this.isEmpty = false;
+            }
+            
+            stopDrawing() {
+                if (this.drawing) {
+                    this.drawing = false;
+                    this.ctx.beginPath();
+                }
+            }
+            
+            clear() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.isEmpty = true;
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        console.log('Medication Dispensing System Initialized');
+    </script>
+</body>
+</html>

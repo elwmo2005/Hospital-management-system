@@ -1,0 +1,41 @@
+🏥 Hospital Dashboard
+├── 👥 Patient Management
+│   ├── Patient Registration
+│   ├── Patient Search
+│   ├── Admission/Discharge
+│   └── Emergency Triage
+├── 🩺 Clinical Module
+│   ├── Medical Records
+│   ├── Vital Signs
+│   ├── Procedure Scheduling
+│   └── Discharge Planning
+├── 🔬 Laboratory
+│   ├── Test Orders
+│   ├── Sample Tracking
+│   ├── Results Entry
+│   └── Lab Reports
+├── 💊 Pharmacy
+│   ├── Prescription Management
+│   ├── Drug Inventory
+│   ├── Dispensing
+│   └── Drug Interactions
+├── 💰 Billing & Finance
+│   ├── Invoice Generation
+│   ├── Insurance Claims
+│   ├── Payment Tracking
+│   └── Financial Reports
+├── 👨‍⚕️ Staff Management
+│   ├── Employee Records
+│   ├── Schedule Management
+│   ├── Department Assignment
+│   └── Performance Tracking
+├── 🤖 AI Analytics
+│   ├── Risk Predictions
+│   ├── Diagnostic Assistance
+│   ├── Model Performance
+│   └── Classification Results
+└── ⚙️ Administration
+    ├── System Configuration
+    ├── User Management
+    ├── Audit Reports
+    └── Security Settings

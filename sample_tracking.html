@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Tracking - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1600px;
+        }
+
+        /* Three-column layout for sample tracking */
+        .tracking-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Collection Queue */
+        .collection-queue {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .queue-filters {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .filter-select {
+            flex: 1;
+            padding: 4px 6px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            font-size: 11px;
+            height: 24px;
+        }
+
+        .queue-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .sample-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .sample-item:hover {
+            background: #f8f9fa;
+        }
+
+        .sample-item.selected {
+            background: #e8f4fd;
+            border-left: 3px solid #3d9aef;
+        }
+
+        .sample-item.urgent {
+            border-left: 3px solid #ffc107;
+        }
+
+        .sample-item.stat {
+            border-left: 3px solid #dc3545;
+        }
+
+        .sample-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .sample-id {
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .sample-priority {
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .priority-routine { background: #e2e8f0; color: #4a5568; }
+        .priority-urgent { background: #fff3cd; color: #856404; }
+        .priority-stat { background: #f8d7da; color: #721c24; }
+
+        .sample-patient {
+            font-size: 12px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .sample-tests {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .sample-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .sample-status {
+            padding: 1px 4px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: 500;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-collected { background: #cce5ff; color: #004085; }
+        .status-transport { background: #d4edda; color: #155724; }
+        .status-received { background: #d1ecf1; color: #0c5460; }
+        .status-processing { background: #e2e8f0; color: #4a5568; }
+        .status-completed { background: #d4edda; color: #155724; }
+
+        .time-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .time-normal { background: #28a745; }
+        .time-warning { background: #ffc107; }
+        .time-critical { background: #dc3545; }
+
+        /* Center Panel - Tracking Workflow */
+        .tracking-content {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .workflow-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .workflow-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .workflow-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3d9aef;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        /* Workflow Pipeline */
+        .workflow-pipeline {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .pipeline-stages {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .pipeline-stages::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 40px;
+            right: 40px;
+            height: 2px;
+            background: #dee2e6;
+            z-index: 1;
+        }
+
+        .stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            background: #f8f9fa;
+            padding: 0 10px;
+        }
+
+        .stage-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            margin-bottom: 8px;
+            border: 2px solid #dee2e6;
+            background: white;
+            color: #666;
+        }
+
+        .stage.active .stage-icon {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .stage.completed .stage-icon {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .stage-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+        }
+
+        /* Sample Details Panel */
+        .sample-details {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .sample-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card-badge {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .card-content {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #555;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 12px;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .detail-value {
+            color: #666;
+        }
+
+        /* Barcode Scanner */
+        .barcode-scanner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .scanner-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .scanner-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 3px;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* Chain of Custody */
+        .custody-chain {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .custody-header {
+            background: #f8f9fa;
+            padding: 10px 12px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .custody-entry {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 11px;
+        }
+
+        .custody-entry:last-child {
+            border-bottom: none;
+        }
+
+        .custody-time {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .custody-action {
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* Right Panel - Sample Actions */
+        .sample-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .panel-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Action Buttons */
+        .action-button {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+            display: flex;
+            align-items: center;
+        }
+
+        .action-button:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        .action-button.primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: white;
+        }
+
+        .action-button.success {
+            background: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+
+        .action-button.warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #333;
+        }
+
+        .action-button.danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .action-icon {
+            margin-right: 8px;
+            width: 16px;
+        }
+
+        /* Form Elements */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .form-input {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+            background: #fff;
+        }
+
+        .form-textarea {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-select {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+            background: #fff;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-info {
+            background: #cce5ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        /* Region Header */
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        /* Temperature Monitoring */
+        .temp-monitor {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 4px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .temp-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .temp-status {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+
+        /* Sample Labels */
+        .sample-labels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .label-preview {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 8px;
+            font-size: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .label-preview:hover {
+            border-color: #3d9aef;
+            background: #f8f9fa;
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .tracking-layout {
+                grid-template-columns: 280px 1fr 320px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .tracking-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .pipeline-stages {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">LT</div>
+                <span>(Lab Tech)</span>
+            </div>
+            <span style="margin-right: 15px;">🌐 Select Language ▾</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Patient Registration</span></div>
+                <div class="nav-item"><span>Patient Search</span></div>
+                <div class="nav-item"><span>Admission/Discharge</span></div>
+                <div class="nav-item"><span>Emergency Triage</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Medical Records</span></div>
+                <div class="nav-item"><span>Vital Signs</span></div>
+                <div class="nav-item"><span>Procedure Scheduling</span></div>
+                <div class="nav-item"><span>Discharge Planning</span></div>
+            </div>
+
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item">
+                    <span>Test Orders</span>
+                </div>
+                <div class="nav-item active">
+                    <span>Sample Tracking</span>
+                </div>
+                <div class="nav-item">
+                    <span>Results Entry</span>
+                </div>
+                <div class="nav-item">
+                    <span>Lab Reports</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Prescription Management</span></div>
+                <div class="nav-item"><span>Drug Inventory</span></div>
+                <div class="nav-item"><span>Dispensing</span></div>
+                <div class="nav-item"><span>Drug Interactions</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Invoice Generation</span></div>
+                <div class="nav-item"><span>Insurance Claims</span></div>
+                <div class="nav-item"><span>Payment Tracking</span></div>
+                <div class="nav-item"><span>Financial Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Employee Records</span></div>
+                <div class="nav-item"><span>Schedule Management</span></div>
+                <div class="nav-item"><span>Department Assignment</span></div>
+                <div class="nav-item"><span>Performance Tracking</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Risk Predictions</span></div>
+                <div class="nav-item"><span>Diagnostic Assistance</span></div>
+                <div class="nav-item"><span>Model Performance</span></div>
+                <div class="nav-item"><span>Classification Results</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>System Configuration</span></div>
+                <div class="nav-item"><span>User Management</span></div>
+                <div class="nav-item"><span>Audit Reports</span></div>
+                <div class="nav-item"><span>Security Settings</span></div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Laboratory</a> › Sample Tracking
+                    </div>
+                    <h1 class="page-title">Laboratory Sample Tracking</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="openCollectionModal()">
+                        🧪 Collect Sample
+                    </button>
+                    <button class="btn btn-warning" onclick="printLabels()">
+                        🏷️ Print Labels
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportReport()">
+                        📊 Export Report
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Three-column Sample Tracking Layout -->
+                <div class="tracking-layout">
+                    <!-- Left Panel - Collection Queue -->
+                    <div class="collection-queue">
+                        <div class="region-header">
+                            <span class="icon">📋</span>
+                            Collection Queue
+                            <span id="queueCount" style="background: #3d9aef; color: white; padding: 2px 6px; border-radius: 8px; font-size: 11px;">12</span>
+                        </div>
+                        <div class="queue-filters">
+                            <div class="filter-row">
+                                <select class="filter-select" onchange="filterByStatus(this.value)">
+                                    <option value="">All Status</option>
+                                    <option value="PENDING">Pending Collection</option>
+                                    <option value="COLLECTED">Collected</option>
+                                    <option value="TRANSPORT">In Transport</option>
+                                    <option value="RECEIVED">Received</option>
+                                    <option value="PROCESSING">Processing</option>
+                                </select>
+                                <select class="filter-select" onchange="filterByPriority(this.value)">
+                                    <option value="">All Priority</option>
+                                    <option value="STAT">STAT</option>
+                                    <option value="URGENT">Urgent</option>
+                                    <option value="ROUTINE">Routine</option>
+                                </select>
+                            </div>
+                            <div class="filter-row">
+                                <select class="filter-select" onchange="filterByLocation(this.value)">
+                                    <option value="">All Locations</option>
+                                    <option value="ER">Emergency Room</option>
+                                    <option value="ICU">ICU</option>
+                                    <option value="WARD">General Ward</option>
+                                    <option value="OUTPATIENT">Outpatient</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="queue-container" id="queueContainer">
+                            <!-- Sample queue items will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Center Panel - Tracking Workflow -->
+                    <div class="tracking-content">
+                        <div class="workflow-header">
+                            <h3 class="workflow-title">Sample Workflow Status</h3>
+                            <div class="workflow-stats">
+                                <div class="stat-item">
+                                    <div class="stat-number" id="pendingCount">8</div>
+                                    <div class="stat-label">Pending</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number" id="collectingCount">4</div>
+                                    <div class="stat-label">Collecting</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number" id="processingCount">6</div>
+                                    <div class="stat-label">Processing</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number" id="completedCount">15</div>
+                                    <div class="stat-label">Completed</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="workflow-pipeline">
+                            <div class="pipeline-stages">
+                                <div class="stage completed" data-stage="ordered">
+                                    <div class="stage-icon">📋</div>
+                                    <div class="stage-label">Ordered</div>
+                                </div>
+                                <div class="stage active" data-stage="collection">
+                                    <div class="stage-icon">🧪</div>
+                                    <div class="stage-label">Collection</div>
+                                </div>
+                                <div class="stage" data-stage="transport">
+                                    <div class="stage-icon">🚚</div>
+                                    <div class="stage-label">Transport</div>
+                                </div>
+                                <div class="stage" data-stage="receiving">
+                                    <div class="stage-icon">📥</div>
+                                    <div class="stage-label">Receiving</div>
+                                </div>
+                                <div class="stage" data-stage="processing">
+                                    <div class="stage-icon">⚗️</div>
+                                    <div class="stage-label">Processing</div>
+                                </div>
+                                <div class="stage" data-stage="results">
+                                    <div class="stage-icon">📊</div>
+                                    <div class="stage-label">Results</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sample-details" id="sampleDetails">
+                            <div id="defaultContent">
+                                <div class="alert alert-info">
+                                    <strong>📋 Sample Tracking Dashboard</strong><br>
+                                    Select a sample from the queue to view detailed tracking information and perform actions.
+                                </div>
+
+                                <div class="sample-card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Quick Statistics</h4>
+                                    </div>
+                                    <div class="card-content">
+                                        <div class="detail-row">
+                                            <span class="detail-label">Samples Collected Today:</span>
+                                            <span class="detail-value">47</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="detail-label">Average Collection Time:</span>
+                                            <span class="detail-value">12 minutes</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="detail-label">Pending STAT Orders:</span>
+                                            <span class="detail-value" style="color: #dc3545; font-weight: bold;">3</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <span class="detail-label">Processing Delays:</span>
+                                            <span class="detail-value" style="color: #ffc107; font-weight: bold;">2</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="sample-card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">Recent Activity</h4>
+                                    </div>
+                                    <div class="card-content">
+                                        <div style="font-size: 11px; line-height: 1.6;">
+                                            <div style="margin-bottom: 8px;">
+                                                <strong>14:35</strong> - Sample SPE-2024-1215-047 collected from Ward 3A
+                                            </div>
+                                            <div style="margin-bottom: 8px;">
+                                                <strong>14:32</strong> - STAT blood draw completed for Patient Ahmed Hassan
+                                            </div>
+                                            <div style="margin-bottom: 8px;">
+                                                <strong>14:28</strong> - Samples transported to Hematology lab
+                                            </div>
+                                            <div style="margin-bottom: 8px;">
+                                                <strong>14:25</strong> - Sample SPE-2024-1215-045 processing completed
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="selectedSampleContent" style="display: none;">
+                                <!-- Selected sample details will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Sample Actions & Details -->
+                    <div class="sample-panel">
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📱</span>
+                                Barcode Scanner
+                            </h4>
+                            <div class="barcode-scanner">
+                                <div class="scanner-icon">📷</div>
+                                <div style="font-size: 12px; margin-bottom: 8px;">Scan or Enter Sample ID</div>
+                                <input type="text" class="scanner-input" placeholder="SPE-2024-1215-XXX" 
+                                       id="barcodeInput" onchange="scanSample(this.value)">
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">🌡️</span>
+                                Temperature Monitor
+                            </h4>
+                            <div class="temp-monitor">
+                                <div class="temp-value">4.2°C</div>
+                                <div class="temp-status">Refrigeration Normal</div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">⚡</span>
+                                Quick Actions
+                            </h4>
+                            <button class="action-button primary" onclick="openCollectionModal()">
+                                <span class="action-icon">🧪</span>
+                                Collect Sample
+                            </button>
+                            <button class="action-button success" onclick="markReceived()">
+                                <span class="action-icon">📥</span>
+                                Mark as Received
+                            </button>
+                            <button class="action-button warning" onclick="flagSample()">
+                                <span class="action-icon">⚠️</span>
+                                Flag Issue
+                            </button>
+                            <button class="action-button" onclick="printLabels()">
+                                <span class="action-icon">🏷️</span>
+                                Print Labels
+                            </button>
+                            <button class="action-button" onclick="updateStatus()">
+                                <span class="action-icon">🔄</span>
+                                Update Status
+                            </button>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📋</span>
+                                Sample Labels
+                            </h4>
+                            <div class="sample-labels">
+                                <div class="label-preview" onclick="printLabel('standard')">
+                                    <div style="font-weight: bold;">Standard</div>
+                                    <div>Patient + Tests</div>
+                                </div>
+                                <div class="label-preview" onclick="printLabel('barcode')">
+                                    <div style="font-weight: bold;">Barcode</div>
+                                    <div>ID + QR Code</div>
+                                </div>
+                                <div class="label-preview" onclick="printLabel('transport')">
+                                    <div style="font-weight: bold;">Transport</div>
+                                    <div>Handling Info</div>
+                                </div>
+                                <div class="label-preview" onclick="printLabel('storage')">
+                                    <div style="font-weight: bold;">Storage</div>
+                                    <div>Temp + Expiry</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">📜</span>
+                                Chain of Custody
+                            </h4>
+                            <div class="custody-chain" id="custodyChain">
+                                <div class="custody-header">No sample selected</div>
+                            </div>
+                        </div>
+
+                        <div class="panel-section">
+                            <h4 class="section-title">
+                                <span class="section-icon">⚠️</span>
+                                Alerts & Notifications
+                            </h4>
+                            <div id="alertsPanel">
+                                <div style="font-size: 11px; color: #666; text-align: center; padding: 10px;">
+                                    No active alerts
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collection Modal -->
+    <div id="collectionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Sample Collection</h3>
+                <button class="modal-close" onclick="closeModal('collectionModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="collectionForm">
+                    <div class="alert alert-info">
+                        <strong>🧪 Recording sample collection</strong> - Complete all required fields
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Sample ID *</label>
+                            <input type="text" class="form-input" name="sampleId" 
+                                   value="SPE-2024-1215-048" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Collection Time *</label>
+                            <input type="datetime-local" class="form-input" name="collectionTime" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Collected By *</label>
+                            <input type="text" class="form-input" name="collectedBy" 
+                                   value="Lab Tech Sarah" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Collection Method</label>
+                            <select class="form-select" name="collectionMethod">
+                                <option value="VENIPUNCTURE">Venipuncture</option>
+                                <option value="FINGER_STICK">Finger Stick</option>
+                                <option value="ARTERIAL">Arterial Draw</option>
+                                <option value="URINE_CLEAN_CATCH">Urine Clean Catch</option>
+                                <option value="URINE_CATHETER">Urine Catheter</option>
+                                <option value="SWAB">Swab</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Patient Condition</label>
+                            <select class="form-select" name="patientCondition">
+                                <option value="FASTING">Fasting</option>
+                                <option value="NON_FASTING">Non-Fasting</option>
+                                <option value="POST_MEAL">Post-Meal</option>
+                                <option value="MEDICATION">On Medication</option>
+                                <option value="UNKNOWN">Unknown</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Volume Collected</label>
+                            <input type="text" class="form-input" name="volumeCollected" placeholder="e.g., 5ml">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Collection Notes</label>
+                            <textarea class="form-textarea" name="collectionNotes" rows="3"
+                                      placeholder="Any special observations or difficulties..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Storage Requirements</label>
+                            <select class="form-select" name="storageRequirements">
+                                <option value="ROOM_TEMP">Room Temperature</option>
+                                <option value="REFRIGERATED">Refrigerated (2-8°C)</option>
+                                <option value="FROZEN">Frozen (-20°C)</option>
+                                <option value="FROZEN_ULTRA">Ultra Frozen (-80°C)</option>
+                                <option value="ICE">On Ice</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Transport Priority</label>
+                            <select class="form-select" name="transportPriority">
+                                <option value="ROUTINE">Routine</option>
+                                <option value="URGENT">Urgent</option>
+                                <option value="STAT">STAT</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('collectionModal')">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-warning" onclick="printCollectionLabel()">
+                            Print Label & Save
+                        </button>
+                        <button type="submit" class="btn btn-success" id="submitCollectionBtn">
+                            Complete Collection
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const sampleQueue = [
+            {
+                id: 'SPE-2024-1215-044',
+                patientName: 'Ahmed Hassan',
+                patientId: 'MRN-20241215-0001',
+                location: 'ICU Room 302',
+                priority: 'STAT',
+                status: 'PENDING',
+                orderTime: '2024-12-15 14:30',
+                tests: ['CBC', 'BMP', 'Troponin'],
+                collectionType: 'Blood Draw',
+                timeIndicator: 'critical'
+            },
+            {
+                id: 'SPE-2024-1215-045',
+                patientName: 'Fatima Al-Zahra',
+                patientId: 'MRN-20241215-0002',
+                location: 'Maternity Ward',
+                priority: 'URGENT',
+                status: 'COLLECTED',
+                orderTime: '2024-12-15 13:45',
+                collectionTime: '2024-12-15 14:15',
+                tests: ['HbA1c', 'Lipid Panel'],
+                collectionType: 'Blood Draw',
+                timeIndicator: 'normal'
+            },
+            {
+                id: 'SPE-2024-1215-046',
+                patientName: 'Omar Khaled',
+                patientId: 'MRN-20241214-0045',
+                location: 'Emergency Room',
+                priority: 'URGENT',
+                status: 'TRANSPORT',
+                orderTime: '2024-12-15 13:20',
+                collectionTime: '2024-12-15 14:00',
+                tests: ['Creatinine', 'BUN', 'Electrolytes'],
+                collectionType: 'Blood Draw',
+                timeIndicator: 'warning'
+            },
+            {
+                id: 'SPE-2024-1215-047',
+                patientName: 'Layla Mohammed',
+                patientId: 'MRN-20241213-0023',
+                location: 'Ward 3A',
+                priority: 'ROUTINE',
+                status: 'RECEIVED',
+                orderTime: '2024-12-15 12:30',
+                collectionTime: '2024-12-15 13:45',
+                tests: ['TSH', 'Free T4'],
+                collectionType: 'Blood Draw',
+                timeIndicator: 'normal'
+            }
+        ];
+
+        let selectedSample = null;
+        let filteredQueue = [...sampleQueue];
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSampleQueue();
+            updateWorkflowStats();
+            
+            // Set default collection time
+            const now = new Date();
+            const collectionTimeInput = document.querySelector('[name="collectionTime"]');
+            if (collectionTimeInput) {
+                collectionTimeInput.value = now.toISOString().slice(0, 16);
+            }
+
+            // Simulate real-time updates
+            setInterval(updateWorkflowStats, 30000);
+            setInterval(checkForAlerts, 60000);
+        });
+
+        // Load sample queue
+        function loadSampleQueue() {
+            const container = document.getElementById('queueContainer');
+            
+            container.innerHTML = filteredQueue.map(sample => `
+                <div class="sample-item ${sample.priority.toLowerCase()} ${selectedSample?.id === sample.id ? 'selected' : ''}" 
+                     onclick="selectSample('${sample.id}')" data-sample-id="${sample.id}">
+                    <div class="time-indicator ${sample.timeIndicator}"></div>
+                    <div class="sample-header">
+                        <div class="sample-id">${sample.id}</div>
+                        <div class="sample-priority priority-${sample.priority.toLowerCase()}">${sample.priority}</div>
+                    </div>
+                    <div class="sample-patient">${sample.patientName}</div>
+                    <div class="sample-tests">${sample.tests.join(', ')}</div>
+                    <div class="sample-meta">
+                        <span>${sample.location}</span>
+                        <span class="sample-status status-${sample.status.toLowerCase()}">${sample.status}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update queue count
+            document.getElementById('queueCount').textContent = filteredQueue.length;
+        }
+
+        // Select sample
+        function selectSample(sampleId) {
+            selectedSample = sampleQueue.find(s => s.id === sampleId);
+            
+            // Update UI selection
+            document.querySelectorAll('.sample-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.querySelector(`[data-sample-id="${sampleId}"]`).classList.add('selected');
+            
+            // Update sample details
+            updateSampleDetails();
+            updateChainOfCustody();
+            updateWorkflowStage();
+        }
+
+        // Update sample details
+        function updateSampleDetails() {
+            if (!selectedSample) return;
+            
+            const defaultContent = document.getElementById('defaultContent');
+            const selectedContent = document.getElementById('selectedSampleContent');
+            
+            defaultContent.style.display = 'none';
+            selectedContent.style.display = 'block';
+            
+            selectedContent.innerHTML = `
+                <div class="sample-card">
+                    <div class="card-header">
+                        <h4 class="card-title">Sample Information</h4>
+                        <div class="card-badge priority-${selectedSample.priority.toLowerCase()}">${selectedSample.priority}</div>
+                    </div>
+                    <div class="card-content">
+                        <div class="detail-row">
+                            <span class="detail-label">Sample ID:</span>
+                            <span class="detail-value">${selectedSample.id}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Patient:</span>
+                            <span class="detail-value">${selectedSample.patientName}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">MRN:</span>
+                            <span class="detail-value">${selectedSample.patientId}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Location:</span>
+                            <span class="detail-value">${selectedSample.location}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value">
+                                <span class="sample-status status-${selectedSample.status.toLowerCase()}">${selectedSample.status}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sample-card">
+                    <div class="card-header">
+                        <h4 class="card-title">Test Orders</h4>
+                    </div>
+                    <div class="card-content">
+                        ${selectedSample.tests.map(test => `
+                            <div class="detail-row">
+                                <span class="detail-label">${test}:</span>
+                                <span class="detail-value">Ordered</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="sample-card">
+                    <div class="card-header">
+                        <h4 class="card-title">Timing Information</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="detail-row">
+                            <span class="detail-label">Order Time:</span>
+                            <span class="detail-value">${formatDateTime(selectedSample.orderTime)}</span>
+                        </div>
+                        ${selectedSample.collectionTime ? `
+                            <div class="detail-row">
+                                <span class="detail-label">Collection Time:</span>
+                                <span class="detail-value">${formatDateTime(selectedSample.collectionTime)}</span>
+                            </div>
+                        ` : ''}
+                        <div class="detail-row">
+                            <span class="detail-label">Time Elapsed:</span>
+                            <span class="detail-value">${calculateElapsedTime(selectedSample.orderTime)}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sample-card">
+                    <div class="card-header">
+                        <h4 class="card-title">Collection Details</h4>
+                    </div>
+                    <div class="card-content">
+                        <div class="detail-row">
+                            <span class="detail-label">Collection Type:</span>
+                            <span class="detail-value">${selectedSample.collectionType}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Specimen Requirements:</span>
+                            <span class="detail-value">Standard blood collection tubes</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Storage:</span>
+                            <span class="detail-value">Refrigerated transport required</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update chain of custody
+        function updateChainOfCustody() {
+            const custodyChain = document.getElementById('custodyChain');
+            
+            if (!selectedSample) {
+                custodyChain.innerHTML = '<div class="custody-header">No sample selected</div>';
+                return;
+            }
+            
+            const custodyEvents = [
+                { time: selectedSample.orderTime, action: 'Sample ordered by Dr. Johnson', user: 'Dr. Johnson' }
+            ];
+            
+            if (selectedSample.collectionTime) {
+                custodyEvents.push({ 
+                    time: selectedSample.collectionTime, 
+                    action: 'Sample collected', 
+                    user: 'Lab Tech Sarah' 
+                });
+            }
+            
+            if (selectedSample.status === 'TRANSPORT' || selectedSample.status === 'RECEIVED' || selectedSample.status === 'PROCESSING') {
+                custodyEvents.push({ 
+                    time: '2024-12-15 14:20', 
+                    action: 'Sample in transport to lab', 
+                    user: 'Transport Team' 
+                });
+            }
+            
+            if (selectedSample.status === 'RECEIVED' || selectedSample.status === 'PROCESSING') {
+                custodyEvents.push({ 
+                    time: '2024-12-15 14:35', 
+                    action: 'Sample received at laboratory', 
+                    user: 'Lab Technician Mike' 
+                });
+            }
+            
+            custodyChain.innerHTML = `
+                <div class="custody-header">Chain of Custody</div>
+                ${custodyEvents.map(event => `
+                    <div class="custody-entry">
+                        <div class="custody-time">${formatDateTime(event.time)}</div>
+                        <div class="custody-action">${event.action} - ${event.user}</div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        // Update workflow stage
+        function updateWorkflowStage() {
+            if (!selectedSample) return;
+            
+            const stages = document.querySelectorAll('.stage');
+            stages.forEach(stage => {
+                stage.classList.remove('active', 'completed');
+            });
+            
+            const statusToStage = {
+                'PENDING': 'collection',
+                'COLLECTED': 'transport',
+                'TRANSPORT': 'receiving',
+                'RECEIVED': 'processing',
+                'PROCESSING': 'processing',
+                'COMPLETED': 'results'
+            };
+            
+            const currentStage = statusToStage[selectedSample.status];
+            const stageElement = document.querySelector(`[data-stage="${currentStage}"]`);
+            
+            if (stageElement) {
+                stageElement.classList.add('active');
+                
+                // Mark previous stages as completed
+                let prevStage = stageElement.previousElementSibling;
+                while (prevStage) {
+                    prevStage.classList.add('completed');
+                    prevStage = prevStage.previousElementSibling;
+                }
+            }
+        }
+
+        // Update workflow stats
+        function updateWorkflowStats() {
+            const stats = {
+                pending: sampleQueue.filter(s => s.status === 'PENDING').length,
+                collecting: sampleQueue.filter(s => s.status === 'COLLECTED').length,
+                processing: sampleQueue.filter(s => ['TRANSPORT', 'RECEIVED', 'PROCESSING'].includes(s.status)).length,
+                completed: sampleQueue.filter(s => s.status === 'COMPLETED').length
+            };
+            
+            document.getElementById('pendingCount').textContent = stats.pending;
+            document.getElementById('collectingCount').textContent = stats.collecting;
+            document.getElementById('processingCount').textContent = stats.processing;
+            document.getElementById('completedCount').textContent = stats.completed;
+        }
+
+        // Filter functions
+        function filterByStatus(status) {
+            if (!status) {
+                filteredQueue = [...sampleQueue];
+            } else {
+                filteredQueue = sampleQueue.filter(sample => sample.status === status);
+            }
+            loadSampleQueue();
+        }
+
+        function filterByPriority(priority) {
+            if (!priority) {
+                filteredQueue = [...sampleQueue];
+            } else {
+                filteredQueue = sampleQueue.filter(sample => sample.priority === priority);
+            }
+            loadSampleQueue();
+        }
+
+        function filterByLocation(location) {
+            if (!location) {
+                filteredQueue = [...sampleQueue];
+            } else {
+                filteredQueue = sampleQueue.filter(sample => 
+                    sample.location.toUpperCase().includes(location)
+                );
+            }
+            loadSampleQueue();
+        }
+
+        // Barcode scanning
+        function scanSample(sampleId) {
+            if (!sampleId) return;
+            
+            const sample = sampleQueue.find(s => s.id === sampleId);
+            if (sample) {
+                selectSample(sampleId);
+                showAlert('success', `Sample ${sampleId} found and selected.`);
+            } else {
+                showAlert('warning', `Sample ${sampleId} not found in queue.`);
+            }
+            
+            // Clear input
+            document.getElementById('barcodeInput').value = '';
+        }
+
+        // Action functions
+        function markReceived() {
+            if (!selectedSample) {
+                showAlert('warning', 'Please select a sample first.');
+                return;
+            }
+            
+            if (selectedSample.status !== 'TRANSPORT') {
+                showAlert('warning', 'Sample must be in transport status to mark as received.');
+                return;
+            }
+            
+            selectedSample.status = 'RECEIVED';
+            loadSampleQueue();
+            updateSampleDetails();
+            updateChainOfCustody();
+            updateWorkflowStage();
+            showAlert('success', `Sample ${selectedSample.id} marked as received.`);
+        }
+
+        function flagSample() {
+            if (!selectedSample) {
+                showAlert('warning', 'Please select a sample first.');
+                return;
+            }
+            
+            const reason = prompt('Enter reason for flagging this sample:');
+            if (reason) {
+                showAlert('warning', `Sample ${selectedSample.id} flagged: ${reason}`);
+                // In real implementation, this would update the database
+            }
+        }
+
+        function updateStatus() {
+            if (!selectedSample) {
+                showAlert('warning', 'Please select a sample first.');
+                return;
+            }
+            
+            showAlert('info', 'Status update functionality would open a detailed modal.');
+        }
+
+        // Modal functions
+        function openCollectionModal() {
+            document.getElementById('collectionModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Label printing
+        function printLabels() {
+            showAlert('info', 'Preparing labels for printing...');
+        }
+
+        function printLabel(labelType) {
+            if (!selectedSample) {
+                showAlert('warning', 'Please select a sample first.');
+                return;
+            }
+            
+            showAlert('success', `${labelType.charAt(0).toUpperCase() + labelType.slice(1)} label printed for sample ${selectedSample.id}.`);
+        }
+
+        function printCollectionLabel() {
+            showAlert('success', 'Collection label printed successfully.');
+        }
+
+        // Form submission
+        document.getElementById('collectionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const sampleData = {};
+            
+            for (let [key, value] of formData.entries()) {
+                sampleData[key] = value;
+            }
+            
+            const submitBtn = document.getElementById('submitCollectionBtn');
+            submitBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px; margin-right: 8px;"></div>Processing...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // Simulate successful collection
+                if (selectedSample) {
+                    selectedSample.status = 'COLLECTED';
+                    selectedSample.collectionTime = sampleData.collectionTime;
+                    selectedSample.collectionNotes = sampleData.collectionNotes;
+                }
+                
+                loadSampleQueue();
+                updateSampleDetails();
+                updateChainOfCustody();
+                updateWorkflowStage();
+                updateWorkflowStats();
+                
+                submitBtn.innerHTML = 'Complete Collection';
+                submitBtn.disabled = false;
+                closeModal('collectionModal');
+                
+                showAlert('success', `Sample collection completed successfully for ${sampleData.sampleId}.`);
+            }, 2000);
+        });
+
+        // Utility functions
+        function formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function calculateElapsedTime(startTime) {
+            const start = new Date(startTime);
+            const now = new Date();
+            const diffMs = now - start;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 60) {
+                return `${diffMins} minutes`;
+            } else {
+                const hours = Math.floor(diffMins / 60);
+                const minutes = diffMins % 60;
+                return `${hours}h ${minutes}m`;
+            }
+        }
+
+        function checkForAlerts() {
+            const alertsPanel = document.getElementById('alertsPanel');
+            
+            // Check for STAT samples pending too long
+            const statSamples = sampleQueue.filter(s => 
+                s.priority === 'STAT' && s.status === 'PENDING'
+            );
+            
+            if (statSamples.length > 0) {
+                alertsPanel.innerHTML = `
+                    <div style="font-size: 11px; margin-bottom: 6px; padding: 4px; background: #f8d7da; border-radius: 2px; color: #721c24;">
+                        🚨 ${statSamples.length} STAT sample(s) pending collection
+                    </div>
+                `;
+            } else {
+                alertsPanel.innerHTML = '<div style="font-size: 11px; color: #666; text-align: center; padding: 10px;">No active alerts</div>';
+            }
+        }
+
+        function exportReport() {
+            showAlert('info', 'Preparing sample tracking report for export...');
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            document.querySelector('.main-container').insertBefore(alertDiv, document.querySelector('.main-container').firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        console.log('Laboratory Sample Tracking System Initialized');
+    </script>
+</body>
+</html>

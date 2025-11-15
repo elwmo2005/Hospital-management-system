@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Search - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Search Container */
+        .search-container {
+            padding: 25px;
+            max-width: 1400px;
+        }
+
+        /* APEX Region Style */
+        .apex-region {
+            background: #ffffff;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        .region-body {
+            padding: 20px;
+        }
+
+        /* Search Form */
+        .search-form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .search-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .search-input {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+            background: #fff;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3d9aef;
+            box-shadow: 0 0 0 1px rgba(61, 154, 239, 0.3);
+        }
+
+        .search-select {
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 28px;
+            background: #fff;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #2e7bc6;
+            border-color: #2e7bc6;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            border-color: #ccc;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f5f5;
+        }
+
+        .btn-success {
+            background: #5cb85c;
+            border-color: #4cae4c;
+            color: #ffffff;
+        }
+
+        .btn-success:hover {
+            background: #449d44;
+        }
+
+        .search-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* Results Table */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .results-table th {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border: 1px solid #d0d0d0;
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .results-table td {
+            border: 1px solid #d0d0d0;
+            padding: 8px 10px;
+            vertical-align: middle;
+        }
+
+        .results-table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .results-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .results-table tbody tr:nth-child(even):hover {
+            background: #f5f5f5;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .status-active { background: #d4edda; color: #155724; }
+        .status-admitted { background: #cce5ff; color: #004085; }
+        .status-discharged { background: #f8f9fa; color: #495057; }
+        .status-critical { background: #f8d7da; color: #721c24; }
+
+        /* Action Buttons */
+        .action-btn {
+            padding: 4px 8px;
+            font-size: 11px;
+            margin-right: 5px;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .action-view {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .action-edit {
+            background: #28a745;
+            color: white;
+        }
+
+        .action-admit {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        /* Quick Filters */
+        .quick-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .filter-chip {
+            padding: 4px 12px;
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 15px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-chip:hover {
+            background: #dee2e6;
+        }
+
+        .filter-chip.active {
+            background: #3d9aef;
+            color: white;
+            border-color: #3d9aef;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8f8f8;
+            border-top: 1px solid #d0d0d0;
+            font-size: 12px;
+        }
+
+        .pagination-info {
+            color: #666;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .pagination-btn {
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+            background: white;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .pagination-btn:hover {
+            background: #f5f5f5;
+        }
+
+        .pagination-btn.active {
+            background: #3d9aef;
+            color: white;
+            border-color: #3d9aef;
+        }
+
+        /* Advanced Search Toggle */
+        .advanced-search-toggle {
+            background: none;
+            border: none;
+            color: #3d9aef;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+        }
+
+        .advanced-search {
+            display: none;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* Loading State */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* AI Suggestions */
+        .ai-suggestions {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .ai-suggestions-header {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .search-form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .content-header {
+                padding: 10px 15px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-container {
+                padding: 15px;
+            }
+
+            .results-table {
+                font-size: 11px;
+            }
+
+            .results-table th,
+            .results-table td {
+                padding: 6px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">AD</div>
+                <span>(Admin)</span>
+            </div>
+            <span style="margin-right: 15px;">🌐 Select Language ▾</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item">
+                    <span>Patient Registration</span>
+                </div>
+                <div class="nav-item active">
+                    <span>Patient Search</span>
+                </div>
+                <div class="nav-item">
+                    <span>Admission/Discharge</span>
+                </div>
+                <div class="nav-item">
+                    <span>Emergency Triage</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Medical Records</span></div>
+                <div class="nav-item"><span>Vital Signs</span></div>
+                <div class="nav-item"><span>Procedure Scheduling</span></div>
+                <div class="nav-item"><span>Discharge Planning</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Test Orders</span></div>
+                <div class="nav-item"><span>Sample Tracking</span></div>
+                <div class="nav-item"><span>Results Entry</span></div>
+                <div class="nav-item"><span>Lab Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Prescription Management</span></div>
+                <div class="nav-item"><span>Drug Inventory</span></div>
+                <div class="nav-item"><span>Dispensing</span></div>
+                <div class="nav-item"><span>Drug Interactions</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Invoice Generation</span></div>
+                <div class="nav-item"><span>Insurance Claims</span></div>
+                <div class="nav-item"><span>Payment Tracking</span></div>
+                <div class="nav-item"><span>Financial Reports</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Employee Records</span></div>
+                <div class="nav-item"><span>Schedule Management</span></div>
+                <div class="nav-item"><span>Department Assignment</span></div>
+                <div class="nav-item"><span>Performance Tracking</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Risk Predictions</span></div>
+                <div class="nav-item"><span>Diagnostic Assistance</span></div>
+                <div class="nav-item"><span>Model Performance</span></div>
+                <div class="nav-item"><span>Classification Results</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>System Configuration</span></div>
+                <div class="nav-item"><span>User Management</span></div>
+                <div class="nav-item"><span>Audit Reports</span></div>
+                <div class="nav-item"><span>Security Settings</span></div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Patient Management</a> › Patient Search
+                    </div>
+                    <h1 class="page-title">Patient Search</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-success" onclick="window.location.href='#'">
+                        ➕ New Patient
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportResults()">
+                        📊 Export
+                    </button>
+                </div>
+            </div>
+
+            <div class="search-container">
+                <!-- AI Search Suggestions -->
+                <div id="aiSuggestions" class="ai-suggestions" style="display: none;">
+                    <div class="ai-suggestions-header">🤖 AI Search Assistant</div>
+                    <div id="aiSuggestionsContent"></div>
+                </div>
+
+                <!-- Search Form -->
+                <div class="apex-region">
+                    <div class="region-header">
+                        <div>
+                            <span class="icon">🔍</span>
+                            Search Patients
+                        </div>
+                        <button class="advanced-search-toggle" onclick="toggleAdvancedSearch()">
+                            Advanced Search
+                        </button>
+                    </div>
+                    <div class="region-body">
+                        <form id="searchForm">
+                            <!-- Quick Filters -->
+                            <div class="quick-filters">
+                                <div class="filter-chip active" data-filter="all">All Patients</div>
+                                <div class="filter-chip" data-filter="admitted">Currently Admitted</div>
+                                <div class="filter-chip" data-filter="emergency">Emergency Cases</div>
+                                <div class="filter-chip" data-filter="critical">Critical Condition</div>
+                                <div class="filter-chip" data-filter="today">Today's Visits</div>
+                            </div>
+
+                            <!-- Basic Search -->
+                            <div class="search-form-row">
+                                <div class="search-group">
+                                    <label class="search-label">Patient Name</label>
+                                    <input type="text" class="search-input" name="patientName" 
+                                           placeholder="First name or Last name" oninput="suggestSearch()">
+                                </div>
+                                <div class="search-group">
+                                    <label class="search-label">Patient Number</label>
+                                    <input type="text" class="search-input" name="patientNumber" placeholder="P-YYYYMMDD-XXX">
+                                </div>
+                                <div class="search-group">
+                                    <label class="search-label">Medical Record Number</label>
+                                    <input type="text" class="search-input" name="mrnNumber" placeholder="MRN-YYYYMMDD-XXXX">
+                                </div>
+                                <div class="search-group">
+                                    <label class="search-label">Phone Number</label>
+                                    <input type="text" class="search-input" name="phoneNumber" placeholder="Phone or partial">
+                                </div>
+                            </div>
+
+                            <!-- Advanced Search -->
+                            <div id="advancedSearch" class="advanced-search">
+                                <div class="search-form-row">
+                                    <div class="search-group">
+                                        <label class="search-label">Date of Birth</label>
+                                        <input type="date" class="search-input" name="dateOfBirth">
+                                    </div>
+                                    <div class="search-group">
+                                        <label class="search-label">Gender</label>
+                                        <select class="search-select" name="gender">
+                                            <option value="">All</option>
+                                            <option value="M">Male</option>
+                                            <option value="F">Female</option>
+                                            <option value="O">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="search-group">
+                                        <label class="search-label">Department</label>
+                                        <select class="search-select" name="department">
+                                            <option value="">All Departments</option>
+                                            <option value="ED">Emergency Department</option>
+                                            <option value="IM">Internal Medicine</option>
+                                            <option value="SURG">Surgery</option>
+                                            <option value="PEDS">Pediatrics</option>
+                                            <option value="CARD">Cardiology</option>
+                                            <option value="NEUR">Neurology</option>
+                                        </select>
+                                    </div>
+                                    <div class="search-group">
+                                        <label class="search-label">Status</label>
+                                        <select class="search-select" name="status">
+                                            <option value="">All Status</option>
+                                            <option value="ACTIVE">Active</option>
+                                            <option value="ADMITTED">Admitted</option>
+                                            <option value="DISCHARGED">Discharged</option>
+                                            <option value="INACTIVE">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="search-form-row">
+                                    <div class="search-group">
+                                        <label class="search-label">Blood Type</label>
+                                        <select class="search-select" name="bloodType">
+                                            <option value="">Any</option>
+                                            <option value="A+">A+</option>
+                                            <option value="A-">A-</option>
+                                            <option value="B+">B+</option>
+                                            <option value="B-">B-</option>
+                                            <option value="AB+">AB+</option>
+                                            <option value="AB-">AB-</option>
+                                            <option value="O+">O+</option>
+                                            <option value="O-">O-</option>
+                                        </select>
+                                    </div>
+                                    <div class="search-group">
+                                        <label class="search-label">Age Range</label>
+                                        <input type="text" class="search-input" name="ageRange" placeholder="e.g., 18-65">
+                                    </div>
+                                    <div class="search-group">
+                                        <label class="search-label">Insurance Provider</label>
+                                        <input type="text" class="search-input" name="insuranceProvider" placeholder="Insurance company">
+                                    </div>
+                                    <div class="search-group">
+                                        <label class="search-label">Visit Date Range</label>
+                                        <input type="date" class="search-input" name="visitDateFrom" placeholder="From">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Search Actions -->
+                            <div class="search-actions">
+                                <button type="submit" class="btn btn-primary">
+                                    🔍 Search
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="clearSearch()">
+                                    🔄 Clear
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="saveSearch()">
+                                    💾 Save Search
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="loadSavedSearch()">
+                                    📂 Load Search
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Search Results -->
+                <div class="apex-region" id="resultsRegion">
+                    <div class="region-header">
+                        <div>
+                            <span class="icon">📋</span>
+                            Search Results
+                            <span id="resultCount" style="color: #666; font-weight: normal;">(0 patients found)</span>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="toggleSelectAll()">Select All</button>
+                            <button class="btn btn-secondary" onclick="bulkActions()">Bulk Actions ▾</button>
+                        </div>
+                    </div>
+                    <div class="region-body" style="padding: 0; position: relative;">
+                        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+                            <div class="spinner"></div>
+                            Searching patients...
+                        </div>
+                        
+                        <table class="results-table" id="resultsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px;">
+                                        <input type="checkbox" id="selectAllCheckbox">
+                                    </th>
+                                    <th>Patient Info</th>
+                                    <th>Demographics</th>
+                                    <th>Contact</th>
+                                    <th>Medical Info</th>
+                                    <th>Status</th>
+                                    <th>Last Visit</th>
+                                    <th>AI Risk</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsBody">
+                                <!-- Results will be populated here -->
+                            </tbody>
+                        </table>
+                        
+                        <div class="pagination">
+                            <div class="pagination-info">
+                                Showing <span id="showingFrom">0</span>-<span id="showingTo">0</span> of <span id="totalResults">0</span> patients
+                            </div>
+                            <div class="pagination-controls">
+                                <button class="pagination-btn" onclick="changePage(1)">First</button>
+                                <button class="pagination-btn" onclick="changePage('next')">Next →</button>
+                                <button class="pagination-btn" onclick="changePage('last')">Last</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample patient data for demonstration
+        const samplePatients = [
+            {
+                id: 1,
+                patientNumber: 'P-20241215-001',
+                mrn: 'MRN-20241215-0001',
+                firstName: 'Ahmed',
+                lastName: 'Hassan',
+                dateOfBirth: '1978-05-15',
+                age: 46,
+                gender: 'M',
+                phone: '+20-12-345-6789',
+                email: 'ahmed.hassan@email.com',
+                bloodType: 'A+',
+                department: 'Cardiology',
+                status: 'ADMITTED',
+                lastVisit: '2024-12-15',
+                riskLevel: 'High',
+                condition: 'Critical',
+                attending: 'Dr. Sarah Johnson'
+            },
+            {
+                id: 2,
+                patientNumber: 'P-20241215-002',
+                mrn: 'MRN-20241215-0002',
+                firstName: 'Fatima',
+                lastName: 'Al-Zahra',
+                dateOfBirth: '1995-08-22',
+                age: 29,
+                gender: 'F',
+                phone: '+20-10-987-6543',
+                email: 'fatima.alzahra@email.com',
+                bloodType: 'O+',
+                department: 'Obstetrics',
+                status: 'ACTIVE',
+                lastVisit: '2024-12-14',
+                riskLevel: 'Low',
+                condition: 'Stable',
+                attending: 'Dr. Amira Saleh'
+            },
+            {
+                id: 3,
+                patientNumber: 'P-20241214-045',
+                mrn: 'MRN-20241214-0045',
+                firstName: 'Omar',
+                lastName: 'Khaled',
+                dateOfBirth: '1962-12-03',
+                age: 62,
+                gender: 'M',
+                phone: '+20-11-555-7788',
+                email: 'omar.khaled@email.com',
+                bloodType: 'B-',
+                department: 'Emergency',
+                status: 'DISCHARGED',
+                lastVisit: '2024-12-14',
+                riskLevel: 'Medium',
+                condition: 'Recovered',
+                attending: 'Dr. Mohamed Nasser'
+            },
+            {
+                id: 4,
+                patientNumber: 'P-20241213-023',
+                mrn: 'MRN-20241213-0023',
+                firstName: 'Layla',
+                lastName: 'Mohammed',
+                dateOfBirth: '1990-03-18',
+                age: 34,
+                gender: 'F',
+                phone: '+20-15-222-3344',
+                email: 'layla.mohammed@email.com',
+                bloodType: 'AB+',
+                department: 'Neurology',
+                status: 'ADMITTED',
+                lastVisit: '2024-12-13',
+                riskLevel: 'Low',
+                condition: 'Stable',
+                attending: 'Dr. Hassan Ali'
+            },
+            {
+                id: 5,
+                patientNumber: 'P-20241212-067',
+                mrn: 'MRN-20241212-0067',
+                firstName: 'Youssef',
+                lastName: 'Ibrahim',
+                dateOfBirth: '2010-09-07',
+                age: 14,
+                gender: 'M',
+                phone: '+20-12-888-9999',
+                email: 'youssef.ibrahim@email.com',
+                bloodType: 'O-',
+                department: 'Pediatrics',
+                status: 'ACTIVE',
+                lastVisit: '2024-12-12',
+                riskLevel: 'Low',
+                condition: 'Healthy',
+                attending: 'Dr. Mona Rashid'
+            }
+        ];
+
+        let currentPage = 1;
+        let filteredPatients = [...samplePatients];
+        let selectedPatients = new Set();
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Toggle advanced search
+        function toggleAdvancedSearch() {
+            const advancedSearch = document.getElementById('advancedSearch');
+            const toggle = document.querySelector('.advanced-search-toggle');
+            
+            if (advancedSearch.style.display === 'none' || !advancedSearch.style.display) {
+                advancedSearch.style.display = 'block';
+                toggle.textContent = 'Basic Search';
+            } else {
+                advancedSearch.style.display = 'none';
+                toggle.textContent = 'Advanced Search';
+            }
+        }
+
+        // Quick filter functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterChips = document.querySelectorAll('.filter-chip');
+            filterChips.forEach(chip => {
+                chip.addEventListener('click', function() {
+                    // Remove active class from all chips
+                    filterChips.forEach(c => c.classList.remove('active'));
+                    // Add active class to clicked chip
+                    this.classList.add('active');
+                    
+                    const filter = this.getAttribute('data-filter');
+                    applyQuickFilter(filter);
+                });
+            });
+
+            // Initialize with sample data
+            displayResults(samplePatients);
+        });
+
+        // Apply quick filters
+        function applyQuickFilter(filter) {
+            let filtered = [...samplePatients];
+            
+            switch(filter) {
+                case 'admitted':
+                    filtered = samplePatients.filter(p => p.status === 'ADMITTED');
+                    break;
+                case 'emergency':
+                    filtered = samplePatients.filter(p => p.department === 'Emergency');
+                    break;
+                case 'critical':
+                    filtered = samplePatients.filter(p => p.condition === 'Critical');
+                    break;
+                case 'today':
+                    const today = new Date().toISOString().split('T')[0];
+                    filtered = samplePatients.filter(p => p.lastVisit === today);
+                    break;
+                default:
+                    filtered = [...samplePatients];
+            }
+            
+            filteredPatients = filtered;
+            displayResults(filtered);
+            showAISuggestions(filter, filtered.length);
+        }
+
+        // AI Search suggestions
+        function suggestSearch() {
+            const patientName = document.querySelector('[name="patientName"]').value;
+            if (patientName && patientName.length > 2) {
+                const suggestions = samplePatients.filter(p => 
+                    p.firstName.toLowerCase().includes(patientName.toLowerCase()) ||
+                    p.lastName.toLowerCase().includes(patientName.toLowerCase())
+                );
+                
+                if (suggestions.length > 0) {
+                    showAISuggestions('name_match', suggestions.length, suggestions);
+                }
+            }
+        }
+
+        function showAISuggestions(type, count, data = null) {
+            const aiSuggestions = document.getElementById('aiSuggestions');
+            const content = document.getElementById('aiSuggestionsContent');
+            
+            let suggestionText = '';
+            
+            switch(type) {
+                case 'admitted':
+                    suggestionText = `Found ${count} currently admitted patients. Consider checking critical cases first.`;
+                    break;
+                case 'emergency':
+                    suggestionText = `${count} emergency cases found. Priority triage recommended for immediate attention.`;
+                    break;
+                case 'critical':
+                    suggestionText = `${count} critical patients identified. Immediate medical attention required.`;
+                    break;
+                case 'name_match':
+                    suggestionText = `${count} potential matches found. Most recent: ${data[0].firstName} ${data[0].lastName} - ${data[0].department}`;
+                    break;
+                default:
+                    suggestionText = `Search completed. ${count} patients match your criteria.`;
+            }
+            
+            content.textContent = suggestionText;
+            aiSuggestions.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                aiSuggestions.style.display = 'none';
+            }, 5000);
+        }
+
+        // Search form submission
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            performSearch();
+        });
+
+        function performSearch() {
+            const formData = new FormData(document.getElementById('searchForm'));
+            const searchCriteria = {};
+            
+            for (let [key, value] of formData.entries()) {
+                if (value.trim()) {
+                    searchCriteria[key] = value.trim();
+                }
+            }
+            
+            // Show loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            // Simulate search delay
+            setTimeout(() => {
+                let filtered = [...samplePatients];
+                
+                // Apply filters based on search criteria
+                if (searchCriteria.patientName) {
+                    const name = searchCriteria.patientName.toLowerCase();
+                    filtered = filtered.filter(p => 
+                        p.firstName.toLowerCase().includes(name) ||
+                        p.lastName.toLowerCase().includes(name)
+                    );
+                }
+                
+                if (searchCriteria.patientNumber) {
+                    filtered = filtered.filter(p => 
+                        p.patientNumber.toLowerCase().includes(searchCriteria.patientNumber.toLowerCase())
+                    );
+                }
+                
+                if (searchCriteria.mrnNumber) {
+                    filtered = filtered.filter(p => 
+                        p.mrn.toLowerCase().includes(searchCriteria.mrnNumber.toLowerCase())
+                    );
+                }
+                
+                if (searchCriteria.phoneNumber) {
+                    filtered = filtered.filter(p => 
+                        p.phone.includes(searchCriteria.phoneNumber)
+                    );
+                }
+                
+                if (searchCriteria.gender) {
+                    filtered = filtered.filter(p => p.gender === searchCriteria.gender);
+                }
+                
+                if (searchCriteria.department) {
+                    filtered = filtered.filter(p => p.department === searchCriteria.department);
+                }
+                
+                if (searchCriteria.status) {
+                    filtered = filtered.filter(p => p.status === searchCriteria.status);
+                }
+                
+                if (searchCriteria.bloodType) {
+                    filtered = filtered.filter(p => p.bloodType === searchCriteria.bloodType);
+                }
+                
+                filteredPatients = filtered;
+                document.getElementById('loadingOverlay').style.display = 'none';
+                displayResults(filtered);
+                
+                if (filtered.length > 0) {
+                    showAISuggestions('search_complete', filtered.length);
+                }
+            }, 1500);
+        }
+
+        // Display search results
+        function displayResults(patients) {
+            const tbody = document.getElementById('resultsBody');
+            const resultCount = document.getElementById('resultCount');
+            
+            tbody.innerHTML = '';
+            resultCount.textContent = `(${patients.length} patients found)`;
+            
+            patients.forEach(patient => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <input type="checkbox" class="patient-checkbox" value="${patient.id}">
+                    </td>
+                    <td>
+                        <div style="font-weight: 600;">${patient.firstName} ${patient.lastName}</div>
+                        <div style="font-size: 11px; color: #666;">${patient.patientNumber}</div>
+                        <div style="font-size: 11px; color: #666;">${patient.mrn}</div>
+                    </td>
+                    <td>
+                        <div>${patient.age} years, ${patient.gender === 'M' ? 'Male' : patient.gender === 'F' ? 'Female' : 'Other'}</div>
+                        <div style="font-size: 11px; color: #666;">${patient.dateOfBirth}</div>
+                        <div style="font-size: 11px; color: #666;">Blood: ${patient.bloodType}</div>
+                    </td>
+                    <td>
+                        <div>${patient.phone}</div>
+                        <div style="font-size: 11px; color: #666;">${patient.email}</div>
+                    </td>
+                    <td>
+                        <div>Dept: ${patient.department}</div>
+                        <div style="font-size: 11px; color: #666;">Dr: ${patient.attending}</div>
+                    </td>
+                    <td>
+                        <span class="status-badge status-${patient.status.toLowerCase()}">${patient.status}</span>
+                        <div style="font-size: 11px; margin-top: 2px;">${patient.condition}</div>
+                    </td>
+                    <td>
+                        <div>${patient.lastVisit}</div>
+                    </td>
+                    <td>
+                        <span class="status-badge ${patient.riskLevel === 'High' ? 'status-critical' : patient.riskLevel === 'Medium' ? 'status-admitted' : 'status-active'}">
+                            ${patient.riskLevel}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="#" class="action-btn action-view" onclick="viewPatient(${patient.id})">View</a>
+                        <a href="#" class="action-btn action-edit" onclick="editPatient(${patient.id})">Edit</a>
+                        ${patient.status !== 'ADMITTED' ? `<a href="#" class="action-btn action-admit" onclick="admitPatient(${patient.id})">Admit</a>` : ''}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Update pagination info
+            updatePaginationInfo(patients.length);
+            
+            // Add event listeners to checkboxes
+            document.querySelectorAll('.patient-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        selectedPatients.add(this.value);
+                    } else {
+                        selectedPatients.delete(this.value);
+                    }
+                });
+            });
+        }
+
+        // Patient actions
+        function viewPatient(patientId) {
+            const patient = samplePatients.find(p => p.id === patientId);
+            alert(`Viewing patient: ${patient.firstName} ${patient.lastName}\nStatus: ${patient.status}\nDepartment: ${patient.department}`);
+        }
+
+        function editPatient(patientId) {
+            const patient = samplePatients.find(p => p.id === patientId);
+            alert(`Editing patient: ${patient.firstName} ${patient.lastName}`);
+        }
+
+        function admitPatient(patientId) {
+            const patient = samplePatients.find(p => p.id === patientId);
+            if (confirm(`Admit patient: ${patient.firstName} ${patient.lastName}?`)) {
+                patient.status = 'ADMITTED';
+                displayResults(filteredPatients);
+                alert('Patient admitted successfully!');
+            }
+        }
+
+        // Select all functionality
+        function toggleSelectAll() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const patientCheckboxes = document.querySelectorAll('.patient-checkbox');
+            
+            const allChecked = selectAllCheckbox.checked;
+            
+            patientCheckboxes.forEach(checkbox => {
+                checkbox.checked = allChecked;
+                if (allChecked) {
+                    selectedPatients.add(checkbox.value);
+                } else {
+                    selectedPatients.delete(checkbox.value);
+                }
+            });
+        }
+
+        // Bulk actions
+        function bulkActions() {
+            if (selectedPatients.size === 0) {
+                alert('Please select patients first');
+                return;
+            }
+            
+            const actions = [
+                'Discharge Selected Patients',
+                'Transfer to Department',
+                'Generate Reports',
+                'Send Notifications',
+                'Export Selected Data'
+            ];
+            
+            const action = prompt('Select action:\n' + actions.map((a, i) => `${i + 1}. ${a}`).join('\n') + '\n\nEnter number:');
+            
+            if (action && actions[action - 1]) {
+                alert(`Performing: ${actions[action - 1]} on ${selectedPatients.size} selected patients`);
+            }
+        }
+
+        // Pagination
+        function changePage(page) {
+            // Implementation for pagination
+            console.log('Changing to page:', page);
+        }
+
+        function updatePaginationInfo(total) {
+            document.getElementById('showingFrom').textContent = total > 0 ? '1' : '0';
+            document.getElementById('showingTo').textContent = total.toString();
+            document.getElementById('totalResults').textContent = total.toString();
+        }
+
+        // Utility functions
+        function clearSearch() {
+            document.getElementById('searchForm').reset();
+            document.getElementById('aiSuggestions').style.display = 'none';
+            filteredPatients = [...samplePatients];
+            displayResults(samplePatients);
+            
+            // Reset filter chips
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            document.querySelector('.filter-chip[data-filter="all"]').classList.add('active');
+        }
+
+        function saveSearch() {
+            const searchData = new FormData(document.getElementById('searchForm'));
+            const searchObj = {};
+            for (let [key, value] of searchData.entries()) {
+                if (value.trim()) searchObj[key] = value;
+            }
+            
+            const searchName = prompt('Save this search as:');
+            if (searchName) {
+                localStorage.setItem(`search_${searchName}`, JSON.stringify(searchObj));
+                alert('Search saved successfully!');
+            }
+        }
+
+        function loadSavedSearch() {
+            const searches = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('search_')) {
+                    searches.push(key.substring(7));
+                }
+            }
+            
+            if (searches.length === 0) {
+                alert('No saved searches found');
+                return;
+            }
+            
+            const searchName = prompt('Load search:\n' + searches.map((s, i) => `${i + 1}. ${s}`).join('\n') + '\n\nEnter number:');
+            
+            if (searchName && searches[searchName - 1]) {
+                const savedSearch = JSON.parse(localStorage.getItem(`search_${searches[searchName - 1]}`));
+                
+                // Populate form with saved data
+                Object.keys(savedSearch).forEach(key => {
+                    const field = document.querySelector(`[name="${key}"]`);
+                    if (field) {
+                        field.value = savedSearch[key];
+                    }
+                });
+                
+                // Perform the search
+                performSearch();
+            }
+        }
+
+        function exportResults() {
+            const dataToExport = filteredPatients.map(p => ({
+                'Patient Number': p.patientNumber,
+                'Name': `${p.firstName} ${p.lastName}`,
+                'Age': p.age,
+                'Gender': p.gender,
+                'Phone': p.phone,
+                'Department': p.department,
+                'Status': p.status,
+                'Last Visit': p.lastVisit
+            }));
+            
+            // Convert to CSV (simplified)
+            const csv = [
+                Object.keys(dataToExport[0]).join(','),
+                ...dataToExport.map(row => Object.values(row).join(','))
+            ].join('\n');
+            
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `patient_search_results_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+F for focus on search
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.querySelector('[name="patientName"]').focus();
+            }
+            
+            // Ctrl+Enter to search
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                performSearch();
+            }
+            
+            // Escape to clear
+            if (e.key === 'Escape') {
+                clearSearch();
+            }
+        });
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Patient Search System Initialized');
+            console.log('Sample patients loaded:', samplePatients.length);
+        });
+    </script>
+</body>
+</html>prev')">← Prev</button>
+                                <button class="pagination-btn active" onclick="changePage(1)">1</button>
+                                <button class="pagination-btn" onclick="changePage(2)">2</button>
+                                <button class="pagination-btn" onclick="changePage(3)">3</button>
+                                <button class="pagination-btn" onclick="changePage('

@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratory - Hospital Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Top Header Bar */
+        .apex-header {
+            background: #13191c;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .oracle-logo {
+            color: #ff0000;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            color: #ffffff;
+            font-size: 13px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .user-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #3d9aef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        /* Left Sidebar Navigation */
+        .sidebar {
+            width: 240px;
+            background: #2d5563;
+            color: #ffffff;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 3px solid #3d9aef;
+        }
+
+        .nav-item .icon {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item.has-submenu .arrow {
+            margin-left: auto;
+            font-size: 10px;
+        }
+
+        .nav-submenu {
+            background: rgba(0,0,0,0.2);
+            display: none;
+        }
+
+        .nav-submenu.open {
+            display: block;
+        }
+
+        .nav-submenu .nav-item {
+            padding-left: 45px;
+            font-size: 13px;
+        }
+
+        /* Content Area */
+        .content-area {
+            flex: 1;
+            background: #f4f4f4;
+            overflow-y: auto;
+        }
+
+        .content-header {
+            background: #ffffff;
+            padding: 15px 25px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .breadcrumb {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #3d9aef;
+            text-decoration: none;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .main-container {
+            padding: 25px;
+            max-width: 1600px;
+        }
+
+        /* APEX Region Style */
+        .apex-region {
+            background: #ffffff;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .region-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 10px 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .region-header .icon {
+            margin-right: 8px;
+            color: #3d9aef;
+        }
+
+        .region-body {
+            padding: 20px;
+        }
+
+        /* Laboratory Layout */
+        .lab-layout {
+            display: grid;
+            grid-template-columns: 350px 1fr 300px;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        /* Left Panel - Test Orders & Patients */
+        .lab-panel {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .lab-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .lab-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .lab-tab.active {
+            background: white;
+            border-bottom-color: #3d9aef;
+            font-weight: 600;
+        }
+
+        .search-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .filter-group {
+            margin-bottom: 10px;
+        }
+
+        .filter-label {
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .results-container {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .result-item:hover {
+            background: #f8f9fa;
+        }
+
+        .result-item.selected {
+            background: #e8f4fd;
+            border-left: 3px solid #3d9aef;
+        }
+
+        .result-title {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .result-details {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .result-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .status-ordered { background: #ffc107; }
+        .status-collected { background: #17a2b8; }
+        .status-processing { background: #3d9aef; }
+        .status-completed { background: #28a745; }
+        .status-critical { background: #dc3545; animation: pulse 1.5s infinite; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .priority-indicator {
+            margin-top: 4px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        .priority-stat { background: #f8d7da; color: #721c24; }
+        .priority-urgent { background: #fff3cd; color: #856404; }
+        .priority-routine { background: #d4edda; color: #155724; }
+
+        /* Center Panel - Laboratory Workflow */
+        .lab-content {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .patient-banner {
+            background: linear-gradient(135deg, #3d9aef 0%, #2e7bc6 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .patient-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Lab Workflow Tabs */
+        .workflow-tabs {
+            padding: 15px 20px 0;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 2px;
+        }
+
+        .workflow-tab {
+            padding: 8px 16px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .workflow-tab.active {
+            background: white;
+            border-bottom-color: white;
+            font-weight: 600;
+            color: #3d9aef;
+        }
+
+        /* Workflow Content */
+        .workflow-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        /* Test Catalog */
+        .test-catalog {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .test-category {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .category-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3d9aef;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .test-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .test-item {
+            padding: 6px 8px;
+            margin-bottom: 4px;
+            background: white;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .test-item:hover {
+            background: #e8f4fd;
+        }
+
+        .test-item.selected {
+            background: #3d9aef;
+            color: white;
+        }
+
+        .test-name {
+            font-weight: 600;
+        }
+
+        .test-cost {
+            color: #666;
+            font-size: 10px;
+        }
+
+        /* Sample Tracking */
+        .sample-workflow {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .workflow-step {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+        }
+
+        .workflow-step.active {
+            background: #e8f4fd;
+            border-color: #3d9aef;
+        }
+
+        .workflow-step.completed {
+            background: #d4edda;
+            border-color: #28a745;
+        }
+
+        .step-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #6c757d;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 16px;
+        }
+
+        .step-icon.active {
+            background: #3d9aef;
+        }
+
+        .step-icon.completed {
+            background: #28a745;
+        }
+
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .step-time {
+            font-size: 10px;
+            color: #666;
+        }
+
+        /* Results Entry */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .result-entry {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .test-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .test-status {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-complete { background: #d4edda; color: #155724; }
+        .status-critical { background: #f8d7da; color: #721c24; }
+
+        /* Forms */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .form-input {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 32px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3d9aef;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input.abnormal {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .form-input.critical {
+            border-color: #dc3545;
+            background: #f8d7da;
+            animation: pulse 2s infinite;
+        }
+
+        .form-select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            height: 32px;
+            background: white;
+        }
+
+        .form-textarea {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            min-height: 80px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .normal-range {
+            font-size: 10px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* Right Panel - Actions & Summary */
+        .lab-sidebar {
+            background: white;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .quick-actions {
+            padding: 15px;
+        }
+
+        .quick-action-btn {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .quick-action-btn:hover {
+            background: #f8f9fa;
+            border-color: #3d9aef;
+        }
+
+        .quick-action-btn .icon {
+            margin-right: 8px;
+            width: 16px;
+            display: inline-block;
+        }
+
+        .lab-summary {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .summary-section {
+            margin-bottom: 15px;
+        }
+
+        .summary-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .summary-content {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+
+        .stat-value {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            min-width: 80px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3d9aef;
+            border-color: #3d9aef;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #2e7bc6;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            border-color: #6c757d;
+            color: #ffffff;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #ffffff;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: #ffffff;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(to bottom, #f8f8f8, #e8e8e8);
+            border-bottom: 1px solid #d0d0d0;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-info {
+            background: #cce5ff;
+            border: 1px solid #b3d7ff;
+            color: #004085;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3d9aef;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Selected Tests List */
+        .selected-tests {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 15px;
+        }
+
+        .selected-test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 8px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 3px;
+            font-size: 11px;
+        }
+
+        .selected-test-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .remove-test {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 6px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+
+        /* Critical Values Alert */
+        .critical-alert {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+            animation: pulse 2s infinite;
+        }
+
+        .critical-title {
+            font-weight: 600;
+            color: #721c24;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* QC Section */
+        .qc-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .qc-title {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .qc-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .qc-control {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 8px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        .qc-status {
+            margin-top: 5px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .qc-pass { background: #d4edda; color: #155724; }
+        .qc-fail { background: #f8d7da; color: #721c24; }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .lab-layout {
+                grid-template-columns: 300px 1fr 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 60px;
+            }
+
+            .nav-item span:not(.icon) {
+                display: none;
+            }
+
+            .lab-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .test-catalog {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="apex-header">
+        <div class="header-left">
+            <div class="oracle-logo">ORACLE</div>
+            <span style="color: #fff; font-size: 14px;">Hospital Management System</span>
+        </div>
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-avatar">LT</div>
+                <span>(Lab Technician)</span>
+            </div>
+            <span style="margin-right: 15px;">🌐 Select Language ▾</span>
+            <span>Main Application</span>
+        </div>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        <!-- Left Sidebar Navigation -->
+        <div class="sidebar">
+            <div class="nav-item">
+                <span class="icon">🏥</span>
+                <span>Hospital Dashboard</span>
+            </div>
+            
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👥</span>
+                <span>Patient Management</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Patient Registration</span></div>
+                <div class="nav-item"><span>Patient Search</span></div>
+                <div class="nav-item"><span>Admission/Discharge</span></div>
+                <div class="nav-item"><span>Emergency Triage</span></div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🩺</span>
+                <span>Clinical Module</span>
+                <span class="arrow">▶</span>
+            </div>
+            <div class="nav-submenu">
+                <div class="nav-item"><span>Medical Records</span></div>
+                <div class="nav-item"><span>Vital Signs</span></div>
+                <div class="nav-item"><span>Procedure Scheduling</span></div>
+                <div class="nav-item"><span>Discharge Planning</span></div>
+            </div>
+
+            <div class="nav-item has-submenu active" onclick="toggleSubmenu(this)">
+                <span class="icon">🔬</span>
+                <span>Laboratory</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="nav-submenu open">
+                <div class="nav-item active">
+                    <span>Test Orders</span>
+                </div>
+                <div class="nav-item">
+                    <span>Sample Tracking</span>
+                </div>
+                <div class="nav-item">
+                    <span>Results Entry</span>
+                </div>
+                <div class="nav-item">
+                    <span>Lab Reports</span>
+                </div>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💊</span>
+                <span>Pharmacy</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">💰</span>
+                <span>Billing & Finance</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">👨‍⚕️</span>
+                <span>Staff Management</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">🤖</span>
+                <span>AI Analytics</span>
+                <span class="arrow">▶</span>
+            </div>
+
+            <div class="nav-item has-submenu" onclick="toggleSubmenu(this)">
+                <span class="icon">⚙️</span>
+                <span>Administration</span>
+                <span class="arrow">▶</span>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            <div class="content-header">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="#">Home</a> › <a href="#">Laboratory</a> › Test Orders
+                    </div>
+                    <h1 class="page-title">Laboratory Management</h1>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-danger" onclick="criticalAlert()">
+                        🚨 Critical Results
+                    </button>
+                    <button class="btn btn-success" onclick="openOrderModal()">
+                        🧪 Order Tests
+                    </button>
+                    <button class="btn btn-warning" onclick="qualityControl()">
+                        📊 Quality Control
+                    </button>
+                    <button class="btn btn-secondary" onclick="printReports()">
+                        🖨️ Print Reports
+                    </button>
+                </div>
+            </div>
+
+            <div class="main-container">
+                <!-- Three-column Laboratory Layout -->
+                <div class="lab-layout">
+                    <!-- Left Panel - Orders & Patients -->
+                    <div class="lab-panel">
+                        <div class="region-header">
+                            <span class="icon">📋</span>
+                            Laboratory Queue
+                        </div>
+                        
+                        <div class="lab-tabs">
+                            <div class="lab-tab active" onclick="switchLabTab('orders', this)">Orders (24)</div>
+                            <div class="lab-tab" onclick="switchLabTab('patients', this)">Patients (18)</div>
+                            <div class="lab-tab" onclick="switchLabTab('critical', this)">Critical (3)</div>
+                        </div>
+
+                        <div class="search-section">
+                            <input type="text" class="search-input" placeholder="Search orders/patients..." 
+                                   oninput="searchLabItems(this.value)" id="labSearchInput">
+                            
+                            <div class="filter-group">
+                                <label class="filter-label">Status</label>
+                                <select class="filter-select" onchange="filterLabItems()">
+                                    <option value="">All Statuses</option>
+                                    <option value="ORDERED">Ordered</option>
+                                    <option value="COLLECTED">Collected</option>
+                                    <option value="PROCESSING">Processing</option>
+                                    <option value="COMPLETED">Completed</option>
+                                    <option value="CRITICAL">Critical</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Priority</label>
+                                <select class="filter-select" onchange="filterLabItems()">
+                                    <option value="">All Priorities</option>
+                                    <option value="STAT">STAT</option>
+                                    <option value="URGENT">Urgent</option>
+                                    <option value="ROUTINE">Routine</option>
+                                </select>
+                            </div>
+
+                            <div class="filter-group">
+                                <label class="filter-label">Department</label>
+                                <select class="filter-select" onchange="filterLabItems()">
+                                    <option value="">All Departments</option>
+                                    <option value="CHEMISTRY">Chemistry</option>
+                                    <option value="HEMATOLOGY">Hematology</option>
+                                    <option value="MICROBIOLOGY">Microbiology</option>
+                                    <option value="IMMUNOLOGY">Immunology</option>
+                                    <option value="PATHOLOGY">Pathology</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="results-container" id="labResults">
+                            <!-- Lab orders/results will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Center Panel - Laboratory Workflow -->
+                    <div class="lab-content">
+                        <div id="patientBanner" class="patient-banner" style="display: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <h2 id="patientDisplayName" style="margin: 0; font-size: 18px;">Select an Order</h2>
+                                    <div style="font-size: 13px; opacity: 0.9; margin-top: 4px;" id="patientBasicInfo">
+                                        Choose a lab order to process
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 11px; opacity: 0.8;">Order ID</div>
+                                    <div style="font-size: 13px; font-weight: 600;" id="orderNumber">--</div>
+                                </div>
+                            </div>
+                            <div class="patient-info-grid" id="patientInfoGrid">
+                                <!-- Patient info will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Workflow Tabs -->
+                        <div class="workflow-tabs">
+                            <div class="workflow-tab active" onclick="switchWorkflowTab('order', this)">Test Ordering</div>
+                            <div class="workflow-tab" onclick="switchWorkflowTab('collection', this)">Sample Collection</div>
+                            <div class="workflow-tab" onclick="switchWorkflowTab('processing', this)">Processing</div>
+                            <div class="workflow-tab" onclick="switchWorkflowTab('results', this)">Results Entry</div>
+                            <div class="workflow-tab" onclick="switchWorkflowTab('reports', this)">Reports</div>
+                        </div>
+
+                        <!-- Workflow Content -->
+                        <div class="workflow-content" id="workflowContent">
+                            <div class="loading">
+                                <div>Select a lab order to begin processing</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel - Quick Actions & Lab Statistics -->
+                    <div class="lab-sidebar">
+                        <div class="region-header">
+                            <span class="icon">⚡</span>
+                            Quick Actions
+                        </div>
+                        
+                        <div class="quick-actions">
+                            <button class="quick-action-btn" onclick="orderStats()">
+                                <span class="icon">🧪</span>
+                                Order STAT Tests
+                            </button>
+                            <button class="quick-action-btn" onclick="collectSamples()">
+                                <span class="icon">💉</span>
+                                Sample Collection
+                            </button>
+                            <button class="quick-action-btn" onclick="processResults()">
+                                <span class="icon">🔬</span>
+                                Process Results
+                            </button>
+                            <button class="quick-action-btn" onclick="criticalValues()">
+                                <span class="icon">🚨</span>
+                                Critical Values
+                            </button>
+                            <button class="quick-action-btn" onclick="qualityControl()">
+                                <span class="icon">📊</span>
+                                Quality Control
+                            </button>
+                            <button class="quick-action-btn" onclick="generateReports()">
+                                <span class="icon">📄</span>
+                                Generate Reports
+                            </button>
+                        </div>
+
+                        <div class="lab-summary">
+                            <div class="summary-section">
+                                <div class="summary-title">Today's Statistics</div>
+                                <div class="stat-grid">
+                                    <div class="stat-item">
+                                        <div class="stat-label">Orders</div>
+                                        <div class="stat-value">127</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-label">Completed</div>
+                                        <div class="stat-value">89</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-label">Pending</div>
+                                        <div class="stat-value">38</div>
+                                    </div>
+                                    <div class="stat-item">
+                                        <div class="stat-label">Critical</div>
+                                        <div class="stat-value">5</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Current Workload</div>
+                                <div class="summary-content">
+                                    <div style="margin-bottom: 5px;">• Chemistry: 12 pending</div>
+                                    <div style="margin-bottom: 5px;">• Hematology: 8 pending</div>
+                                    <div style="margin-bottom: 5px;">• Microbiology: 15 pending</div>
+                                    <div style="margin-bottom: 5px;">• Immunology: 3 pending</div>
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Turnaround Times</div>
+                                <div class="summary-content">
+                                    <div style="margin-bottom: 5px;">STAT: Avg 45 min</div>
+                                    <div style="margin-bottom: 5px;">Urgent: Avg 2.3 hours</div>
+                                    <div style="margin-bottom: 5px;">Routine: Avg 4.1 hours</div>
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Quality Metrics</div>
+                                <div class="summary-content">
+                                    <div style="margin-bottom: 5px;">✅ QC Controls: All Pass</div>
+                                    <div style="margin-bottom: 5px;">📊 Accuracy: 99.2%</div>
+                                    <div style="margin-bottom: 5px;">⏱️ On-time: 96.8%</div>
+                                    <div style="margin-bottom: 5px;">🔄 Repeat Rate: 1.3%</div>
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Critical Alerts</div>
+                                <div class="summary-content" id="criticalAlerts">
+                                    <div style="color: #dc3545; margin-bottom: 5px;">🚨 Patient Ahmed Hassan: Troponin critical</div>
+                                    <div style="color: #dc3545; margin-bottom: 5px;">🚨 Patient Omar Khaled: Glucose critical</div>
+                                    <div style="color: #ffc107; margin-bottom: 5px;">⚠️ 3 samples need recollection</div>
+                                </div>
+                            </div>
+
+                            <div class="summary-section">
+                                <div class="summary-title">Equipment Status</div>
+                                <div class="summary-content">
+                                    <div style="margin-bottom: 5px;">🟢 Chemistry Analyzer: Normal</div>
+                                    <div style="margin-bottom: 5px;">🟢 Hematology Counter: Normal</div>
+                                    <div style="margin-bottom: 5px;">🟡 Coagulation Analyzer: Maintenance</div>
+                                    <div style="margin-bottom: 5px;">🟢 Microbiology Incubator: Normal</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Tests Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Order Laboratory Tests</h3>
+                <button class="modal-close" onclick="closeModal('orderModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info">
+                    <strong>🧪 Select patient and tests to create a new lab order</strong>
+                </div>
+                
+                <!-- Patient Selection -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Patient *</label>
+                        <select class="form-select" name="patientId" required>
+                            <option value="">-- Select Patient --</option>
+                            <option value="1">Ahmed Hassan (MRN-001) - Cardiology</option>
+                            <option value="2">Fatima Al-Zahra (MRN-002) - Obstetrics</option>
+                            <option value="3">Omar Khaled (MRN-045) - Emergency</option>
+                            <option value="4">Layla Mohammed (MRN-023) - General Surgery</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Priority *</label>
+                        <select class="form-select" name="priority" required>
+                            <option value="ROUTINE">Routine</option>
+                            <option value="URGENT">Urgent</option>
+                            <option value="STAT">STAT</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Ordering Physician</label>
+                        <select class="form-select" name="orderingPhysician">
+                            <option value="">-- Select Physician --</option>
+                            <option value="1">Dr. Ahmed Nasser</option>
+                            <option value="2">Dr. Sarah Johnson</option>
+                            <option value="3">Dr. Mohamed Ali</option>
+                            <option value="4">Dr. Layla Hassan</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Clinical Indication</label>
+                        <input type="text" class="form-input" name="clinicalIndication" 
+                               placeholder="Reason for testing...">
+                    </div>
+                </div>
+
+                <!-- Test Catalog -->
+                <div class="test-catalog" id="testCatalog">
+                    <div class="test-category">
+                        <div class="category-title">
+                            <div class="category-icon">🩸</div>
+                            Hematology
+                        </div>
+                        <div class="test-list">
+                            <div class="test-item" onclick="selectTest(this, 'CBC', 'Complete Blood Count', 45)">
+                                <div>
+                                    <div class="test-name">Complete Blood Count (CBC)</div>
+                                    <div style="font-size: 10px; color: #666;">RBC, WBC, Hemoglobin, Hematocrit, Platelets</div>
+                                </div>
+                                <div class="test-cost">$45</div>
+                            </div>
+                            <div class="test-item" onclick="selectTest(this, 'ESR', 'Erythrocyte Sedimentation Rate', 25)">
+                                <div>
+                                    <div class="test-name">ESR</div>
+                                    <div style="font-size: 10px; color: #666;">Inflammation marker</div>
+                                </div>
+                                <div class="test-cost">$25</div>
+                            </div>
+                            <div class="test-item" onclick="selectTest(this, 'PT_PTT', 'Prothrombin Time/PTT', 35)">
+                                <div>
+                                    <div class="test-name">PT/PTT</div>
+                                    <div style="font-size: 10px; color: #666;">Coagulation studies</div>
+                                </div>
+                                <div class="test-cost">$35</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-category">
+                        <div class="category-title">
+                            <div class="category-icon">⚗️</div>
+                            Chemistry
+                        </div>
+                        <div class="test-list">
+                            <div class="test-item" onclick="selectTest(this, 'BMP', 'Basic Metabolic Panel', 65)">
+                                <div>
+                                    <div class="test-name">Basic Metabolic Panel</div>
+                                    <div style="font-size: 10px; color: #666;">Glucose, BUN, Creatinine, Electrolytes</div>
+                                </div>
+                                <div class="test-cost">$65</div>
+                            </div>
+                            <div class="test-item" onclick="selectTest(this, 'LIPID', 'Lipid Panel', 55)">
+                                <div>
+                                    <div class="test-name">Lipid Panel</div>
+                                    <div style="font-size: 10px; color: #666;">Cholesterol, Triglycerides, HDL, LDL</div>
+                                </div>
+                                <div class="test-cost">$55</div>
+                            </div>
+                            <div class="test-item" onclick="selectTest(this, 'LIVER', 'Liver Function Tests', 75)">
+                                <div>
+                                    <div class="test-name">Liver Function Tests</div>
+                                    <div style="font-size: 10px; color: #666;">ALT, AST, Bilirubin, Alkaline Phosphatase</div>
+                                </div>
+                                <div class="test-cost">$75</div>
+                            </div>
+                            <div class="test-item" onclick="selectTest(this, 'CARDIAC', 'Cardiac Enzymes', 125)">
+                                <div>
+                                    <div class="test-name">Cardiac Enzymes</div>
+                                    <div style="font-size: 10px; color: #666;">Troponin I, CK-MB, Total CK</div>
+                                </div>
+                                <div class="test-cost">$125</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-category">
+                        <div class="category-title">
+                            <div class="category-icon">🦠</div>
+                            Microbiology
+                        </div>
+                        <div class="test-list">
+                            <div class="test-item" onclick="selectTest(this, 'BLOOD_CULTURE', 'Blood Culture', 85)">
+                                <div>
+                                    <div class="test-name">Blood Culture</div>
+                                    <div style="font-size: 10px; color: #666;">Bacterial and fungal identification</div>
+                                </div>
+                                <div class="test-cost">$85</div>
+                            </div>
+                            <div class="test-item" onclick="selectTest(this, 'URINE_CULTURE', 'Urine Culture', 45)">
+                                <div>
+                                    <div class="test-name">Urine Culture</div>
+                                    <div style="font-size: 10px; color: #666;">UTI diagnosis and sensitivity</div>
+                                </div>
+                                <div class="test-cost">$45</div>
+                            </div>
+                            <div class="test-item" onclick="selectTest(this, 'STOOL_CULTURE', 'Stool Culture', 65)">
+                                <div>
+                                    <div class="test-name">Stool Culture</div>
+                                    <div style="font-size: 10px; color: #666;">GI pathogen identification</div>
+                                </div>
+                                <div class="test-cost">$65</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="test-category">
+                        <div class="category-title">
+                            <div class="category-icon">🛡️</div>
+                            Immunology
+                        </div>
+                        <div class="test-list">
+                            <div class="test-item" onclick="selectTest(this, 'CRP', 'C-Reactive Protein', 35)">
+                                <div>
+                                    <div class="test-name">C-Reactive Protein</div>
+                                    <div style="font-size: 10px; color: #666;">Inflammation marker</div>
+                                </div>
+                                <div class="test-cost">$35</div>
+                            </div>
+                            <div class="test-item" onclick="selectTest(this, 'RF', 'Rheumatoid Factor', 45)">
+                                <div>
+                                    <div class="test-name">Rheumatoid Factor</div>
+                                    <div style="font-size: 10px; color: #666;">Autoimmune screening</div>
+                                </div>
+                                <div class="test-cost">$45</div>
+                            </div>
+                            <div class="test-item" onclick="selectTest(this, 'HEP_PANEL', 'Hepatitis Panel', 155)">
+                                <div>
+                                    <div class="test-name">Hepatitis Panel</div>
+                                    <div style="font-size: 10px; color: #666;">Hep A, B, C screening</div>
+                                </div>
+                                <div class="test-cost">$155</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Tests -->
+                <div class="selected-tests" id="selectedTests" style="display: none;">
+                    <div style="font-weight: 600; margin-bottom: 10px;">Selected Tests:</div>
+                    <div id="selectedTestsList"></div>
+                    <div style="margin-top: 10px; text-align: right;">
+                        <strong>Total Cost: $<span id="totalCost">0</span></strong>
+                    </div>
+                </div>
+
+                <!-- Special Instructions -->
+                <div class="form-group" style="margin-top: 20px;">
+                    <label class="form-label">Special Instructions</label>
+                    <textarea class="form-textarea" name="specialInstructions" rows="3"
+                              placeholder="Fasting requirements, special handling, collection notes..."></textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 20px; border-top: 1px solid #ddd; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('orderModal')">
+                        Cancel
+                    </button>
+                    <button type="button" class="btn btn-warning" onclick="saveDraftOrder()">
+                        Save Draft
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="submitLabOrder()" id="submitOrderBtn">
+                        🧪 Submit Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        const labOrders = [
+            {
+                id: 1, patientName: 'Ahmed Hassan', mrn: 'MRN-001', room: 'GEN-201',
+                orderDate: '2024-12-15 08:30', tests: ['Cardiac Enzymes', 'CBC', 'BMP'],
+                status: 'CRITICAL', priority: 'STAT', department: 'CHEMISTRY',
+                physician: 'Dr. Ahmed Nasser', specimenId: 'LAB-2024-001'
+            },
+            {
+                id: 2, patientName: 'Fatima Al-Zahra', mrn: 'MRN-002', room: 'MAT-105',
+                orderDate: '2024-12-15 09:15', tests: ['CBC', 'Glucose', 'Urinalysis'],
+                status: 'PROCESSING', priority: 'ROUTINE', department: 'HEMATOLOGY',
+                physician: 'Dr. Amira Saleh', specimenId: 'LAB-2024-002'
+            },
+            {
+                id: 3, patientName: 'Omar Khaled', mrn: 'MRN-045', room: 'ICU-03',
+                orderDate: '2024-12-15 10:45', tests: ['Blood Culture', 'Lactate', 'ABG'],
+                status: 'COLLECTED', priority: 'URGENT', department: 'MICROBIOLOGY',
+                physician: 'Dr. Sarah Johnson', specimenId: 'LAB-2024-003'
+            },
+            {
+                id: 4, patientName: 'Layla Mohammed', mrn: 'MRN-023', room: 'GEN-105',
+                orderDate: '2024-12-15 11:20', tests: ['Liver Function', 'Lipid Panel'],
+                status: 'COMPLETED', priority: 'ROUTINE', department: 'CHEMISTRY',
+                physician: 'Dr. Mohamed Ali', specimenId: 'LAB-2024-004'
+            }
+        ];
+
+        const workflowTemplates = {
+            order: {
+                title: 'Test Ordering',
+                content: `
+                    <div class="test-catalog" id="mainTestCatalog">
+                        <div class="alert alert-info">
+                            <strong>🧪 Laboratory Test Catalog - Select tests to add to order</strong>
+                        </div>
+                        <!-- Test catalog content similar to modal -->
+                    </div>
+                `
+            },
+            collection: {
+                title: 'Sample Collection',
+                content: `
+                    <div class="sample-workflow">
+                        <div class="workflow-step completed">
+                            <div class="step-icon completed">✓</div>
+                            <div class="step-title">Order Received</div>
+                            <div class="step-time">08:30 AM</div>
+                        </div>
+                        <div class="workflow-step active">
+                            <div class="step-icon active">💉</div>
+                            <div class="step-title">Sample Collection</div>
+                            <div class="step-time">09:15 AM</div>
+                        </div>
+                        <div class="workflow-step">
+                            <div class="step-icon">🏃</div>
+                            <div class="step-title">Transport</div>
+                            <div class="step-time">Pending</div>
+                        </div>
+                        <div class="workflow-step">
+                            <div class="step-icon">📥</div>
+                            <div class="step-title">Lab Receipt</div>
+                            <div class="step-time">Pending</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Collection Date/Time</label>
+                            <input type="datetime-local" class="form-input" value="2024-12-15T09:15">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Collected By</label>
+                            <select class="form-select">
+                                <option>Phlebotomist Sarah</option>
+                                <option>Nurse Ahmed</option>
+                                <option>Lab Tech Mohamed</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Specimen Quality</label>
+                            <select class="form-select">
+                                <option>Satisfactory</option>
+                                <option>Hemolyzed</option>
+                                <option>Clotted</option>
+                                <option>Insufficient Volume</option>
+                                <option>Lipemic</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Collection Method</label>
+                            <select class="form-select">
+                                <option>Venipuncture</option>
+                                <option>Finger Stick</option>
+                                <option>Central Line</option>
+                                <option>Arterial Puncture</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Collection Notes</label>
+                        <textarea class="form-textarea" rows="3" 
+                                  placeholder="Patient fasting status, collection difficulties, special handling..."></textarea>
+                    </div>
+                `
+            },
+            processing: {
+                title: 'Laboratory Processing',
+                content: `
+                    <div class="qc-section">
+                        <div class="qc-title">Quality Control Status</div>
+                        <div class="qc-controls">
+                            <div class="qc-control">
+                                <div>Level 1 Control</div>
+                                <div class="qc-status qc-pass">PASS</div>
+                            </div>
+                            <div class="qc-control">
+                                <div>Level 2 Control</div>
+                                <div class="qc-status qc-pass">PASS</div>
+                            </div>
+                            <div class="qc-control">
+                                <div>Calibration</div>
+                                <div class="qc-status qc-pass">PASS</div>
+                            </div>
+                            <div class="qc-control">
+                                <div>Blank Control</div>
+                                <div class="qc-status qc-pass">PASS</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Analyzer</label>
+                            <select class="form-select">
+                                <option>Chemistry Analyzer #1</option>
+                                <option>Hematology Counter #2</option>
+                                <option>Coagulation Analyzer #1</option>
+                                <option>Blood Gas Analyzer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Run Number</label>
+                            <input type="text" class="form-input" value="RUN-2024-1215-003" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Processing Technician</label>
+                            <select class="form-select">
+                                <option>Lab Tech Ahmed</option>
+                                <option>Lab Tech Sarah</option>
+                                <option>Lab Tech Mohamed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Processing Start Time</label>
+                            <input type="datetime-local" class="form-input" value="2024-12-15T10:30">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Processing Notes</label>
+                        <textarea class="form-textarea" rows="3" 
+                                  placeholder="Instrument performance, dilutions performed, technical issues..."></textarea>
+                    </div>
+                `
+            },
+            results: {
+                title: 'Results Entry & Verification',
+                content: `
+                    <div class="critical-alert" id="criticalResultsAlert" style="display: none;">
+                        <div class="critical-title">
+                            🚨 CRITICAL RESULTS DETECTED
+                        </div>
+                        <div>One or more results are outside critical ranges. Physician notification required immediately.</div>
+                    </div>
+                    
+                    <div class="results-grid" id="resultsEntryGrid">
+                        <!-- Results will be populated here -->
+                    </div>
+                    
+                    <div class="form-row" style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">Verified By</label>
+                            <select class="form-select">
+                                <option>Dr. Lab Director</option>
+                                <option>Senior Tech Sarah</option>
+                                <option>Lab Supervisor Ahmed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Verification Date/Time</label>
+                            <input type="datetime-local" class="form-input" value="2024-12-15T11:45">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Technical Comments</label>
+                        <textarea class="form-textarea" rows="3" 
+                                  placeholder="Any technical issues, repeat analyses, or interpretive comments..."></textarea>
+                    </div>
+                `
+            },
+            reports: {
+                title: 'Laboratory Reports',
+                content: `
+                    <div class="alert alert-success">
+                        <strong>✅ Results verified and ready for physician review</strong>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">Report Type</label>
+                            <select class="form-select">
+                                <option>Standard Lab Report</option>
+                                <option>Critical Values Report</option>
+                                <option>Cumulative Report</option>
+                                <option>Trend Report</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Delivery Method</label>
+                            <select class="form-select">
+                                <option>Electronic (EMR)</option>
+                                <option>Printed Copy</option>
+                                <option>Fax to Physician</option>
+                                <option>Phone Notification</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Additional Recipients</label>
+                        <textarea class="form-textarea" rows="2" 
+                                  placeholder="Additional physicians or departments to notify..."></textarea>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 4px; padding: 15px; margin-top: 15px;">
+                        <div style="font-weight: 600; margin-bottom: 10px;">Report Preview:</div>
+                        <div style="font-size: 11px; font-family: monospace; line-height: 1.4;">
+                            GENERAL MEDICAL CENTER<br>
+                            LABORATORY REPORT<br><br>
+                            Patient: Ahmed Hassan<br>
+                            MRN: MRN-001<br>
+                            DOB: 05/15/1978<br>
+                            Order Date: 12/15/2024 08:30<br>
+                            Report Date: 12/15/2024 11:45<br><br>
+                            TEST RESULTS:<br>
+                            Troponin I: 15.2 ng/mL (H) [0.0-0.4]<br>
+                            CK-MB: 8.5 ng/mL (H) [0.0-5.0]<br>
+                            Hemoglobin: 12.5 g/dL [13.5-17.5]<br>
+                            WBC: 8.2 K/uL [4.5-11.0]<br><br>
+                            (H) = High, (L) = Low<br>
+                            Reference ranges in brackets
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        let selectedOrder = null;
+        let currentLabTab = 'orders';
+        let currentWorkflowTab = 'order';
+        let selectedTests = [];
+        let totalCost = 0;
+
+        // Navigation functionality
+        function toggleSubmenu(item) {
+            const submenu = item.nextElementSibling;
+            const arrow = item.querySelector('.arrow');
+            
+            if (submenu && submenu.classList.contains('nav-submenu')) {
+                submenu.classList.toggle('open');
+                arrow.textContent = submenu.classList.contains('open') ? '▼' : '▶';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLabOrders();
+        });
+
+        // Switch lab tabs
+        function switchLabTab(tab, element) {
+            document.querySelectorAll('.lab-tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            
+            currentLabTab = tab;
+            loadLabOrders();
+        }
+
+        // Load lab orders
+        function loadLabOrders() {
+            const container = document.getElementById('labResults');
+            
+            let filteredOrders = labOrders;
+            if (currentLabTab === 'critical') {
+                filteredOrders = labOrders.filter(o => o.status === 'CRITICAL');
+            }
+            
+            container.innerHTML = filteredOrders.map(order => `
+                <div class="result-item" onclick="selectLabOrder(${order.id})" data-order-id="${order.id}">
+                    <div class="result-title">${order.patientName}</div>
+                    <div class="result-details">
+                        MRN: ${order.mrn} | Room: ${order.room}<br>
+                        Tests: ${order.tests.join(', ')}<br>
+                        Physician: ${order.physician}<br>
+                        Specimen: ${order.specimenId}
+                    </div>
+                    <div class="result-status">
+                        <div class="status-indicator status-${order.status.toLowerCase()}"></div>
+                        <span>${getStatusText(order.status)}</span>
+                    </div>
+                    <div class="priority-indicator priority-${order.priority.toLowerCase()}">
+                        ${order.priority}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Select lab order
+        function selectLabOrder(orderId) {
+            selectedOrder = labOrders.find(o => o.id === orderId);
+            
+            // Update UI selection
+            document.querySelectorAll('.result-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.querySelector(`[data-order-id="${orderId}"]`).classList.add('selected');
+            
+            // Update patient banner
+            updatePatientBanner();
+            
+            // Load workflow content
+            loadWorkflowContent();
+        }
+
+        // Update patient banner
+        function updatePatientBanner() {
+            if (!selectedOrder) return;
+            
+            const banner = document.getElementById('patientBanner');
+            const displayName = document.getElementById('patientDisplayName');
+            const basicInfo = document.getElementById('patientBasicInfo');
+            const orderNumber = document.getElementById('orderNumber');
+            const infoGrid = document.getElementById('patientInfoGrid');
+            
+            displayName.textContent = selectedOrder.patientName;
+            basicInfo.textContent = `${selectedOrder.tests.join(', ')} | Room: ${selectedOrder.room} | ${selectedOrder.priority} Priority`;
+            orderNumber.textContent = selectedOrder.specimenId;
+            
+            infoGrid.innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">MRN</div>
+                    <div class="info-value">${selectedOrder.mrn}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value">${getStatusText(selectedOrder.status)}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Priority</div>
+                    <div class="info-value">${selectedOrder.priority}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Department</div>
+                    <div class="info-value">${selectedOrder.department}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Order Date</div>
+                    <div class="info-value">${formatDateTime(selectedOrder.orderDate)}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Physician</div>
+                    <div class="info-value">${selectedOrder.physician}</div>
+                </div>
+            `;
+            
+            banner.style.display = 'block';
+        }
+
+        // Switch workflow tabs
+        function switchWorkflowTab(tab, element) {
+            document.querySelectorAll('.workflow-tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            
+            currentWorkflowTab = tab;
+            loadWorkflowContent();
+        }
+
+        // Load workflow content
+        function loadWorkflowContent() {
+            if (!selectedOrder) return;
+            
+            const container = document.getElementById('workflowContent');
+            
+            if (currentWorkflowTab === 'results') {
+                loadResultsEntryContent();
+            } else {
+                const template = workflowTemplates[currentWorkflowTab];
+                container.innerHTML = template.content;
+            }
+        }
+
+        // Load results entry content
+        function loadResultsEntryContent() {
+            const container = document.getElementById('workflowContent');
+            
+            const sampleResults = [
+                { test: 'Troponin I', value: '15.2', unit: 'ng/mL', range: '0.0-0.4', status: 'critical' },
+                { test: 'CK-MB', value: '8.5', unit: 'ng/mL', range: '0.0-5.0', status: 'abnormal' },
+                { test: 'Hemoglobin', value: '12.5', unit: 'g/dL', range: '13.5-17.5', status: 'low' },
+                { test: 'WBC Count', value: '8.2', unit: 'K/uL', range: '4.5-11.0', status: 'normal' }
+            ];
+            
+            let resultsHTML = `
+                <div class="critical-alert" style="display: ${selectedOrder.status === 'CRITICAL' ? 'block' : 'none'};">
+                    <div class="critical-title">
+                        🚨 CRITICAL RESULTS DETECTED
+                    </div>
+                    <div>One or more results are outside critical ranges. Physician notification required immediately.</div>
+                </div>
+                
+                <div class="results-grid">
+            `;
+            
+            sampleResults.forEach(result => {
+                resultsHTML += `
+                    <div class="result-entry">
+                        <div class="test-header">
+                            <div class="test-title">${result.test}</div>
+                            <div class="test-status status-${result.status === 'critical' ? 'critical' : result.status === 'normal' ? 'complete' : 'pending'}">
+                                ${result.status.toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Result Value</label>
+                            <input type="text" class="form-input ${result.status === 'critical' ? 'critical' : result.status !== 'normal' ? 'abnormal' : ''}" 
+                                   value="${result.value}" onchange="validateResult(this, '${result.range}')">
+                            <div class="normal-range">Normal Range: ${result.range} ${result.unit}</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Result Status</label>
+                            <select class="form-select">
+                                <option value="normal" ${result.status === 'normal' ? 'selected' : ''}>Normal</option>
+                                <option value="abnormal" ${result.status === 'abnormal' || result.status === 'low' ? 'selected' : ''}>Abnormal</option>
+                                <option value="critical" ${result.status === 'critical' ? 'selected' : ''}>Critical</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resultsHTML += `
+                </div>
+                
+                <div class="form-row" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Verified By</label>
+                        <select class="form-select">
+                            <option>Dr. Lab Director</option>
+                            <option>Senior Tech Sarah</option>
+                            <option>Lab Supervisor Ahmed</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Verification Date/Time</label>
+                        <input type="datetime-local" class="form-input" value="2024-12-15T11:45">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Technical Comments</label>
+                    <textarea class="form-textarea" rows="3" 
+                              placeholder="Any technical issues, repeat analyses, or interpretive comments..."></textarea>
+                </div>
+            `;
+            
+            container.innerHTML = resultsHTML;
+        }
+
+        // Open order modal
+        function openOrderModal() {
+            document.getElementById('orderModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Select test in modal
+        function selectTest(element, code, name, cost) {
+            element.classList.toggle('selected');
+            
+            if (element.classList.contains('selected')) {
+                selectedTests.push({ code, name, cost });
+            } else {
+                selectedTests = selectedTests.filter(t => t.code !== code);
+            }
+            
+            updateSelectedTests();
+        }
+
+        // Update selected tests display
+        function updateSelectedTests() {
+            const container = document.getElementById('selectedTests');
+            const listContainer = document.getElementById('selectedTestsList');
+            
+            if (selectedTests.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            
+            listContainer.innerHTML = selectedTests.map(test => `
+                <div class="selected-test-item">
+                    <div>
+                        <div style="font-weight: 600;">${test.name}</div>
+                        <div style="color: #666; font-size: 10px;">$${test.cost}</div>
+                    </div>
+                    <button class="remove-test" onclick="removeSelectedTest('${test.code}')">Remove</button>
+                </div>
+            `).join('');
+            
+            totalCost = selectedTests.reduce((sum, test) => sum + test.cost, 0);
+            document.getElementById('totalCost').textContent = totalCost;
+        }
+
+        // Remove selected test
+        function removeSelectedTest(code) {
+            selectedTests = selectedTests.filter(t => t.code !== code);
+            
+            // Update UI
+            document.querySelectorAll('.test-item').forEach(item => {
+                if (item.onclick.toString().includes(code)) {
+                    item.classList.remove('selected');
+                }
+            });
+            
+            updateSelectedTests();
+        }
+
+        // Submit lab order
+        function submitLabOrder() {
+            if (selectedTests.length === 0) {
+                showAlert('warning', 'Please select at least one test.');
+                return;
+            }
+            
+            const patientId = document.querySelector('[name="patientId"]').value;
+            if (!patientId) {
+                showAlert('warning', 'Please select a patient.');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitOrderBtn');
+            submitBtn.innerHTML = '<div class="spinner" style="width: 14px; height: 14px; margin-right: 8px;"></div>Submitting...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // Add new order to data
+                const newOrder = {
+                    id: Date.now(),
+                    patientName: document.querySelector('[name="patientId"] option:checked').textContent.split('(')[0].trim(),
+                    mrn: document.querySelector('[name="patientId"] option:checked').textContent.match(/\(([^)]+)\)/)[1],
+                    room: 'GEN-201',
+                    orderDate: new Date().toISOString().slice(0, 16).replace('T', ' '),
+                    tests: selectedTests.map(t => t.name),
+                    status: 'ORDERED',
+                    priority: document.querySelector('[name="priority"]').value,
+                    department: 'CHEMISTRY',
+                    physician: document.querySelector('[name="orderingPhysician"] option:checked')?.textContent || 'Dr. Current User',
+                    specimenId: `LAB-${Date.now()}`
+                };
+                
+                labOrders.unshift(newOrder);
+                
+                // Reset form
+                selectedTests = [];
+                updateSelectedTests();
+                document.querySelectorAll('.test-item.selected').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                submitBtn.innerHTML = '🧪 Submit Order';
+                submitBtn.disabled = false;
+                closeModal('orderModal');
+                
+                // Refresh list
+                loadLabOrders();
+                
+                showAlert('success', `Laboratory order submitted successfully. Specimen ID: ${newOrder.specimenId}`);
+            }, 2000);
+        }
+
+        // Utility functions
+        function getStatusText(status) {
+            const statusMap = {
+                'ORDERED': 'Ordered',
+                'COLLECTED': 'Collected',
+                'PROCESSING': 'Processing',
+                'COMPLETED': 'Completed',
+                'CRITICAL': 'Critical Results'
+            };
+            return statusMap[status] || status;
+        }
+
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            document.querySelector('.main-container').insertBefore(alertDiv, document.querySelector('.main-container').firstChild);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Validate result values
+        function validateResult(input, range) {
+            const value = parseFloat(input.value);
+            const [min, max] = range.split('-').map(v => parseFloat(v));
+            
+            if (value < min || value > max) {
+                if (value < min * 0.5 || value > max * 2) {
+                    input.className = 'form-input critical';
+                    document.getElementById('criticalResultsAlert').style.display = 'block';
+                } else {
+                    input.className = 'form-input abnormal';
+                }
+            } else {
+                input.className = 'form-input';
+            }
+        }
+
+        // Quick action functions
+        function orderStats() {
+            openOrderModal();
+            document.querySelector('[name="priority"]').value = 'STAT';
+            showAlert('warning', 'STAT order mode activated. Please select tests.');
+        }
+
+        function collectSamples() {
+            if (!selectedOrder) {
+                showAlert('warning', 'Please select an order first.');
+                return;
+            }
+            switchWorkflowTab('collection', document.querySelectorAll('.workflow-tab')[1]);
+        }
+
+        function processResults() {
+            if (!selectedOrder) {
+                showAlert('warning', 'Please select an order first.');
+                return;
+            }
+            switchWorkflowTab('results', document.querySelectorAll('.workflow-tab')[3]);
+        }
+
+        function criticalValues() {
+            alert('Opening critical values notification system...');
+        }
+
+        function criticalAlert() {
+            alert('Viewing all critical laboratory results requiring immediate attention...');
+        }
+
+        function qualityControl() {
+            alert('Opening quality control management interface...');
+        }
+
+        function printReports() {
+            if (!selectedOrder) {
+                showAlert('warning', 'Please select an order first.');
+                return;
+            }
+            alert('Preparing laboratory reports for printing...');
+        }
+
+        function generateReports() {
+            if (!selectedOrder) {
+                showAlert('warning', 'Please select an order first.');
+                return;
+            }
+            switchWorkflowTab('reports', document.querySelectorAll('.workflow-tab')[4]);
+        }
+
+        function saveDraftOrder() {
+            showAlert('info', 'Laboratory order saved as draft.');
+        }
+
+        function searchLabItems(query) {
+            // Implement search functionality
+            console.log('Searching for:', query);
+        }
+
+        function filterLabItems() {
+            // Implement filtering functionality
+            loadLabOrders();
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        console.log('Laboratory Management System Initialized');
+    </script>
+</body>
+</html>
