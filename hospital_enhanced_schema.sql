@@ -1,0 +1,1289 @@
+-- ===================================================================
+-- HOSPITAL MANAGEMENT SYSTEM - ENHANCED ORACLE SCHEMA FOR HTML SCREENS
+-- ===================================================================
+-- This file extends the base schema with additional objects for HTML screens
+-- Includes: Lab Management, Pharmacy, Billing, Emergency Triage, etc.
+-- Compatible with Oracle APEX integration
+-- ===================================================================
+
+-- ===================================================================
+-- ENHANCED LABORATORY MANAGEMENT TABLES
+-- ===================================================================
+
+-- Lab Test Parameters for detailed test components
+CREATE TABLE LAB_TEST_PARAMETERS (
+    PARAMETER_ID            NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    TEST_ID                 NUMBER NOT NULL,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    PARAMETER_CODE          VARCHAR2(50) NOT NULL,
+    PARAMETER_NAME          VARCHAR2(200) NOT NULL,
+    DATA_TYPE               VARCHAR2(20) DEFAULT 'NUMERIC',
+    UNIT_OF_MEASURE         VARCHAR2(50),
+    NORMAL_RANGE_MIN        NUMBER(15,4),
+    NORMAL_RANGE_MAX        NUMBER(15,4),
+    CRITICAL_LOW            NUMBER(15,4),
+    CRITICAL_HIGH           NUMBER(15,4),
+    SORT_ORDER              NUMBER(3,0),
+    STATUS                  VARCHAR2(20) DEFAULT 'ACTIVE',
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY              VARCHAR2(100) DEFAULT USER,
+
+    CONSTRAINT FK_LAB_PARAM_TEST FOREIGN KEY (TEST_ID) REFERENCES LAB_TESTS(TEST_ID),
+    CONSTRAINT FK_LAB_PARAM_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT CK_LAB_PARAM_DATATYPE CHECK (DATA_TYPE IN ('NUMERIC', 'TEXT', 'BOOLEAN', 'DATE'))
+);
+
+CREATE INDEX IDX_LAB_PARAM_TEST ON LAB_TEST_PARAMETERS(TEST_ID);
+
+-- Specimen tracking for lab workflow
+CREATE TABLE LAB_SPECIMENS (
+    SPECIMEN_ID             NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ORDER_ID                NUMBER NOT NULL,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    SPECIMEN_NUMBER         VARCHAR2(50) NOT NULL,
+    SPECIMEN_TYPE           VARCHAR2(100) NOT NULL,
+    COLLECTION_DATE         TIMESTAMP WITH TIME ZONE,
+    COLLECTED_BY            NUMBER,
+    COLLECTION_METHOD       VARCHAR2(100),
+    SPECIMEN_QUALITY        VARCHAR2(50) DEFAULT 'SATISFACTORY',
+    RECEIVED_DATE           TIMESTAMP WITH TIME ZONE,
+    RECEIVED_BY             NUMBER,
+    PROCESSING_START_DATE   TIMESTAMP WITH TIME ZONE,
+    PROCESSING_END_DATE     TIMESTAMP WITH TIME ZONE,
+    SPECIMEN_STATUS         VARCHAR2(20) DEFAULT 'ORDERED',
+    REJECTION_REASON        VARCHAR2(500),
+    STORAGE_LOCATION        VARCHAR2(100),
+    BARCODE                 VARCHAR2(100) UNIQUE,
+    COLLECTION_NOTES        CLOB,
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    CREATED_BY              VARCHAR2(100) DEFAULT USER,
+
+    CONSTRAINT FK_SPECIMEN_ORDER FOREIGN KEY (ORDER_ID) REFERENCES LAB_ORDERS(ORDER_ID),
+    CONSTRAINT FK_SPECIMEN_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT FK_SPECIMEN_COLLECTED_BY FOREIGN KEY (COLLECTED_BY) REFERENCES STAFF_MEMBERS(STAFF_ID),
+    CONSTRAINT FK_SPECIMEN_RECEIVED_BY FOREIGN KEY (RECEIVED_BY) REFERENCES STAFF_MEMBERS(STAFF_ID),
+    CONSTRAINT UK_SPECIMEN_NUMBER UNIQUE (HOSPITAL_ID, SPECIMEN_NUMBER),
+    CONSTRAINT CK_SPECIMEN_STATUS CHECK (SPECIMEN_STATUS IN ('ORDERED', 'COLLECTED', 'RECEIVED', 'PROCESSING', 'COMPLETED', 'REJECTED')),
+    CONSTRAINT CK_SPECIMEN_QUALITY CHECK (SPECIMEN_QUALITY IN ('SATISFACTORY', 'HEMOLYZED', 'CLOTTED', 'INSUFFICIENT', 'LIPEMIC', 'CONTAMINATED'))
+);
+
+CREATE INDEX IDX_SPECIMEN_ORDER ON LAB_SPECIMENS(ORDER_ID);
+CREATE INDEX IDX_SPECIMEN_STATUS ON LAB_SPECIMENS(SPECIMEN_STATUS);
+CREATE INDEX IDX_SPECIMEN_BARCODE ON LAB_SPECIMENS(BARCODE);
+
+-- Lab result parameters (detailed results for each test component)
+CREATE TABLE LAB_RESULT_PARAMETERS (
+    RESULT_PARAMETER_ID     NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    RESULT_ID               NUMBER NOT NULL,
+    PARAMETER_ID            NUMBER NOT NULL,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    RESULT_VALUE            VARCHAR2(500),
+    RESULT_TEXT             CLOB,
+    NUMERIC_VALUE           NUMBER(15,4),
+    ABNORMAL_FLAG           VARCHAR2(20),
+    CRITICAL_FLAG           CHAR(1) DEFAULT 'N',
+    DELTA_CHECK_FLAG        CHAR(1) DEFAULT 'N',
+    UNITS                   VARCHAR2(50),
+    REFERENCE_RANGE         VARCHAR2(200),
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT FK_RESULT_PARAM_RESULT FOREIGN KEY (RESULT_ID) REFERENCES LAB_RESULTS(RESULT_ID) ON DELETE CASCADE,
+    CONSTRAINT FK_RESULT_PARAM_PARAMETER FOREIGN KEY (PARAMETER_ID) REFERENCES LAB_TEST_PARAMETERS(PARAMETER_ID),
+    CONSTRAINT FK_RESULT_PARAM_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT CK_ABNORMAL_FLAG CHECK (ABNORMAL_FLAG IN ('NORMAL', 'HIGH', 'LOW', 'CRITICAL_HIGH', 'CRITICAL_LOW', 'ABNORMAL')),
+    CONSTRAINT CK_CRITICAL_FLAG CHECK (CRITICAL_FLAG IN ('Y', 'N')),
+    CONSTRAINT CK_DELTA_FLAG CHECK (DELTA_CHECK_FLAG IN ('Y', 'N'))
+);
+
+CREATE INDEX IDX_RESULT_PARAM_RESULT ON LAB_RESULT_PARAMETERS(RESULT_ID);
+CREATE INDEX IDX_RESULT_PARAM_CRITICAL ON LAB_RESULT_PARAMETERS(CRITICAL_FLAG) WHERE CRITICAL_FLAG = 'Y';
+
+-- Quality Control for lab equipment
+CREATE TABLE LAB_QUALITY_CONTROL (
+    QC_ID                   NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    EQUIPMENT_ID            NUMBER,
+    QC_RUN_DATE             TIMESTAMP WITH TIME ZONE NOT NULL,
+    QC_TYPE                 VARCHAR2(50) NOT NULL,
+    QC_LEVEL                VARCHAR2(50),
+    TEST_ID                 NUMBER,
+    PARAMETER_ID            NUMBER,
+    EXPECTED_VALUE          NUMBER(15,4),
+    ACTUAL_VALUE            NUMBER(15,4),
+    ACCEPTABLE_RANGE_MIN    NUMBER(15,4),
+    ACCEPTABLE_RANGE_MAX    NUMBER(15,4),
+    QC_STATUS               VARCHAR2(20) DEFAULT 'PENDING',
+    PERFORMED_BY            NUMBER,
+    COMMENTS                CLOB,
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT FK_QC_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT FK_QC_EQUIPMENT FOREIGN KEY (EQUIPMENT_ID) REFERENCES MEDICAL_EQUIPMENT(EQUIPMENT_ID),
+    CONSTRAINT FK_QC_TEST FOREIGN KEY (TEST_ID) REFERENCES LAB_TESTS(TEST_ID),
+    CONSTRAINT FK_QC_PARAMETER FOREIGN KEY (PARAMETER_ID) REFERENCES LAB_TEST_PARAMETERS(PARAMETER_ID),
+    CONSTRAINT FK_QC_PERFORMED_BY FOREIGN KEY (PERFORMED_BY) REFERENCES STAFF_MEMBERS(STAFF_ID),
+    CONSTRAINT CK_QC_STATUS CHECK (QC_STATUS IN ('PENDING', 'PASS', 'FAIL', 'WARNING')),
+    CONSTRAINT CK_QC_TYPE CHECK (QC_TYPE IN ('CALIBRATION', 'CONTROL_LEVEL_1', 'CONTROL_LEVEL_2', 'CONTROL_LEVEL_3', 'BLANK'))
+);
+
+CREATE INDEX IDX_QC_DATE ON LAB_QUALITY_CONTROL(QC_RUN_DATE);
+CREATE INDEX IDX_QC_STATUS ON LAB_QUALITY_CONTROL(QC_STATUS);
+
+-- Critical value notifications
+CREATE TABLE LAB_CRITICAL_NOTIFICATIONS (
+    NOTIFICATION_ID         NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    RESULT_ID               NUMBER NOT NULL,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    PATIENT_ID              NUMBER NOT NULL,
+    PARAMETER_ID            NUMBER,
+    CRITICAL_VALUE          VARCHAR2(500),
+    NOTIFICATION_DATE       TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    NOTIFIED_PHYSICIAN      NUMBER,
+    NOTIFICATION_METHOD     VARCHAR2(50),
+    NOTIFICATION_STATUS     VARCHAR2(20) DEFAULT 'PENDING',
+    ACKNOWLEDGED_DATE       TIMESTAMP WITH TIME ZONE,
+    ACKNOWLEDGED_BY         NUMBER,
+    READ_BACK_VERIFICATION  VARCHAR2(500),
+    FOLLOW_UP_ACTION        CLOB,
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT FK_CRIT_NOTIF_RESULT FOREIGN KEY (RESULT_ID) REFERENCES LAB_RESULTS(RESULT_ID),
+    CONSTRAINT FK_CRIT_NOTIF_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT FK_CRIT_NOTIF_PATIENT FOREIGN KEY (PATIENT_ID) REFERENCES PATIENTS(PATIENT_ID),
+    CONSTRAINT FK_CRIT_NOTIF_PHYSICIAN FOREIGN KEY (NOTIFIED_PHYSICIAN) REFERENCES STAFF_MEMBERS(STAFF_ID),
+    CONSTRAINT FK_CRIT_NOTIF_ACK_BY FOREIGN KEY (ACKNOWLEDGED_BY) REFERENCES STAFF_MEMBERS(STAFF_ID),
+    CONSTRAINT CK_NOTIF_METHOD CHECK (NOTIFICATION_METHOD IN ('PHONE', 'EMR_ALERT', 'PAGE', 'EMAIL', 'SMS', 'IN_PERSON')),
+    CONSTRAINT CK_NOTIF_STATUS CHECK (NOTIFICATION_STATUS IN ('PENDING', 'NOTIFIED', 'ACKNOWLEDGED', 'ESCALATED'))
+);
+
+CREATE INDEX IDX_CRIT_NOTIF_DATE ON LAB_CRITICAL_NOTIFICATIONS(NOTIFICATION_DATE);
+CREATE INDEX IDX_CRIT_NOTIF_STATUS ON LAB_CRITICAL_NOTIFICATIONS(NOTIFICATION_STATUS);
+
+-- ===================================================================
+-- ENHANCED PHARMACY MANAGEMENT TABLES
+-- ===================================================================
+
+-- Drug interactions database
+CREATE TABLE DRUG_INTERACTIONS (
+    INTERACTION_ID          NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    MEDICATION_ID_1         NUMBER NOT NULL,
+    MEDICATION_ID_2         NUMBER NOT NULL,
+    INTERACTION_SEVERITY    VARCHAR2(20) NOT NULL,
+    INTERACTION_TYPE        VARCHAR2(100),
+    CLINICAL_EFFECT         CLOB,
+    MANAGEMENT_STRATEGY     CLOB,
+    EVIDENCE_LEVEL          VARCHAR2(50),
+    DOCUMENTATION_LEVEL     VARCHAR2(50),
+    STATUS                  VARCHAR2(20) DEFAULT 'ACTIVE',
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT FK_DRUG_INT_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT FK_DRUG_INT_MED1 FOREIGN KEY (MEDICATION_ID_1) REFERENCES MEDICATIONS(MEDICATION_ID),
+    CONSTRAINT FK_DRUG_INT_MED2 FOREIGN KEY (MEDICATION_ID_2) REFERENCES MEDICATIONS(MEDICATION_ID),
+    CONSTRAINT CK_INTERACTION_SEVERITY CHECK (INTERACTION_SEVERITY IN ('MINOR', 'MODERATE', 'MAJOR', 'CONTRAINDICATED')),
+    CONSTRAINT CK_DIFFERENT_MEDS CHECK (MEDICATION_ID_1 <> MEDICATION_ID_2)
+);
+
+CREATE INDEX IDX_DRUG_INT_MED1 ON DRUG_INTERACTIONS(MEDICATION_ID_1);
+CREATE INDEX IDX_DRUG_INT_MED2 ON DRUG_INTERACTIONS(MEDICATION_ID_2);
+CREATE INDEX IDX_DRUG_INT_SEVERITY ON DRUG_INTERACTIONS(INTERACTION_SEVERITY);
+
+-- Medication dispensing log
+CREATE TABLE MEDICATION_DISPENSING (
+    DISPENSING_ID           NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    PRESCRIPTION_ID         NUMBER NOT NULL,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    MEDICATION_ID           NUMBER NOT NULL,
+    DISPENSED_QUANTITY      NUMBER(10,2) NOT NULL,
+    DISPENSED_DATE          TIMESTAMP WITH TIME ZONE NOT NULL,
+    DISPENSED_BY            NUMBER NOT NULL,
+    BATCH_NUMBER            VARCHAR2(100),
+    EXPIRY_DATE             DATE,
+    DISPENSING_NOTES        CLOB,
+    PATIENT_COUNSELING      CHAR(1) DEFAULT 'N',
+    COUNSELING_NOTES        CLOB,
+    BARCODE                 VARCHAR2(100),
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT FK_DISPENSE_PRESCRIPTION FOREIGN KEY (PRESCRIPTION_ID) REFERENCES PRESCRIPTIONS(PRESCRIPTION_ID),
+    CONSTRAINT FK_DISPENSE_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT FK_DISPENSE_MEDICATION FOREIGN KEY (MEDICATION_ID) REFERENCES MEDICATIONS(MEDICATION_ID),
+    CONSTRAINT FK_DISPENSE_BY FOREIGN KEY (DISPENSED_BY) REFERENCES STAFF_MEMBERS(STAFF_ID),
+    CONSTRAINT CK_DISPENSED_QTY CHECK (DISPENSED_QUANTITY > 0),
+    CONSTRAINT CK_PATIENT_COUNSELING CHECK (PATIENT_COUNSELING IN ('Y', 'N'))
+);
+
+CREATE INDEX IDX_DISPENSE_PRESCRIPTION ON MEDICATION_DISPENSING(PRESCRIPTION_ID);
+CREATE INDEX IDX_DISPENSE_DATE ON MEDICATION_DISPENSING(DISPENSED_DATE);
+
+-- Medication stock movements
+CREATE TABLE MEDICATION_STOCK_MOVEMENTS (
+    MOVEMENT_ID             NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    MEDICATION_ID           NUMBER NOT NULL,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    MOVEMENT_TYPE           VARCHAR2(50) NOT NULL,
+    MOVEMENT_DATE           TIMESTAMP WITH TIME ZONE NOT NULL,
+    QUANTITY                NUMBER(10,2) NOT NULL,
+    UNIT_COST               NUMBER(10,2),
+    REFERENCE_NUMBER        VARCHAR2(100),
+    BATCH_NUMBER            VARCHAR2(100),
+    EXPIRY_DATE             DATE,
+    SUPPLIER_ID             NUMBER,
+    MOVED_BY                NUMBER,
+    FROM_LOCATION           VARCHAR2(200),
+    TO_LOCATION             VARCHAR2(200),
+    REASON                  VARCHAR2(500),
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT FK_STOCK_MOV_MEDICATION FOREIGN KEY (MEDICATION_ID) REFERENCES MEDICATIONS(MEDICATION_ID),
+    CONSTRAINT FK_STOCK_MOV_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT FK_STOCK_MOV_BY FOREIGN KEY (MOVED_BY) REFERENCES STAFF_MEMBERS(STAFF_ID),
+    CONSTRAINT CK_MOVEMENT_TYPE CHECK (MOVEMENT_TYPE IN ('RECEIPT', 'ISSUE', 'RETURN', 'ADJUSTMENT', 'TRANSFER', 'DISPOSAL', 'EXPIRED'))
+);
+
+CREATE INDEX IDX_STOCK_MOV_MEDICATION ON MEDICATION_STOCK_MOVEMENTS(MEDICATION_ID);
+CREATE INDEX IDX_STOCK_MOV_DATE ON MEDICATION_STOCK_MOVEMENTS(MOVEMENT_DATE);
+
+-- ===================================================================
+-- ENHANCED BILLING & FINANCE TABLES
+-- ===================================================================
+
+-- Payment transactions
+CREATE TABLE PAYMENTS (
+    PAYMENT_ID              NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    BILL_ID                 NUMBER NOT NULL,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    PATIENT_ID              NUMBER NOT NULL,
+    PAYMENT_DATE            TIMESTAMP WITH TIME ZONE NOT NULL,
+    PAYMENT_AMOUNT          NUMBER(12,2) NOT NULL,
+    PAYMENT_METHOD          VARCHAR2(50) NOT NULL,
+    PAYMENT_TYPE            VARCHAR2(50) DEFAULT 'PATIENT',
+    REFERENCE_NUMBER        VARCHAR2(100),
+    TRANSACTION_ID          VARCHAR2(100),
+    PAYMENT_STATUS          VARCHAR2(20) DEFAULT 'COMPLETED',
+    RECEIVED_BY             NUMBER,
+    BANK_NAME               VARCHAR2(200),
+    CHECK_NUMBER            VARCHAR2(50),
+    CARD_LAST_FOUR          VARCHAR2(4),
+    APPROVAL_CODE           VARCHAR2(50),
+    PAYMENT_NOTES           VARCHAR2(1000),
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT FK_PAYMENT_BILL FOREIGN KEY (BILL_ID) REFERENCES BILLING(BILL_ID),
+    CONSTRAINT FK_PAYMENT_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT FK_PAYMENT_PATIENT FOREIGN KEY (PATIENT_ID) REFERENCES PATIENTS(PATIENT_ID),
+    CONSTRAINT FK_PAYMENT_RECEIVED_BY FOREIGN KEY (RECEIVED_BY) REFERENCES STAFF_MEMBERS(STAFF_ID),
+    CONSTRAINT CK_PAYMENT_AMOUNT CHECK (PAYMENT_AMOUNT > 0),
+    CONSTRAINT CK_PAYMENT_METHOD CHECK (PAYMENT_METHOD IN ('CASH', 'CREDIT_CARD', 'DEBIT_CARD', 'CHECK', 'BANK_TRANSFER', 'INSURANCE', 'MOBILE_PAYMENT')),
+    CONSTRAINT CK_PAYMENT_TYPE CHECK (PAYMENT_TYPE IN ('PATIENT', 'INSURANCE', 'GOVERNMENT', 'CHARITY', 'OTHER')),
+    CONSTRAINT CK_PAYMENT_STATUS CHECK (PAYMENT_STATUS IN ('PENDING', 'COMPLETED', 'FAILED', 'REFUNDED', 'CANCELLED'))
+);
+
+CREATE INDEX IDX_PAYMENT_BILL ON PAYMENTS(BILL_ID);
+CREATE INDEX IDX_PAYMENT_DATE ON PAYMENTS(PAYMENT_DATE);
+CREATE INDEX IDX_PAYMENT_STATUS ON PAYMENTS(PAYMENT_STATUS);
+
+-- Insurance claim processing
+CREATE TABLE INSURANCE_CLAIM_DETAILS (
+    CLAIM_DETAIL_ID         NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    BILL_ID                 NUMBER NOT NULL,
+    INSURANCE_ID            NUMBER NOT NULL,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    CLAIM_NUMBER            VARCHAR2(100) NOT NULL,
+    CLAIM_DATE              DATE NOT NULL,
+    CLAIM_AMOUNT            NUMBER(12,2) NOT NULL,
+    APPROVED_AMOUNT         NUMBER(12,2),
+    REJECTED_AMOUNT         NUMBER(12,2),
+    CLAIM_STATUS            VARCHAR2(20) DEFAULT 'SUBMITTED',
+    SUBMISSION_DATE         DATE,
+    APPROVAL_DATE           DATE,
+    PAYMENT_DATE            DATE,
+    REJECTION_REASON        VARCHAR2(1000),
+    AUTHORIZATION_NUMBER    VARCHAR2(100),
+    CLAIM_NOTES             CLOB,
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_DATE            TIMESTAMP WITH TIME ZONE,
+
+    CONSTRAINT FK_CLAIM_BILL FOREIGN KEY (BILL_ID) REFERENCES BILLING(BILL_ID),
+    CONSTRAINT FK_CLAIM_INSURANCE FOREIGN KEY (INSURANCE_ID) REFERENCES PATIENT_INSURANCE(INSURANCE_ID),
+    CONSTRAINT FK_CLAIM_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT UK_CLAIM_NUMBER UNIQUE (HOSPITAL_ID, CLAIM_NUMBER),
+    CONSTRAINT CK_CLAIM_AMOUNTS CHECK (CLAIM_AMOUNT > 0),
+    CONSTRAINT CK_CLAIM_STATUS CHECK (CLAIM_STATUS IN ('DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'PARTIAL_APPROVED', 'REJECTED', 'PAID'))
+);
+
+CREATE INDEX IDX_CLAIM_BILL ON INSURANCE_CLAIM_DETAILS(BILL_ID);
+CREATE INDEX IDX_CLAIM_STATUS ON INSURANCE_CLAIM_DETAILS(CLAIM_STATUS);
+CREATE INDEX IDX_CLAIM_DATE ON INSURANCE_CLAIM_DETAILS(CLAIM_DATE);
+
+-- ===================================================================
+-- EMERGENCY TRIAGE TABLES
+-- ===================================================================
+
+CREATE TABLE EMERGENCY_TRIAGE (
+    TRIAGE_ID               NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    PATIENT_ID              NUMBER NOT NULL,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    ARRIVAL_DATE            TIMESTAMP WITH TIME ZONE NOT NULL,
+    ARRIVAL_METHOD          VARCHAR2(50),
+    CHIEF_COMPLAINT         VARCHAR2(1000) NOT NULL,
+    TRIAGE_LEVEL            VARCHAR2(20) NOT NULL,
+    TRIAGE_CATEGORY         VARCHAR2(50),
+    TRIAGE_NURSE            NUMBER NOT NULL,
+    INITIAL_VITAL_SIGNS_ID  NUMBER,
+    PAIN_SCORE              NUMBER(2,0),
+    CONSCIOUSNESS_LEVEL     VARCHAR2(50),
+    ALLERGIES_NOTED         CLOB,
+    CURRENT_MEDICATIONS     CLOB,
+    INITIAL_ASSESSMENT      CLOB,
+    WAITING_AREA            VARCHAR2(100),
+    ASSIGNED_TO_DOCTOR      NUMBER,
+    TRIAGE_START_TIME       TIMESTAMP WITH TIME ZONE,
+    TRIAGE_END_TIME         TIMESTAMP WITH TIME ZONE,
+    DISPOSITION             VARCHAR2(100),
+    STATUS                  VARCHAR2(20) DEFAULT 'WAITING',
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_DATE            TIMESTAMP WITH TIME ZONE,
+
+    CONSTRAINT FK_TRIAGE_PATIENT FOREIGN KEY (PATIENT_ID) REFERENCES PATIENTS(PATIENT_ID),
+    CONSTRAINT FK_TRIAGE_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT FK_TRIAGE_NURSE FOREIGN KEY (TRIAGE_NURSE) REFERENCES STAFF_MEMBERS(STAFF_ID),
+    CONSTRAINT FK_TRIAGE_VITALS FOREIGN KEY (INITIAL_VITAL_SIGNS_ID) REFERENCES VITAL_SIGNS(VITAL_ID),
+    CONSTRAINT FK_TRIAGE_DOCTOR FOREIGN KEY (ASSIGNED_TO_DOCTOR) REFERENCES STAFF_MEMBERS(STAFF_ID),
+    CONSTRAINT CK_TRIAGE_LEVEL CHECK (TRIAGE_LEVEL IN ('LEVEL_1_RESUSCITATION', 'LEVEL_2_EMERGENT', 'LEVEL_3_URGENT', 'LEVEL_4_LESS_URGENT', 'LEVEL_5_NON_URGENT')),
+    CONSTRAINT CK_TRIAGE_STATUS CHECK (STATUS IN ('WAITING', 'IN_PROGRESS', 'COMPLETED', 'ADMITTED', 'DISCHARGED', 'LEFT_WITHOUT_TREATMENT')),
+    CONSTRAINT CK_PAIN_SCORE CHECK (PAIN_SCORE BETWEEN 0 AND 10)
+);
+
+CREATE INDEX IDX_TRIAGE_PATIENT ON EMERGENCY_TRIAGE(PATIENT_ID);
+CREATE INDEX IDX_TRIAGE_LEVEL ON EMERGENCY_TRIAGE(TRIAGE_LEVEL);
+CREATE INDEX IDX_TRIAGE_STATUS ON EMERGENCY_TRIAGE(STATUS);
+CREATE INDEX IDX_TRIAGE_ARRIVAL ON EMERGENCY_TRIAGE(ARRIVAL_DATE);
+
+-- ===================================================================
+-- DISCHARGE PLANNING TABLE
+-- ===================================================================
+
+CREATE TABLE DISCHARGE_PLANNING (
+    DISCHARGE_PLAN_ID       NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ADMISSION_ID            NUMBER NOT NULL,
+    PATIENT_ID              NUMBER NOT NULL,
+    HOSPITAL_ID             NUMBER NOT NULL,
+    PLANNED_DISCHARGE_DATE  DATE,
+    DISCHARGE_TYPE          VARCHAR2(100),
+    DISCHARGE_DESTINATION   VARCHAR2(200),
+    HOME_CARE_SERVICES      CLOB,
+    EQUIPMENT_NEEDS         CLOB,
+    MEDICATION_EDUCATION    CLOB,
+    DIET_INSTRUCTIONS       CLOB,
+    ACTIVITY_RESTRICTIONS   CLOB,
+    FOLLOW_UP_APPOINTMENTS  CLOB,
+    DISCHARGE_INSTRUCTIONS  CLOB,
+    PATIENT_EDUCATION       CLOB,
+    SOCIAL_SERVICES_CONSULT CHAR(1) DEFAULT 'N',
+    TRANSPORTATION_ARRANGED CHAR(1) DEFAULT 'N',
+    DME_ORDERED             CHAR(1) DEFAULT 'N',
+    PLAN_STATUS             VARCHAR2(20) DEFAULT 'DRAFT',
+    CREATED_BY              NUMBER,
+    CREATED_DATE            TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UPDATED_DATE            TIMESTAMP WITH TIME ZONE,
+
+    CONSTRAINT FK_DISCHARGE_PLAN_ADMISSION FOREIGN KEY (ADMISSION_ID) REFERENCES PATIENT_ADMISSIONS(ADMISSION_ID),
+    CONSTRAINT FK_DISCHARGE_PLAN_PATIENT FOREIGN KEY (PATIENT_ID) REFERENCES PATIENTS(PATIENT_ID),
+    CONSTRAINT FK_DISCHARGE_PLAN_HOSPITAL FOREIGN KEY (HOSPITAL_ID) REFERENCES HOSPITALS(HOSPITAL_ID),
+    CONSTRAINT FK_DISCHARGE_PLAN_CREATED_BY FOREIGN KEY (CREATED_BY) REFERENCES STAFF_MEMBERS(STAFF_ID),
+    CONSTRAINT CK_DISCHARGE_PLAN_STATUS CHECK (PLAN_STATUS IN ('DRAFT', 'ACTIVE', 'COMPLETED', 'CANCELLED'))
+);
+
+CREATE INDEX IDX_DISCHARGE_PLAN_ADMISSION ON DISCHARGE_PLANNING(ADMISSION_ID);
+CREATE INDEX IDX_DISCHARGE_PLAN_STATUS ON DISCHARGE_PLANNING(PLAN_STATUS);
+
+-- ===================================================================
+-- PL/SQL PACKAGE: LABORATORY MANAGEMENT
+-- ===================================================================
+
+CREATE OR REPLACE PACKAGE PKG_LABORATORY IS
+
+    -- Create lab order with tests
+    PROCEDURE CREATE_LAB_ORDER(
+        p_patient_id        IN NUMBER,
+        p_hospital_id       IN NUMBER,
+        p_doctor_id         IN NUMBER,
+        p_admission_id      IN NUMBER DEFAULT NULL,
+        p_priority          IN VARCHAR2 DEFAULT 'ROUTINE',
+        p_clinical_indication IN VARCHAR2 DEFAULT NULL,
+        p_order_id          OUT NUMBER
+    );
+
+    -- Add test to order
+    PROCEDURE ADD_TEST_TO_ORDER(
+        p_order_id          IN NUMBER,
+        p_test_id           IN NUMBER,
+        p_special_instructions IN VARCHAR2 DEFAULT NULL
+    );
+
+    -- Collect specimen
+    PROCEDURE COLLECT_SPECIMEN(
+        p_order_id          IN NUMBER,
+        p_specimen_type     IN VARCHAR2,
+        p_collected_by      IN NUMBER,
+        p_collection_method IN VARCHAR2 DEFAULT NULL,
+        p_specimen_quality  IN VARCHAR2 DEFAULT 'SATISFACTORY',
+        p_specimen_id       OUT NUMBER
+    );
+
+    -- Enter lab results
+    PROCEDURE ENTER_LAB_RESULT(
+        p_order_id          IN NUMBER,
+        p_test_id           IN NUMBER,
+        p_parameter_id      IN NUMBER,
+        p_result_value      IN VARCHAR2,
+        p_numeric_value     IN NUMBER DEFAULT NULL,
+        p_result_id         OUT NUMBER
+    );
+
+    -- Verify results and check for critical values
+    PROCEDURE VERIFY_LAB_RESULTS(
+        p_result_id         IN NUMBER,
+        p_verified_by       IN NUMBER,
+        p_comments          IN VARCHAR2 DEFAULT NULL,
+        p_has_critical_values OUT BOOLEAN
+    );
+
+    -- Notify physician of critical values
+    PROCEDURE NOTIFY_CRITICAL_VALUE(
+        p_result_id         IN NUMBER,
+        p_physician_id      IN NUMBER,
+        p_notification_method IN VARCHAR2,
+        p_notification_id   OUT NUMBER
+    );
+
+    -- Get lab order status
+    FUNCTION GET_ORDER_STATUS(
+        p_order_id          IN NUMBER
+    ) RETURN VARCHAR2;
+
+    -- Calculate turnaround time
+    FUNCTION GET_TURNAROUND_TIME(
+        p_order_id          IN NUMBER
+    ) RETURN NUMBER;
+
+END PKG_LABORATORY;
+/
+
+CREATE OR REPLACE PACKAGE BODY PKG_LABORATORY IS
+
+    PROCEDURE CREATE_LAB_ORDER(
+        p_patient_id        IN NUMBER,
+        p_hospital_id       IN NUMBER,
+        p_doctor_id         IN NUMBER,
+        p_admission_id      IN NUMBER DEFAULT NULL,
+        p_priority          IN VARCHAR2 DEFAULT 'ROUTINE',
+        p_clinical_indication IN VARCHAR2 DEFAULT NULL,
+        p_order_id          OUT NUMBER
+    ) IS
+    BEGIN
+        INSERT INTO LAB_ORDERS (
+            PATIENT_ID, HOSPITAL_ID, DOCTOR_ID, ADMISSION_ID,
+            ORDER_DATE, PRIORITY, CLINICAL_INDICATION, ORDER_STATUS
+        ) VALUES (
+            p_patient_id, p_hospital_id, p_doctor_id, p_admission_id,
+            SYSTIMESTAMP, p_priority, p_clinical_indication, 'ORDERED'
+        ) RETURNING ORDER_ID INTO p_order_id;
+
+        COMMIT;
+    END CREATE_LAB_ORDER;
+
+    PROCEDURE ADD_TEST_TO_ORDER(
+        p_order_id          IN NUMBER,
+        p_test_id           IN NUMBER,
+        p_special_instructions IN VARCHAR2 DEFAULT NULL
+    ) IS
+        v_hospital_id NUMBER;
+    BEGIN
+        -- Get hospital ID from order
+        SELECT HOSPITAL_ID INTO v_hospital_id
+        FROM LAB_ORDERS WHERE ORDER_ID = p_order_id;
+
+        -- Add test to order (implementation depends on your schema structure)
+        -- This might involve updating the order or creating a separate order-test junction table
+
+        COMMIT;
+    END ADD_TEST_TO_ORDER;
+
+    PROCEDURE COLLECT_SPECIMEN(
+        p_order_id          IN NUMBER,
+        p_specimen_type     IN VARCHAR2,
+        p_collected_by      IN NUMBER,
+        p_collection_method IN VARCHAR2 DEFAULT NULL,
+        p_specimen_quality  IN VARCHAR2 DEFAULT 'SATISFACTORY',
+        p_specimen_id       OUT NUMBER
+    ) IS
+        v_hospital_id NUMBER;
+        v_specimen_number VARCHAR2(50);
+    BEGIN
+        -- Get hospital ID from order
+        SELECT HOSPITAL_ID INTO v_hospital_id
+        FROM LAB_ORDERS WHERE ORDER_ID = p_order_id;
+
+        -- Generate specimen number
+        SELECT 'SPEC-' || TO_CHAR(SYSDATE, 'YYYYMMDD') || '-' ||
+               LPAD(HOSPITALS_BILL_SEQ.NEXTVAL, 6, '0')
+        INTO v_specimen_number FROM DUAL;
+
+        -- Create specimen record
+        INSERT INTO LAB_SPECIMENS (
+            ORDER_ID, HOSPITAL_ID, SPECIMEN_NUMBER, SPECIMEN_TYPE,
+            COLLECTION_DATE, COLLECTED_BY, COLLECTION_METHOD,
+            SPECIMEN_QUALITY, SPECIMEN_STATUS
+        ) VALUES (
+            p_order_id, v_hospital_id, v_specimen_number, p_specimen_type,
+            SYSTIMESTAMP, p_collected_by, p_collection_method,
+            p_specimen_quality, 'COLLECTED'
+        ) RETURNING SPECIMEN_ID INTO p_specimen_id;
+
+        -- Update order status
+        UPDATE LAB_ORDERS
+        SET ORDER_STATUS = 'COLLECTED',
+            SPECIMEN_COLLECTION_DATE = SYSTIMESTAMP
+        WHERE ORDER_ID = p_order_id;
+
+        COMMIT;
+    END COLLECT_SPECIMEN;
+
+    PROCEDURE ENTER_LAB_RESULT(
+        p_order_id          IN NUMBER,
+        p_test_id           IN NUMBER,
+        p_parameter_id      IN NUMBER,
+        p_result_value      IN VARCHAR2,
+        p_numeric_value     IN NUMBER DEFAULT NULL,
+        p_result_id         OUT NUMBER
+    ) IS
+        v_hospital_id NUMBER;
+        v_abnormal_flag VARCHAR2(20) := 'NORMAL';
+        v_critical_flag CHAR(1) := 'N';
+        v_normal_min NUMBER;
+        v_normal_max NUMBER;
+        v_critical_low NUMBER;
+        v_critical_high NUMBER;
+    BEGIN
+        -- Get hospital ID
+        SELECT HOSPITAL_ID INTO v_hospital_id
+        FROM LAB_ORDERS WHERE ORDER_ID = p_order_id;
+
+        -- Get normal and critical ranges
+        SELECT NORMAL_RANGE_MIN, NORMAL_RANGE_MAX, CRITICAL_LOW, CRITICAL_HIGH
+        INTO v_normal_min, v_normal_max, v_critical_low, v_critical_high
+        FROM LAB_TEST_PARAMETERS
+        WHERE PARAMETER_ID = p_parameter_id;
+
+        -- Check if result is abnormal or critical
+        IF p_numeric_value IS NOT NULL THEN
+            IF p_numeric_value < v_critical_low OR p_numeric_value > v_critical_high THEN
+                v_critical_flag := 'Y';
+                v_abnormal_flag := CASE
+                    WHEN p_numeric_value < v_critical_low THEN 'CRITICAL_LOW'
+                    ELSE 'CRITICAL_HIGH'
+                END;
+            ELSIF p_numeric_value < v_normal_min THEN
+                v_abnormal_flag := 'LOW';
+            ELSIF p_numeric_value > v_normal_max THEN
+                v_abnormal_flag := 'HIGH';
+            END IF;
+        END IF;
+
+        -- Check if result record exists
+        BEGIN
+            SELECT RESULT_ID INTO p_result_id
+            FROM LAB_RESULTS WHERE ORDER_ID = p_order_id;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                -- Create new result record
+                INSERT INTO LAB_RESULTS (
+                    ORDER_ID, HOSPITAL_ID, RESULT_DATE, RESULT_STATUS
+                ) VALUES (
+                    p_order_id, v_hospital_id, SYSTIMESTAMP, 'PRELIMINARY'
+                ) RETURNING RESULT_ID INTO p_result_id;
+        END;
+
+        -- Insert result parameter
+        INSERT INTO LAB_RESULT_PARAMETERS (
+            RESULT_ID, PARAMETER_ID, HOSPITAL_ID, RESULT_VALUE,
+            NUMERIC_VALUE, ABNORMAL_FLAG, CRITICAL_FLAG
+        ) VALUES (
+            p_result_id, p_parameter_id, v_hospital_id, p_result_value,
+            p_numeric_value, v_abnormal_flag, v_critical_flag
+        );
+
+        -- Update order status
+        UPDATE LAB_ORDERS
+        SET ORDER_STATUS = 'PROCESSING'
+        WHERE ORDER_ID = p_order_id;
+
+        COMMIT;
+    END ENTER_LAB_RESULT;
+
+    PROCEDURE VERIFY_LAB_RESULTS(
+        p_result_id         IN NUMBER,
+        p_verified_by       IN NUMBER,
+        p_comments          IN VARCHAR2 DEFAULT NULL,
+        p_has_critical_values OUT BOOLEAN
+    ) IS
+        v_critical_count NUMBER;
+    BEGIN
+        -- Check for critical values
+        SELECT COUNT(*)
+        INTO v_critical_count
+        FROM LAB_RESULT_PARAMETERS
+        WHERE RESULT_ID = p_result_id
+          AND CRITICAL_FLAG = 'Y';
+
+        p_has_critical_values := (v_critical_count > 0);
+
+        -- Update result status
+        UPDATE LAB_RESULTS
+        SET RESULT_STATUS = 'FINAL',
+            VERIFIED_BY = p_verified_by,
+            VERIFIED_DATE = SYSTIMESTAMP,
+            COMMENTS = p_comments
+        WHERE RESULT_ID = p_result_id;
+
+        -- Update order status
+        UPDATE LAB_ORDERS o
+        SET ORDER_STATUS = 'COMPLETED'
+        WHERE ORDER_ID = (SELECT ORDER_ID FROM LAB_RESULTS WHERE RESULT_ID = p_result_id);
+
+        COMMIT;
+    END VERIFY_LAB_RESULTS;
+
+    PROCEDURE NOTIFY_CRITICAL_VALUE(
+        p_result_id         IN NUMBER,
+        p_physician_id      IN NUMBER,
+        p_notification_method IN VARCHAR2,
+        p_notification_id   OUT NUMBER
+    ) IS
+        v_hospital_id NUMBER;
+        v_patient_id NUMBER;
+    BEGIN
+        -- Get hospital and patient info
+        SELECT o.HOSPITAL_ID, o.PATIENT_ID
+        INTO v_hospital_id, v_patient_id
+        FROM LAB_RESULTS r
+        JOIN LAB_ORDERS o ON r.ORDER_ID = o.ORDER_ID
+        WHERE r.RESULT_ID = p_result_id;
+
+        -- Create notification record
+        INSERT INTO LAB_CRITICAL_NOTIFICATIONS (
+            RESULT_ID, HOSPITAL_ID, PATIENT_ID, NOTIFIED_PHYSICIAN,
+            NOTIFICATION_METHOD, NOTIFICATION_STATUS
+        ) VALUES (
+            p_result_id, v_hospital_id, v_patient_id, p_physician_id,
+            p_notification_method, 'NOTIFIED'
+        ) RETURNING NOTIFICATION_ID INTO p_notification_id;
+
+        COMMIT;
+    END NOTIFY_CRITICAL_VALUE;
+
+    FUNCTION GET_ORDER_STATUS(
+        p_order_id          IN NUMBER
+    ) RETURN VARCHAR2 IS
+        v_status VARCHAR2(20);
+    BEGIN
+        SELECT ORDER_STATUS INTO v_status
+        FROM LAB_ORDERS WHERE ORDER_ID = p_order_id;
+
+        RETURN v_status;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN NULL;
+    END GET_ORDER_STATUS;
+
+    FUNCTION GET_TURNAROUND_TIME(
+        p_order_id          IN NUMBER
+    ) RETURN NUMBER IS
+        v_tat NUMBER;
+    BEGIN
+        SELECT EXTRACT(HOUR FROM (r.RESULT_DATE - o.ORDER_DATE)) * 60 +
+               EXTRACT(MINUTE FROM (r.RESULT_DATE - o.ORDER_DATE))
+        INTO v_tat
+        FROM LAB_ORDERS o
+        JOIN LAB_RESULTS r ON o.ORDER_ID = r.ORDER_ID
+        WHERE o.ORDER_ID = p_order_id;
+
+        RETURN v_tat;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN NULL;
+    END GET_TURNAROUND_TIME;
+
+END PKG_LABORATORY;
+/
+
+-- ===================================================================
+-- PL/SQL PACKAGE: PHARMACY MANAGEMENT
+-- ===================================================================
+
+CREATE OR REPLACE PACKAGE PKG_PHARMACY IS
+
+    -- Check drug interactions
+    FUNCTION CHECK_DRUG_INTERACTIONS(
+        p_patient_id        IN NUMBER,
+        p_new_medication_id IN NUMBER
+    ) RETURN SYS_REFCURSOR;
+
+    -- Dispense medication
+    PROCEDURE DISPENSE_MEDICATION(
+        p_prescription_id   IN NUMBER,
+        p_quantity          IN NUMBER,
+        p_dispensed_by      IN NUMBER,
+        p_batch_number      IN VARCHAR2 DEFAULT NULL,
+        p_counseling_provided IN CHAR DEFAULT 'N',
+        p_dispensing_id     OUT NUMBER
+    );
+
+    -- Update medication stock
+    PROCEDURE UPDATE_MEDICATION_STOCK(
+        p_medication_id     IN NUMBER,
+        p_hospital_id       IN NUMBER,
+        p_quantity_change   IN NUMBER,
+        p_movement_type     IN VARCHAR2,
+        p_reason            IN VARCHAR2 DEFAULT NULL,
+        p_moved_by          IN NUMBER DEFAULT NULL
+    );
+
+    -- Check stock level
+    FUNCTION GET_STOCK_LEVEL(
+        p_medication_id     IN NUMBER,
+        p_hospital_id       IN NUMBER
+    ) RETURN NUMBER;
+
+    -- Get medications due for reorder
+    FUNCTION GET_REORDER_LIST(
+        p_hospital_id       IN NUMBER
+    ) RETURN SYS_REFCURSOR;
+
+END PKG_PHARMACY;
+/
+
+CREATE OR REPLACE PACKAGE BODY PKG_PHARMACY IS
+
+    FUNCTION CHECK_DRUG_INTERACTIONS(
+        p_patient_id        IN NUMBER,
+        p_new_medication_id IN NUMBER
+    ) RETURN SYS_REFCURSOR IS
+        v_cursor SYS_REFCURSOR;
+    BEGIN
+        OPEN v_cursor FOR
+            SELECT di.INTERACTION_SEVERITY,
+                   di.INTERACTION_TYPE,
+                   di.CLINICAL_EFFECT,
+                   di.MANAGEMENT_STRATEGY,
+                   m.MEDICATION_NAME AS INTERACTING_MEDICATION
+            FROM PRESCRIPTIONS p
+            JOIN MEDICATIONS m ON p.MEDICATION_ID = m.MEDICATION_ID
+            JOIN DRUG_INTERACTIONS di ON (
+                (di.MEDICATION_ID_1 = p.MEDICATION_ID AND di.MEDICATION_ID_2 = p_new_medication_id) OR
+                (di.MEDICATION_ID_2 = p.MEDICATION_ID AND di.MEDICATION_ID_1 = p_new_medication_id)
+            )
+            WHERE p.PATIENT_ID = p_patient_id
+              AND p.PRESCRIPTION_STATUS IN ('PRESCRIBED', 'DISPENSED', 'PARTIALLY_DISPENSED')
+              AND di.STATUS = 'ACTIVE';
+
+        RETURN v_cursor;
+    END CHECK_DRUG_INTERACTIONS;
+
+    PROCEDURE DISPENSE_MEDICATION(
+        p_prescription_id   IN NUMBER,
+        p_quantity          IN NUMBER,
+        p_dispensed_by      IN NUMBER,
+        p_batch_number      IN VARCHAR2 DEFAULT NULL,
+        p_counseling_provided IN CHAR DEFAULT 'N',
+        p_dispensing_id     OUT NUMBER
+    ) IS
+        v_medication_id NUMBER;
+        v_hospital_id NUMBER;
+        v_prescribed_qty NUMBER;
+        v_dispensed_qty NUMBER;
+        v_status VARCHAR2(20);
+    BEGIN
+        -- Get prescription details
+        SELECT MEDICATION_ID, HOSPITAL_ID, QUANTITY,
+               NVL(DISPENSED_QUANTITY, 0)
+        INTO v_medication_id, v_hospital_id, v_prescribed_qty, v_dispensed_qty
+        FROM PRESCRIPTIONS
+        WHERE PRESCRIPTION_ID = p_prescription_id;
+
+        -- Create dispensing record
+        INSERT INTO MEDICATION_DISPENSING (
+            PRESCRIPTION_ID, HOSPITAL_ID, MEDICATION_ID,
+            DISPENSED_QUANTITY, DISPENSED_DATE, DISPENSED_BY,
+            BATCH_NUMBER, PATIENT_COUNSELING
+        ) VALUES (
+            p_prescription_id, v_hospital_id, v_medication_id,
+            p_quantity, SYSTIMESTAMP, p_dispensed_by,
+            p_batch_number, p_counseling_provided
+        ) RETURNING DISPENSING_ID INTO p_dispensing_id;
+
+        -- Update prescription
+        v_dispensed_qty := v_dispensed_qty + p_quantity;
+
+        IF v_dispensed_qty >= v_prescribed_qty THEN
+            v_status := 'DISPENSED';
+        ELSE
+            v_status := 'PARTIALLY_DISPENSED';
+        END IF;
+
+        UPDATE PRESCRIPTIONS
+        SET DISPENSED_QUANTITY = v_dispensed_qty,
+            DISPENSED_DATE = SYSTIMESTAMP,
+            DISPENSED_BY = p_dispensed_by,
+            PRESCRIPTION_STATUS = v_status
+        WHERE PRESCRIPTION_ID = p_prescription_id;
+
+        -- Update stock
+        UPDATE_MEDICATION_STOCK(
+            p_medication_id => v_medication_id,
+            p_hospital_id => v_hospital_id,
+            p_quantity_change => -p_quantity,
+            p_movement_type => 'ISSUE',
+            p_reason => 'Dispensing for prescription ' || p_prescription_id,
+            p_moved_by => p_dispensed_by
+        );
+
+        COMMIT;
+    END DISPENSE_MEDICATION;
+
+    PROCEDURE UPDATE_MEDICATION_STOCK(
+        p_medication_id     IN NUMBER,
+        p_hospital_id       IN NUMBER,
+        p_quantity_change   IN NUMBER,
+        p_movement_type     IN VARCHAR2,
+        p_reason            IN VARCHAR2 DEFAULT NULL,
+        p_moved_by          IN NUMBER DEFAULT NULL
+    ) IS
+    BEGIN
+        -- Update medication stock
+        UPDATE MEDICATIONS
+        SET STOCK_QUANTITY = STOCK_QUANTITY + p_quantity_change,
+            UPDATED_DATE = SYSTIMESTAMP,
+            UPDATED_BY = COALESCE(SYS_CONTEXT('APEX$SESSION', 'APP_USER'), USER)
+        WHERE MEDICATION_ID = p_medication_id
+          AND HOSPITAL_ID = p_hospital_id;
+
+        -- Record stock movement
+        INSERT INTO MEDICATION_STOCK_MOVEMENTS (
+            MEDICATION_ID, HOSPITAL_ID, MOVEMENT_TYPE,
+            MOVEMENT_DATE, QUANTITY, MOVED_BY, REASON
+        ) VALUES (
+            p_medication_id, p_hospital_id, p_movement_type,
+            SYSTIMESTAMP, p_quantity_change, p_moved_by, p_reason
+        );
+
+        COMMIT;
+    END UPDATE_MEDICATION_STOCK;
+
+    FUNCTION GET_STOCK_LEVEL(
+        p_medication_id     IN NUMBER,
+        p_hospital_id       IN NUMBER
+    ) RETURN NUMBER IS
+        v_stock NUMBER;
+    BEGIN
+        SELECT STOCK_QUANTITY INTO v_stock
+        FROM MEDICATIONS
+        WHERE MEDICATION_ID = p_medication_id
+          AND HOSPITAL_ID = p_hospital_id;
+
+        RETURN v_stock;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            RETURN 0;
+    END GET_STOCK_LEVEL;
+
+    FUNCTION GET_REORDER_LIST(
+        p_hospital_id       IN NUMBER
+    ) RETURN SYS_REFCURSOR IS
+        v_cursor SYS_REFCURSOR;
+    BEGIN
+        OPEN v_cursor FOR
+            SELECT MEDICATION_ID,
+                   MEDICATION_NAME,
+                   STOCK_QUANTITY,
+                   REORDER_LEVEL,
+                   (REORDER_LEVEL - STOCK_QUANTITY) AS QUANTITY_NEEDED
+            FROM MEDICATIONS
+            WHERE HOSPITAL_ID = p_hospital_id
+              AND STOCK_QUANTITY <= REORDER_LEVEL
+              AND STATUS = 'ACTIVE'
+            ORDER BY (REORDER_LEVEL - STOCK_QUANTITY) DESC;
+
+        RETURN v_cursor;
+    END GET_REORDER_LIST;
+
+END PKG_PHARMACY;
+/
+
+-- ===================================================================
+-- ENHANCED VIEWS FOR HTML SCREENS
+-- ===================================================================
+
+-- View for Laboratory Dashboard
+CREATE OR REPLACE VIEW V_LAB_DASHBOARD AS
+SELECT
+    o.ORDER_ID,
+    o.HOSPITAL_ID,
+    h.HOSPITAL_NAME,
+    o.PATIENT_ID,
+    p.PATIENT_NUMBER,
+    p.FIRST_NAME || ' ' || p.LAST_NAME AS PATIENT_NAME,
+    p.MEDICAL_RECORD_NUMBER AS MRN,
+    o.ORDER_DATE,
+    o.PRIORITY,
+    o.ORDER_STATUS,
+    o.CLINICAL_INDICATION,
+    lt.TEST_NAME,
+    s.SPECIMEN_NUMBER,
+    s.SPECIMEN_STATUS,
+    s.COLLECTION_DATE,
+    r.RESULT_DATE,
+    r.RESULT_STATUS,
+    sm.FIRST_NAME || ' ' || sm.LAST_NAME AS ORDERING_PHYSICIAN,
+    pa.ROOM_NUMBER,
+    CASE
+        WHEN EXISTS (
+            SELECT 1 FROM LAB_RESULT_PARAMETERS lrp
+            WHERE lrp.RESULT_ID = r.RESULT_ID AND lrp.CRITICAL_FLAG = 'Y'
+        ) THEN 'Y'
+        ELSE 'N'
+    END AS HAS_CRITICAL_VALUES,
+    ROUND(EXTRACT(HOUR FROM (SYSTIMESTAMP - o.ORDER_DATE)) * 60 +
+          EXTRACT(MINUTE FROM (SYSTIMESTAMP - o.ORDER_DATE)), 0) AS TAT_MINUTES
+FROM LAB_ORDERS o
+JOIN HOSPITALS h ON o.HOSPITAL_ID = h.HOSPITAL_ID
+JOIN PATIENTS p ON o.PATIENT_ID = p.PATIENT_ID
+JOIN LAB_TESTS lt ON o.TEST_ID = lt.TEST_ID
+LEFT JOIN LAB_SPECIMENS s ON o.ORDER_ID = s.ORDER_ID
+LEFT JOIN LAB_RESULTS r ON o.ORDER_ID = r.ORDER_ID
+LEFT JOIN STAFF_MEMBERS sm ON o.DOCTOR_ID = sm.STAFF_ID
+LEFT JOIN PATIENT_ADMISSIONS pa ON o.ADMISSION_ID = pa.ADMISSION_ID
+WHERE o.ORDER_DATE >= TRUNC(SYSDATE) - 7;
+
+-- View for Emergency Triage Board
+CREATE OR REPLACE VIEW V_EMERGENCY_TRIAGE_BOARD AS
+SELECT
+    et.TRIAGE_ID,
+    et.PATIENT_ID,
+    p.PATIENT_NUMBER,
+    p.FIRST_NAME || ' ' || p.LAST_NAME AS PATIENT_NAME,
+    p.DATE_OF_BIRTH,
+    FLOOR(MONTHS_BETWEEN(SYSDATE, p.DATE_OF_BIRTH) / 12) AS AGE,
+    p.GENDER,
+    et.ARRIVAL_DATE,
+    et.CHIEF_COMPLAINT,
+    et.TRIAGE_LEVEL,
+    et.TRIAGE_CATEGORY,
+    et.PAIN_SCORE,
+    et.STATUS AS TRIAGE_STATUS,
+    et.WAITING_AREA,
+    vs.BLOOD_PRESSURE_SYSTOLIC || '/' || vs.BLOOD_PRESSURE_DIASTOLIC AS BLOOD_PRESSURE,
+    vs.HEART_RATE,
+    vs.RESPIRATORY_RATE,
+    vs.TEMPERATURE,
+    vs.OXYGEN_SATURATION,
+    nurse.FIRST_NAME || ' ' || nurse.LAST_NAME AS TRIAGE_NURSE_NAME,
+    doc.FIRST_NAME || ' ' || doc.LAST_NAME AS ASSIGNED_DOCTOR_NAME,
+    ROUND((SYSTIMESTAMP - et.ARRIVAL_DATE) * 24 * 60, 0) AS WAITING_TIME_MINUTES,
+    CASE et.TRIAGE_LEVEL
+        WHEN 'LEVEL_1_RESUSCITATION' THEN 1
+        WHEN 'LEVEL_2_EMERGENT' THEN 2
+        WHEN 'LEVEL_3_URGENT' THEN 3
+        WHEN 'LEVEL_4_LESS_URGENT' THEN 4
+        WHEN 'LEVEL_5_NON_URGENT' THEN 5
+    END AS PRIORITY_ORDER
+FROM EMERGENCY_TRIAGE et
+JOIN PATIENTS p ON et.PATIENT_ID = p.PATIENT_ID
+LEFT JOIN VITAL_SIGNS vs ON et.INITIAL_VITAL_SIGNS_ID = vs.VITAL_ID
+LEFT JOIN STAFF_MEMBERS nurse ON et.TRIAGE_NURSE = nurse.STAFF_ID
+LEFT JOIN STAFF_MEMBERS doc ON et.ASSIGNED_TO_DOCTOR = doc.STAFF_ID
+WHERE et.ARRIVAL_DATE >= TRUNC(SYSDATE)
+  AND et.STATUS NOT IN ('COMPLETED', 'DISCHARGED', 'ADMITTED')
+ORDER BY PRIORITY_ORDER, et.ARRIVAL_DATE;
+
+-- View for Pharmacy Dispensing Queue
+CREATE OR REPLACE VIEW V_PHARMACY_DISPENSING_QUEUE AS
+SELECT
+    pr.PRESCRIPTION_ID,
+    pr.HOSPITAL_ID,
+    pr.PATIENT_ID,
+    p.PATIENT_NUMBER,
+    p.FIRST_NAME || ' ' || p.LAST_NAME AS PATIENT_NAME,
+    pr.PRESCRIPTION_DATE,
+    m.MEDICATION_NAME,
+    m.GENERIC_NAME,
+    m.BRAND_NAME,
+    m.STRENGTH,
+    m.DOSAGE_FORM,
+    pr.DOSAGE,
+    pr.FREQUENCY,
+    pr.ROUTE,
+    pr.QUANTITY,
+    NVL(pr.DISPENSED_QUANTITY, 0) AS DISPENSED_QUANTITY,
+    pr.QUANTITY - NVL(pr.DISPENSED_QUANTITY, 0) AS REMAINING_QUANTITY,
+    pr.PRESCRIPTION_STATUS,
+    m.STOCK_QUANTITY AS AVAILABLE_STOCK,
+    CASE
+        WHEN m.STOCK_QUANTITY < (pr.QUANTITY - NVL(pr.DISPENSED_QUANTITY, 0)) THEN 'INSUFFICIENT'
+        ELSE 'AVAILABLE'
+    END AS STOCK_STATUS,
+    doc.FIRST_NAME || ' ' || doc.LAST_NAME AS PRESCRIBING_DOCTOR,
+    pa.ROOM_NUMBER,
+    ROUND((SYSTIMESTAMP - pr.PRESCRIPTION_DATE) * 24, 1) AS HOURS_PENDING
+FROM PRESCRIPTIONS pr
+JOIN PATIENTS p ON pr.PATIENT_ID = p.PATIENT_ID
+JOIN MEDICATIONS m ON pr.MEDICATION_ID = m.MEDICATION_ID
+LEFT JOIN STAFF_MEMBERS doc ON pr.DOCTOR_ID = doc.STAFF_ID
+LEFT JOIN PATIENT_ADMISSIONS pa ON pr.ADMISSION_ID = pa.ADMISSION_ID
+WHERE pr.PRESCRIPTION_STATUS IN ('PRESCRIBED', 'PARTIALLY_DISPENSED')
+ORDER BY pr.PRESCRIPTION_DATE;
+
+-- View for Billing Summary
+CREATE OR REPLACE VIEW V_BILLING_SUMMARY AS
+SELECT
+    b.BILL_ID,
+    b.HOSPITAL_ID,
+    b.PATIENT_ID,
+    p.PATIENT_NUMBER,
+    p.FIRST_NAME || ' ' || p.LAST_NAME AS PATIENT_NAME,
+    b.BILL_NUMBER,
+    b.BILL_DATE,
+    b.TOTAL_AMOUNT,
+    b.INSURANCE_AMOUNT,
+    b.PATIENT_AMOUNT,
+    b.DISCOUNT_AMOUNT,
+    b.TAX_AMOUNT,
+    b.BILLING_STATUS,
+    NVL((SELECT SUM(PAYMENT_AMOUNT) FROM PAYMENTS WHERE BILL_ID = b.BILL_ID AND PAYMENT_STATUS = 'COMPLETED'), 0) AS TOTAL_PAID,
+    b.PATIENT_AMOUNT - NVL((SELECT SUM(PAYMENT_AMOUNT) FROM PAYMENTS WHERE BILL_ID = b.BILL_ID AND PAYMENT_STATUS = 'COMPLETED'), 0) AS BALANCE_DUE,
+    b.DUE_DATE,
+    CASE
+        WHEN b.DUE_DATE < SYSDATE AND b.BILLING_STATUS NOT IN ('PAID', 'CANCELLED') THEN 'OVERDUE'
+        ELSE b.BILLING_STATUS
+    END AS PAYMENT_STATUS,
+    pa.ADMISSION_ID,
+    pa.ADMISSION_DATE,
+    pa.DISCHARGE_DATE,
+    ins.INSURANCE_PROVIDER,
+    ins.POLICY_NUMBER
+FROM BILLING b
+JOIN PATIENTS p ON b.PATIENT_ID = p.PATIENT_ID
+LEFT JOIN PATIENT_ADMISSIONS pa ON b.ADMISSION_ID = pa.ADMISSION_ID
+LEFT JOIN PATIENT_INSURANCE ins ON p.PATIENT_ID = ins.PATIENT_ID
+    AND ins.STATUS = 'ACTIVE'
+    AND ROWNUM = 1;
+
+-- ===================================================================
+-- SEQUENCES FOR ADDITIONAL NUMBERING
+-- ===================================================================
+
+CREATE SEQUENCE LAB_SPECIMEN_SEQ START WITH 1 INCREMENT BY 1 NOCACHE;
+CREATE SEQUENCE PAYMENT_TRANSACTION_SEQ START WITH 1 INCREMENT BY 1 NOCACHE;
+CREATE SEQUENCE CLAIM_NUMBER_SEQ START WITH 1 INCREMENT BY 1 NOCACHE;
+
+-- ===================================================================
+-- TRIGGERS FOR AUTOMATIC UPDATES
+-- ===================================================================
+
+-- Trigger to automatically update medication stock on dispensing
+CREATE OR REPLACE TRIGGER TRG_MEDICATION_DISPENSE_STOCK
+AFTER INSERT ON MEDICATION_DISPENSING
+FOR EACH ROW
+BEGIN
+    -- Update stock quantity
+    UPDATE MEDICATIONS
+    SET STOCK_QUANTITY = STOCK_QUANTITY - :NEW.DISPENSED_QUANTITY,
+        UPDATED_DATE = SYSTIMESTAMP
+    WHERE MEDICATION_ID = :NEW.MEDICATION_ID;
+
+    -- Log stock movement
+    INSERT INTO MEDICATION_STOCK_MOVEMENTS (
+        MEDICATION_ID, HOSPITAL_ID, MOVEMENT_TYPE, MOVEMENT_DATE,
+        QUANTITY, MOVED_BY, REFERENCE_NUMBER
+    ) VALUES (
+        :NEW.MEDICATION_ID, :NEW.HOSPITAL_ID, 'ISSUE', SYSTIMESTAMP,
+        -:NEW.DISPENSED_QUANTITY, :NEW.DISPENSED_BY,
+        'DISP-' || :NEW.DISPENSING_ID
+    );
+END;
+/
+
+-- Trigger for critical value alerts
+CREATE OR REPLACE TRIGGER TRG_LAB_CRITICAL_ALERT
+AFTER INSERT OR UPDATE ON LAB_RESULT_PARAMETERS
+FOR EACH ROW
+WHEN (NEW.CRITICAL_FLAG = 'Y')
+DECLARE
+    v_patient_id NUMBER;
+    v_hospital_id NUMBER;
+    v_doctor_id NUMBER;
+BEGIN
+    -- Get patient and physician info
+    SELECT o.PATIENT_ID, o.HOSPITAL_ID, o.DOCTOR_ID
+    INTO v_patient_id, v_hospital_id, v_doctor_id
+    FROM LAB_RESULTS r
+    JOIN LAB_ORDERS o ON r.ORDER_ID = o.ORDER_ID
+    WHERE r.RESULT_ID = :NEW.RESULT_ID;
+
+    -- Create critical notification
+    INSERT INTO LAB_CRITICAL_NOTIFICATIONS (
+        RESULT_ID, HOSPITAL_ID, PATIENT_ID, PARAMETER_ID,
+        CRITICAL_VALUE, NOTIFIED_PHYSICIAN, NOTIFICATION_METHOD,
+        NOTIFICATION_STATUS
+    ) VALUES (
+        :NEW.RESULT_ID, v_hospital_id, v_patient_id, :NEW.PARAMETER_ID,
+        :NEW.RESULT_VALUE, v_doctor_id, 'EMR_ALERT',
+        'PENDING'
+    );
+END;
+/
+
+-- Trigger to update billing status based on payments
+CREATE OR REPLACE TRIGGER TRG_PAYMENT_UPDATE_BILLING
+AFTER INSERT ON PAYMENTS
+FOR EACH ROW
+DECLARE
+    v_total_paid NUMBER;
+    v_patient_amount NUMBER;
+    v_new_status VARCHAR2(20);
+BEGIN
+    -- Calculate total paid
+    SELECT SUM(PAYMENT_AMOUNT)
+    INTO v_total_paid
+    FROM PAYMENTS
+    WHERE BILL_ID = :NEW.BILL_ID
+      AND PAYMENT_STATUS = 'COMPLETED';
+
+    -- Get patient amount
+    SELECT PATIENT_AMOUNT INTO v_patient_amount
+    FROM BILLING WHERE BILL_ID = :NEW.BILL_ID;
+
+    -- Determine new status
+    IF v_total_paid >= v_patient_amount THEN
+        v_new_status := 'PAID';
+    ELSIF v_total_paid > 0 THEN
+        v_new_status := 'PARTIAL_PAID';
+    ELSE
+        v_new_status := 'PENDING';
+    END IF;
+
+    -- Update billing status
+    UPDATE BILLING
+    SET BILLING_STATUS = v_new_status,
+        PAYMENT_DATE = CASE WHEN v_new_status = 'PAID' THEN SYSTIMESTAMP ELSE PAYMENT_DATE END
+    WHERE BILL_ID = :NEW.BILL_ID;
+END;
+/
+
+-- ===================================================================
+-- ADDITIONAL UTILITY FUNCTIONS
+-- ===================================================================
+
+-- Function to calculate patient's current bill total
+CREATE OR REPLACE FUNCTION GET_PATIENT_BILL_TOTAL(
+    p_patient_id IN NUMBER,
+    p_hospital_id IN NUMBER
+) RETURN NUMBER IS
+    v_total NUMBER;
+BEGIN
+    SELECT NVL(SUM(PATIENT_AMOUNT - NVL((
+        SELECT SUM(PAYMENT_AMOUNT) FROM PAYMENTS
+        WHERE BILL_ID = b.BILL_ID AND PAYMENT_STATUS = 'COMPLETED'
+    ), 0)), 0)
+    INTO v_total
+    FROM BILLING b
+    WHERE b.PATIENT_ID = p_patient_id
+      AND b.HOSPITAL_ID = p_hospital_id
+      AND b.BILLING_STATUS NOT IN ('PAID', 'CANCELLED');
+
+    RETURN v_total;
+END;
+/
+
+-- Function to check if specimen is within acceptable time window
+CREATE OR REPLACE FUNCTION IS_SPECIMEN_TIMELY(
+    p_specimen_id IN NUMBER,
+    p_max_hours IN NUMBER DEFAULT 24
+) RETURN VARCHAR2 IS
+    v_hours_elapsed NUMBER;
+BEGIN
+    SELECT EXTRACT(HOUR FROM (SYSTIMESTAMP - COLLECTION_DATE)) * 60 +
+           EXTRACT(MINUTE FROM (SYSTIMESTAMP - COLLECTION_DATE))
+    INTO v_hours_elapsed
+    FROM LAB_SPECIMENS
+    WHERE SPECIMEN_ID = p_specimen_id;
+
+    IF v_hours_elapsed <= p_max_hours THEN
+        RETURN 'Y';
+    ELSE
+        RETURN 'N';
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 'N';
+END;
+/
+
+-- ===================================================================
+-- GRANT PERMISSIONS (for APEX workspace)
+-- ===================================================================
+
+-- Grant execute on packages to APEX workspace schema (adjust schema name as needed)
+-- GRANT EXECUTE ON PKG_LABORATORY TO APEX_SCHEMA;
+-- GRANT EXECUTE ON PKG_PHARMACY TO APEX_SCHEMA;
+-- GRANT EXECUTE ON PKG_PATIENT_MANAGEMENT TO APEX_SCHEMA;
+
+-- Grant select on views
+-- GRANT SELECT ON V_LAB_DASHBOARD TO APEX_SCHEMA;
+-- GRANT SELECT ON V_EMERGENCY_TRIAGE_BOARD TO APEX_SCHEMA;
+-- GRANT SELECT ON V_PHARMACY_DISPENSING_QUEUE TO APEX_SCHEMA;
+-- GRANT SELECT ON V_BILLING_SUMMARY TO APEX_SCHEMA;
+
+-- ===================================================================
+-- SAMPLE DATA FOR TESTING (Optional)
+-- ===================================================================
+
+-- Insert sample lab test parameters
+INSERT INTO LAB_TEST_PARAMETERS (TEST_ID, HOSPITAL_ID, PARAMETER_CODE, PARAMETER_NAME, UNIT_OF_MEASURE, NORMAL_RANGE_MIN, NORMAL_RANGE_MAX, CRITICAL_LOW, CRITICAL_HIGH, SORT_ORDER)
+SELECT
+    (SELECT TEST_ID FROM LAB_TESTS WHERE TEST_CODE = 'CBC' AND ROWNUM = 1),
+    1, 'WBC', 'White Blood Cell Count', 'K/uL', 4.5, 11.0, 2.0, 30.0, 1 FROM DUAL UNION ALL
+SELECT
+    (SELECT TEST_ID FROM LAB_TESTS WHERE TEST_CODE = 'CBC' AND ROWNUM = 1),
+    1, 'RBC', 'Red Blood Cell Count', 'M/uL', 4.5, 5.5, 2.0, 7.0, 2 FROM DUAL UNION ALL
+SELECT
+    (SELECT TEST_ID FROM LAB_TESTS WHERE TEST_CODE = 'CBC' AND ROWNUM = 1),
+    1, 'HGB', 'Hemoglobin', 'g/dL', 13.5, 17.5, 7.0, 20.0, 3 FROM DUAL UNION ALL
+SELECT
+    (SELECT TEST_ID FROM LAB_TESTS WHERE TEST_CODE = 'CBC' AND ROWNUM = 1),
+    1, 'PLT', 'Platelet Count', 'K/uL', 150, 400, 50, 1000, 4 FROM DUAL;
+
+COMMIT;
+
+-- ===================================================================
+-- COMPLETION MESSAGE
+-- ===================================================================
+
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('============================================');
+    DBMS_OUTPUT.PUT_LINE('Enhanced Hospital Management Schema Created');
+    DBMS_OUTPUT.PUT_LINE('============================================');
+    DBMS_OUTPUT.PUT_LINE('Objects Created:');
+    DBMS_OUTPUT.PUT_LINE('- Laboratory Management Tables & Views');
+    DBMS_OUTPUT.PUT_LINE('- Pharmacy Management Tables & Views');
+    DBMS_OUTPUT.PUT_LINE('- Billing & Payment Tables');
+    DBMS_OUTPUT.PUT_LINE('- Emergency Triage Tables');
+    DBMS_OUTPUT.PUT_LINE('- PL/SQL Packages: PKG_LABORATORY, PKG_PHARMACY');
+    DBMS_OUTPUT.PUT_LINE('- Automated Triggers for Business Logic');
+    DBMS_OUTPUT.PUT_LINE('- Utility Functions');
+    DBMS_OUTPUT.PUT_LINE('============================================');
+END;
+/
